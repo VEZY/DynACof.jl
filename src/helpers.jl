@@ -9,7 +9,7 @@ using the average daily temperature, not recommended).
 - `Tmin::Float64`: Minimum daily temperature (Celsius degree)
 - `MinTT::Float64`: Minimum temperature threshold, also called base temperature (Celsius degree), default to 5.
 - `MaxTT::Float64`: Maximum temperature threshold (Celsius degree), optional, default to NULL
-- `Round::Bool`: Boolean. /!\ Important: round the result to 2 decimal, with default to `TRUE`.
+- `Round::Bool`: Boolean. Important: round the result to 2 decimal, with default to `TRUE`.
 - `Tmean::Float64`: Optional. Average daily temperature (Celsius degree). Only needed if Tmax and Tmin are missing.
 
 Please keep in mind that this function gives an approximation of the degree days. GDD are
