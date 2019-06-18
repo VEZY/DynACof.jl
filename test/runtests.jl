@@ -1,6 +1,6 @@
 using DynACof
 using Test
 
-@testset "DynACof.jl" begin
-    # Write your own tests here.
+@testset "Test on helpers" begin
+   include("helpers_tests.jl")
 end
