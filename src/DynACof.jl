@@ -1,6 +1,6 @@
 module DynACof
 
-import DataFrames.readtable
+import CSV.read
 
 export greet, greet2
 export GDD, Meteorology

@@ -61,7 +61,7 @@ Met_c= Meteorology()
 """
 # function Meteorology(file, Period, Parameters= Import_Parameters())
 function Meteorology(file)
-  MetData= readtable(file);
+  MetData= CSV.read(file);
   return MetData
   # MetData$Date= lubridate::fast_strptime(MetData$Date, "%Y-%m-%d",lt=F)
   #
