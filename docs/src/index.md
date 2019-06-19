@@ -1,5 +1,10 @@
 # DynACof.jl
 
+```@contents
+```
+
+## Index
+
 ```@index
 ```
 
