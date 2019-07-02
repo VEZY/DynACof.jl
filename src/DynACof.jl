@@ -1,9 +1,12 @@
 module DynACof
 
 import CSV.read
+import DataFrames.DataFrame
 
 export greet, greet2
-export GDD, Meteorology
+
+# helpers:
+export GDD, Meteorology,is_missing
 
 include("test.jl")
 include("helpers.jl")
