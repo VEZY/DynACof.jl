@@ -1,13 +1,11 @@
 """
-Meteorology(file = NULL, Period = NULL, Parameters = Import_Parameters())
+Meteorology(file = NULL, period = NULL, Parameters = Import_Parameters())
 
 Import the meteorology data, check its format, and eventually compute missing variables.
 # Arguments
-- `file::Char`: Either the file name to read, a shell command that preprocesses the file (e.g. fread("grep filename"))
-or the input itself as a string, see [data.table::fread()]. In both cases, a length 1 character string.
-A filename input is passed through path.expand for convenience and may be a URL starting http:// or file://.
-Default to `NULL` to return the [Aquiares()] example data from the package.
-- `Period::Date`: A vector of two POSIX dates that correspond to the min and max dates for the desired time period to be returned.
+- `file::String`: The meteorology file path.
+- `period::Array{String,1}`: A vector of two character string as POSIX dates that correspond to the min and max dates for the desired time period to be returned.
+The default value ["0000-01-01", "0000-01-02"] makes the function take the min and max values from the meteorology file.
 - `Parameters::Date`: A list of parameters
 * Start_Date: optional, the Posixct date of the first meteo file record. Only needed if the Date column is missing.
 * FPAR      : Fraction of global radiation corresponding to PAR radiation, only needed if either RAD or PAR is missing.
@@ -24,121 +22,106 @@ used to compute the soil net radiation using an extinction coefficient with the 
 formulation. This computation is likely to be depreciated in the near future as the computation has been replaced by a metamodel. It
 is kept for information for the moment.
 
-  | *Var*           | *unit*      | *Definition*                                 | *If missing*                                                       |
-  |-----------------|-------------|----------------------------------------------|--------------------------------------------------------------------|
-  | Date            | POSIXct     | Date in POSIXct format                       | Computed from start date parameter, or set a dummy date if missing |
-  | year            | year        | Year of the simulation                       | Computed from Date                                                 |
-  | DOY             | day         | day of the year                              | Computed from Date                                                 |
-  | Rain            | mm          | Rainfall                                     | Assume no rain                                                     |
-  | Tair            | Celsius     | Air temperature (above canopy)               | Computed from Tmax and Tmin                                        |
-  | Tmax            | Celsius     | Maximum air temperature during the day       | Required (error)                                                   |
-  | Tmin            | Celsius     | Minimum air temperature during the day       | Required (error)                                                   |
-  | RH              | `%`          | Relative humidity                            | Not used, but prefered over VPD for Rn computation                 |
-  | RAD             | MJ m-2 d-1  | Incident shortwave radiation                 | Computed from PAR                                                  |
-  | Pressure        | hPa         | Atmospheric pressure                         | Computed from VPD, Tair and Elevation, or alternatively from Tair and Elevation. |
-  | WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                          |
-  | CO2             | ppm         | Atmospheric CO2 concentration                | Taken as constant: `Parameters -> CO2`                                |
-  | DegreeDays      | Celsius     | Growing degree days                          | Computed using [GDD()]                                             |
-  | PAR             | MJ m-2 d-1  | Incident photosynthetically active radiation | Computed from RAD                                                  |
-  | FDiff           | Fraction    | Diffuse light fraction                       | Computed using [Diffuse_d()] using Spitters et al. (1986) formula  |
-  | VPD             | hPa         | Vapor pressure deficit                       | Computed from RH                                                   |
-  | Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [Rad_net()] with RH, or VPD                         |
-  | DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
-  | Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                      |
-  | ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
+| *Var*           | *unit*      | *Definition*                                 | *If missing*                                                       |
+|-----------------|-------------|----------------------------------------------|--------------------------------------------------------------------|
+| Date            | POSIXct     | Date in POSIXct format                       | Computed from start date parameter, or set a dummy date if missing |
+| year            | year        | Year of the simulation                       | Computed from Date                                                 |
+| DOY             | day         | day of the year                              | Computed from Date                                                 |
+| Rain            | mm          | Rainfall                                     | Assume no rain                                                     |
+| Tair            | Celsius     | Air temperature (above canopy)               | Computed from Tmax and Tmin                                        |
+| Tmax            | Celsius     | Maximum air temperature during the day       | Required (error)                                                   |
+| Tmin            | Celsius     | Minimum air temperature during the day       | Required (error)                                                   |
+| RH              | `%`          | Relative humidity                            | Not used, but prefered over VPD for Rn computation                 |
+| RAD             | MJ m-2 d-1  | Incident shortwave radiation                 | Computed from PAR                                                  |
+| Pressure        | hPa         | Atmospheric pressure                         | Computed from VPD, Tair and Elevation, or alternatively from Tair and Elevation. |
+| WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                          |
+| CO2             | ppm         | Atmospheric CO2 concentration                | Taken as constant: `Parameters -> CO2`                                |
+| DegreeDays      | Celsius     | Growing degree days                          | Computed using [GDD()]                                             |
+| PAR             | MJ m-2 d-1  | Incident photosynthetically active radiation | Computed from RAD                                                  |
+| FDiff           | Fraction    | Diffuse light fraction                       | Computed using [Diffuse_d()] using Spitters et al. (1986) formula  |
+| VPD             | hPa         | Vapor pressure deficit                       | Computed from RH                                                   |
+| Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [Rad_net()] with RH, or VPD                         |
+| DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
+| Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                      |
+| ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
 
-  Note: It is highly recommended to set the system environment timezone to the one from the meteorology file. If not, the function try to use the Timezone
-  from the parameter files to set it. When in doubt, set it to UTC (`Sys.setenv(TZ="UTC")`), as for [Aquiares()].
+Note: It is highly recommended to set the system environment timezone to the one from the meteorology file. If not, the function try to use the Timezone
+from the parameter files to set it. When in doubt, set it to UTC (`Sys.setenv(TZ="UTC")`), as for [Aquiares()].
 
-  # Returns
-  A daily meteorology data.frame (invisibly).
+# Returns
+A daily meteorology data.frame (invisibly).
 
 
-  # Examples
-  ```julia
-  Met_c= Meteorology()
-  ```
-  """
-  # function Meteorology(file, Period, Parameters= Import_Parameters())
-  function Meteorology(file)
-    MetData= CSV.read(file);
+# Examples
+```julia
+Met_c= Meteorology()
+```
+"""
+function Meteorology(file::String, period::Array{String,1}= ["0000-01-01", "0000-01-02"])
+    period_date= Dates.Date.(period_date)
+
+    MetData= CSV.read(file; copycols=true);
 
     if is_missing(MetData,"Date")
-      if !is_missing(Parameters,"Start_Date")
-        MetData[:Date] = collect(Dates.Date(Parameters["Start_Date"]):Dates.Day(1):(Dates.Date(Parameters["Start_Date"])+Dates.Day(nrow(MetData)-1)))
-        # warn.var(Var= "Date","Parameters$Start_Date",type='warn')
-      end
+        if !is_missing(Parameters,"Start_Date")
+            MetData[:Date] =
+            collect(Dates.Date(Parameters["Start_Date"]):Dates.Day(1):
+            (Dates.Date(Parameters["Start_Date"]) + Dates.Day(nrow(MetData)-1)))
+            warn_var("Date","Start_Date from Parameters","warn")
+        end
+    else
+        MetData[:Date] = collect(Dates.Date("2000-01-01"):Dates.Day(1):
+        (Dates.Date(Dates.Date("2000-01-01")) + Dates.Day(nrow(MetData)-1)))
+        warn_var("Date","dummy 2000-01-01", "warn")
     end
 
-    # Missing Date:
-    # if(is.null(MetData$Date)){
-    #   if(!is.null(Parameters$Start_Date)){
-    #     MetData$Date= seq(from=lubridate::ymd(Parameters$Start_Date),
-    #                       length.out= nrow(MetData), by="day")
-    #     warn.var(Var= "Date","Parameters$Start_Date",type='warn')
-    #   }else{
-    #     MetData$Date= seq(from=lubridate::ymd("2000/01/01"),
-    #                       length.out= nrow(MetData), by="day")
-    #     warn.var(Var= "Date","dummy 2000/01/01",type='warn')
-    #   }
-    # }
-    #
-    # if(!is.null(Period)){
-    #   if(Period[1]<min(MetData$Date)|Period[2]>max(MetData$Date)){
-    #     if(Period[2]>max(MetData$Date)){
-    #       warning(paste("Meteo file do not cover the given period", "n",
-    #                     "Max date in meteo file= ",as.character(format(max(MetData$Date), "%Y-%m-%d")),
-    #                     " ; max given period= ", as.character(Period[2]), "n",
-    #                     "setting the maximum date of simulation to the one from the meteo file"))
-    #     }
-    #     if(Period[1]<min(MetData$Date)){
-    #       warning(paste("Meteo file do not cover the given period", "n",
-    #                     "Min date in meteo file= ",as.character(format(min(MetData$Date), "%Y-%m-%d")),
-    #                     " ; min given period= ", as.character(Period[1]), "n",
-    #                     "setting the minimum date of simulation to the one from the meteo file"))
-    #     }
-    #   }
-    #   MetData= MetData[MetData$Date>=Period[1]&MetData$Date<=(Period[2]),]
-    # }
-    #
-    # # Missing RAD:
-    # if(is.null(MetData$RAD)){
-    #   if(!is.null(MetData$PAR)){
-    #     MetData$RAD= MetData$PAR/Parameters$FPAR
-    #     warn.var(Var= "RAD", replacement= "PAR",type='warn')
-    #   }else{
-    #     warn.var(Var= "RAD", replacement= "PAR",type='error')
-    #   }
-    # }
-    #
-    # # Missing PAR:
-    # if(is.null(MetData$PAR)){
-    #   MetData$PAR= MetData$RAD*Parameters$FPAR
-    #   warn.var(Var= "PAR",replacement= "RAD",type='warn')
-    # }
-    # MetData$PAR[MetData$PAR<0.1]= 0.1
-    #
-    # # Missing Tmax and/or Tmin Temperature:
-    # if(is.null(MetData$Tmin)|is.null(MetData$Tmax)){
-    #   warn.var(Var= "Tmin and/or Tmax",type='error')
-    # }
-    #
-    # # Missing air temperature:
-    # if(is.null(MetData$Tair)){
-    #   MetData$Tair= (MetData$Tmax-MetData$Tmin)/2
-    #   warn.var(Var= "Tair",replacement= "the equation (MetData$Tmax-MetData$Tmin)/2",type='warn')
-    # }
-    #
-    # # Missing VPD:
-    # if(is.null(MetData$VPD)){
-    #   if(!is.null(MetData$RH)){
-    #     MetData$VPD= bigleaf::rH.to.VPD(rH = MetData$RH/100, Tair = MetData$Tair)*10 # hPa
-    #     warn.var(Var= "VPD","RH and Tair using bigleaf::rH.to.VPD",type='warn')
-    #   }else{
-    #     warn.var(Var= "VPD", replacement= "RH",type='error')
-    #   }
-    # }
-    #
+    if period_date != ["0000-01-01", "0000-01-02"]
+        if period_date[1]<min(MetData.Date)| period_date[2]>max(MetData.Date)
+            error("Given period is not covered by the meteorology file")
+        else
+            MetData= MetData[period_date[1] .<= MetData.Date .<= period_date[2], :]
+        end
+    end
+
+    if is_missing(MetData,"RAD")
+        if !is_missing(MetData,"PAR")
+            MetData[:RAD] = MetData[:PAR] ./ Parameters["FPAR"]
+            warn_var("RAD", "PAR", "warn")
+        else
+            warn_var("RAD", "PAR", "error")
+        end
+    end
+
+    if is_missing(MetData,"PAR")
+        if !is_missing(MetData,"RAD")
+            MetData[:PAR] = MetData[:RAD] .* Parameters["FPAR"]
+            warn_var("PAR", "RAD", "warn")
+        else
+            warn_var("PAR", "RAD", "error")
+        end
+    end
+    MetData.PAR[MetData.PAR.<0.1, :] .= 0.1
+
+    if is_missing(MetData,"Tmin") || is_missing(MetData,"Tmax")
+        warn_var("Tmin and/or Tmax","error")
+    end
+
+    if is_missing(MetData,"Tair")
+        MetData[:Tair] = (MetData.Tmax .+ MetData.Tmin) ./ 2.0
+        warn_var("Tair","the equation (MetData.Tmax-MetData.Tmin)/2","warn")
+    end
+
+    if is_missing(MetData,"VPD")
+        if !is_missing(MetData,"RH")
+            MetData[:VPD] = rH_to_VPD.(MetData.RH ./ 100.0, MetData.Tair) .* 10.0 # hPa
+            warn_var("VPD","RH and Tair using bigleaf::rH.to.VPD","warn")
+        else
+            warn_var("VPD","RH","error")
+        end
+    end
+
+    1+2
+
     # # Missing air pressure:
     # if(is.null(MetData$Pressure)){
     #   if(!is.null(Parameters$Elevation)){
@@ -147,37 +130,37 @@ is kept for information for the moment.
     #                                        Tair = MetData$Tair,
     #                                        VPD = MetData$VPD)*10
     #       # Return in kPa
-    #       warn.var(Var= "Pressure",
-    #                replacement=paste("Elevation, Tair and VPD",
+    #       warn_var("Pressure",
+    #                paste("Elevation, Tair and VPD",
     #                                  "using bigleaf::pressure.from.elevation"),
-    #                type='warn')
+    #                "warn")
     #     }else{
     #       bigleaf::pressure.from.elevation(elev = Parameters$Elevation,
     #                                        Tair = MetData$Tair)*10
     #       # Return in kPa
-    #       warn.var(Var= "Pressure",
-    #                replacement=paste("Elevation and Tair",
+    #       warn_var("Pressure",
+    #                paste("Elevation and Tair",
     #                                  "using bigleaf::pressure.from.elevation"),
-    #                type='warn')
+    #                "warn")
     #     }
     #   }else{
-    #     warn.var(Var= "Pressure",replacement="Elevation",type='error')
+    #     warn_var("Pressure","Elevation","error")
     #   }
     # }
     #
     # # Missing rain:
     # if(is.null(MetData$Rain)){
     #   MetData$Rain= 0 # assume no rain
-    #   warn.var(Var= "Rain","constant (= 0, assuming no rain)",type='warn')
+    #   warn_var("Rain","constant (= 0, assuming no rain)","warn")
     # }
     #
     # # Missing wind speed:
     # if(is.null(MetData$WindSpeed)){
     #   if(!is.null(Parameters$WindSpeed)){
     #     MetData$WindSpeed= Parameters$WindSpeed # assume constant windspeed
-    #     warn.var(Var= "WindSpeed","constant (= Parameters$WindSpeed)",type='warn')
+    #     warn_var("WindSpeed","constant (= Parameters$WindSpeed)","warn")
     #   }else{
-    #     warn.var(Var= "WindSpeed", replacement= "Parameters$WindSpeed (constant value)",type='error')
+    #     warn_var("WindSpeed",  "Parameters$WindSpeed (constant value)","error")
     #   }
     # }
     # MetData$WindSpeed[MetData$WindSpeed<0.01]= 0.01
@@ -185,9 +168,9 @@ is kept for information for the moment.
     # if(is.null(MetData$CO2)){
     #   if(!is.null(Parameters$CO2)){
     #     MetData$CO2= Parameters$CO2 # assume constant windspeed
-    #     warn.var(Var= "CO2","constant (= Parameters$CO2)",type='warn')
+    #     warn_var("CO2","constant (= Parameters$CO2)","warn")
     #   }else{
-    #     warn.var(Var= "CO2", replacement= "Parameters$CO2 (constant value)",type='error')
+    #     warn_var("CO2",  "Parameters$CO2 (constant value)","error")
     #   }
     # }
     #
@@ -196,7 +179,7 @@ is kept for information for the moment.
     #   MetData$DegreeDays=
     #     GDD(Tmax= MetData$Tmax,Tmin= MetData$Tmin, MinTT= Parameters$MinTT,
     #         MaxTT = Parameters$MaxTT)
-    #   warn.var(Var= "DegreeDays","Tmax, Tmin and MinTT",type='warn')
+    #   warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
     # }
     #
     # # Missing diffuse fraction:
@@ -204,7 +187,7 @@ is kept for information for the moment.
     #   MetData$FDiff=
     #     Diffuse_d(DOY = MetData$DOY, RAD = MetData$RAD,
     #               Latitude = Parameters$Latitude,type = "Spitters")
-    #   warn.var(Var= "FDiff","DOY, RAD and Latitude using Diffuse_d()",type='warn')
+    #   warn_var("FDiff","DOY, RAD and Latitude using Diffuse_d()","warn")
     # }
     #
     #
@@ -258,7 +241,7 @@ is kept for information for the moment.
     # MetData[,-c(1:3)]= round(MetData[,-c(1:3)],4)
     #
     # attr(MetData,"unit")=
-    #   data.frame(Var= Varnames,
+    #   data.frame(Varnames,
     #              unit=c("year","day","POSIXct date","mm","Celsius","%","MJ m-2 d-1","hPa",
     #                     "m s-1","ppm","Celsius","MJ m-2 d-1","Fraction","hPa","MJ m-2 d-1",
     #                     "Celsius","Celsius","day","kg m-3","rad"))
@@ -266,4 +249,4 @@ is kept for information for the moment.
     # message("Meteo computation done")
     # message(paste("n", crayon::green$bold$underline("Meteo computation done")))
     return MetData
-  end
+end

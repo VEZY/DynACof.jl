@@ -2,15 +2,20 @@ module DynACof
 
 import CSV.read
 import DataFrames.DataFrame
-
-export greet, greet2
+import ForwardDiff.derivative # To find Δ (esat slope)
 
 # helpers:
-export GDD, Meteorology,is_missing
+export GDD,is_missing
+# ecophysio helpers:
+export rH_to_VPD,esat,esat_slope
+export constant
+
+# Main functions:
+export Meteorology
 
 include("test.jl")
 include("helpers.jl")
 include("meteo.jl")
+include("ecophysio_helpers.jl")
 
-greet() = print("Hello World!")
 end # module

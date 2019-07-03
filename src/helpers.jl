@@ -124,7 +124,7 @@ end
 
 
 """
-    warn.var("Date","Start_Date from Parameters","warn")
+    warn_var("Date","Start_Date from Parameters","warn")
 Warn or stop execution if mandatory meteorology input variables are not provided.
 It helps the user to know which variable is missing and/or if there are replacements
 
@@ -138,6 +138,11 @@ It helps the user to know which variable is missing and/or if there are replacem
 are missing from input: either an error (default), or a warning.
 * If the `"replacement"` variable is not provided in the meteorology file either, this function
 will return an error with a hint on which variables can be provided to compute `"Var"`
+
+# Examples
+```julia
+warn_var("Date","Start_Date from Parameters","warn")
+```
 """
 function warn_var(Var::String,replacement::String,type::String="error")
   if type=="error"
@@ -149,6 +154,14 @@ function warn_var(Var::String,replacement::String,type::String="error")
   end
 end
 
+"""
+    warn_var("Date")
+Stop execution if mandatory meteorology input variable is not provided.
+
+# Arguments
+- `Var::String`: Input variable name
+
+"""
 function warn_var(Var::String)
   error("$Var missing from input Meteo. Cannot proceed unless provided.")
 end
