@@ -112,7 +112,7 @@ true
 """
 function is_missing(data::Dict,column::String)::Bool
   try
-    Parameters[column]
+    data[column]
   catch error
     if isa(error, KeyError)
       return true
