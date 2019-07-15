@@ -1,7 +1,7 @@
 module DynACof
 
-import CSV.read
 using DataFrames
+using CSV
 import Dates
 import ForwardDiff.derivative # To find Δ (esat slope)
 
@@ -10,6 +10,7 @@ import ForwardDiff.derivative # To find Δ (esat slope)
 export GDD,is_missing
 # ecophysio helpers:
 export rH_to_VPD,esat,esat_slope
+export pressure_from_elevation, virtual_temp, VPD_to_e
 export physics_constant
 
 # Main functions:

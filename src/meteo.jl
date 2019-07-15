@@ -58,25 +58,22 @@ Met_c= Meteorology()
 ```
 """
 function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["0000-01-01", "0000-01-02"])
-    period_date= Dates.Date.(period_date)
+    period_date= Dates.Date.(period)
 
     MetData= CSV.read(file; copycols=true);
 
     if is_missing(MetData,"Date")
         if !is_missing(Parameters,"Start_Date")
-            MetData[:Date] =
-            collect(Dates.Date(Parameters["Start_Date"]):Dates.Day(1):
-            (Dates.Date(Parameters["Start_Date"]) + Dates.Day(nrow(MetData)-1)))
+            MetData[:Date] = collect(Dates.Date(Parameters["Start_Date"]):Dates.Day(1):(Dates.Date(Parameters["Start_Date"]) + Dates.Day(nrow(MetData)-1)))
             warn_var("Date","Start_Date from Parameters","warn")
+        else
+            MetData[:Date] = collect(Dates.Date("2000-01-01"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01")) + Dates.Day(nrow(MetData)-1)))
+            warn_var("Date","dummy 2000-01-01", "warn")
         end
-    else
-        MetData[:Date] = collect(Dates.Date("2000-01-01"):Dates.Day(1):
-        (Dates.Date(Dates.Date("2000-01-01")) + Dates.Day(nrow(MetData)-1)))
-        warn_var("Date","dummy 2000-01-01", "warn")
     end
 
     if period_date != ["0000-01-01", "0000-01-02"]
-        if period_date[1]<min(MetData.Date)| period_date[2]>max(MetData.Date)
+        if period_date[1]<MetData.Date[1] || period_date[2]>MetData.Date[end]
             error("Given period is not covered by the meteorology file")
         else
             MetData= MetData[period_date[1] .<= MetData.Date .<= period_date[2], :]
@@ -120,68 +117,50 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
         end
     end
 
-    1+2
+    if is_missing(MetData,"Pressure")
+        if !is_missing(Parameters,"Elevation")
+            MetData[:Pressure] = pressure_from_elevation.(Parameters["Elevation"], MetData.Tair, MetData.VPD) .* 10
+            # Return in kPa
+            warn_var("Pressure","Elevation, Tair and VPD using pressure_from_elevation","warn")
+        else
+            warn_var("Pressure","Elevation","error")
+        end
+    end
+    
+    # Missing rain:
+    if is_missing(MetData,"Rain")
+        MetData[:Rain] = 0.0
+        warn_var("Rain","constant (= 0, assuming no rain)","warn")
+    end
 
-    # # Missing air pressure:
-    # if(is.null(MetData$Pressure)){
-    #   if(!is.null(Parameters$Elevation)){
-    #     if(!is.null(MetData$VPD)){
-    #       bigleaf::pressure.from.elevation(elev = Parameters$Elevation,
-    #                                        Tair = MetData$Tair,
-    #                                        VPD = MetData$VPD)*10
-    #       # Return in kPa
-    #       warn_var("Pressure",
-    #                paste("Elevation, Tair and VPD",
-    #                                  "using bigleaf::pressure.from.elevation"),
-    #                "warn")
-    #     }else{
-    #       bigleaf::pressure.from.elevation(elev = Parameters$Elevation,
-    #                                        Tair = MetData$Tair)*10
-    #       # Return in kPa
-    #       warn_var("Pressure",
-    #                paste("Elevation and Tair",
-    #                                  "using bigleaf::pressure.from.elevation"),
-    #                "warn")
-    #     }
-    #   }else{
-    #     warn_var("Pressure","Elevation","error")
-    #   }
-    # }
-    #
-    # # Missing rain:
-    # if(is.null(MetData$Rain)){
-    #   MetData$Rain= 0 # assume no rain
-    #   warn_var("Rain","constant (= 0, assuming no rain)","warn")
-    # }
-    #
-    # # Missing wind speed:
-    # if(is.null(MetData$WindSpeed)){
-    #   if(!is.null(Parameters$WindSpeed)){
-    #     MetData$WindSpeed= Parameters$WindSpeed # assume constant windspeed
-    #     warn_var("WindSpeed","constant (= Parameters$WindSpeed)","warn")
-    #   }else{
-    #     warn_var("WindSpeed",  "Parameters$WindSpeed (constant value)","error")
-    #   }
-    # }
-    # MetData$WindSpeed[MetData$WindSpeed<0.01]= 0.01
-    # # Missing atmospheric CO2 concentration:
-    # if(is.null(MetData$CO2)){
-    #   if(!is.null(Parameters$CO2)){
-    #     MetData$CO2= Parameters$CO2 # assume constant windspeed
-    #     warn_var("CO2","constant (= Parameters$CO2)","warn")
-    #   }else{
-    #     warn_var("CO2",  "Parameters$CO2 (constant value)","error")
-    #   }
-    # }
-    #
-    # # Missing DegreeDays:
-    # if(is.null(MetData$DegreeDays)){
-    #   MetData$DegreeDays=
-    #     GDD(Tmax= MetData$Tmax,Tmin= MetData$Tmin, MinTT= Parameters$MinTT,
-    #         MaxTT = Parameters$MaxTT)
-    #   warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
-    # }
-    #
+    # Missing wind speed:
+    if is_missing(MetData,"WindSpeed")
+        if !is_missing(Parameters,"WindSpeed")
+            MetData[:WindSpeed] = Parameters["WindSpeed"] # assume constant windspeed
+            warn_var("WindSpeed","constant (= WindSpeed from Parameters )","warn")
+        else
+            warn_var("WindSpeed",  "WindSpeed from Parameters (constant value)","error")
+        end
+    end
+
+    MetData.WindSpeed[MetData.WindSpeed.<0.01, :] .= 0.01
+    
+    # Missing atmospheric CO2 concentration:
+    if is_missing(MetData,"CO2")
+        if !is_missing(Parameters,"CO2")
+            MetData[:CO2] = Parameters["CO2"] # assume constant CO2
+            warn_var("CO2","constant (= CO2 from Parameters)","warn")
+        else
+            warn_var("WindSpeed",  "CO2 from Parameters (constant value)","error")
+        end
+    end
+
+    # Missing DegreeDays:
+    if is_missing(MetData,"DegreeDays")
+        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters["MinTT"], Parameters["MaxTT"])
+        warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
+    end
+
     # # Missing diffuse fraction:
     # if(is.null(MetData$FDiff)){
     #   MetData$FDiff=

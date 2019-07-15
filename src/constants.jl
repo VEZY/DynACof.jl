@@ -3,7 +3,8 @@ Constants used in the DynACof package
 
 This function defines the following constants:
 - Cp: specific heat of air for constant pressure (``J\\ K^{-1}\\ kg^{-1}``), Source: Allen 1998 FAO Eq. 8 p. 32
-- pressure0: reference atmospheric pressure at sea level (Pa)
+- eps: Ratio of the molecular weight of water vapor to dry air (=Mw/Md)
+- pressure0: reference atmospheric pressure at sea level (kPa)
 - FPAR: Fraction of global radiation that is PAR (source: MAESPA model)
 - g: gravitational acceleration (``m\\ s^{-2}``)
 - Rd: gas constant of dry air (``J\\ kg^{-1}\\ K^{-1}``), source : Foken p. 245
@@ -28,7 +29,8 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 """
 function physics_constant(;
     cp::Float64= 1013*10^-6,
-    pressure0::Float64 = 101325.0,
+    eps::Float64= 0.622, 
+    pressure0::Float64 = 101.325,
     FPAR::Float64      = 0.5,
     g::Float64         = 9.81,
     Rd::Float64        = 287.0586,
@@ -45,11 +47,12 @@ function physics_constant(;
     Dheat::Float64     = 21.5e-6
     )
 
-    Constants(cp,pressure0,FPAR,g,Rd,Rgas,Kelvin,vonkarman,MJ_to_W,Gsc,σ,H2OMW,W_umol,λ,cl,Dheat)
+    Constants(cp,eps,pressure0,FPAR,g,Rd,Rgas,Kelvin,vonkarman,MJ_to_W,Gsc,σ,H2OMW,W_umol,λ,cl,Dheat)
 end
 
 struct Constants
     cp::Float64
+    eps::Float64
     pressure0::Float64
     FPAR::Float64
     g::Float64

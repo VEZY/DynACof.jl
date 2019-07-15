@@ -32,4 +32,7 @@ end;
     @test rH_to_VPD(0.5,20.0) ≈ 1.1662980110489036
     @test esat(20.0,"Allen_1998") ≈ 2.3382812709274456
     @test esat_slope(20.0,"Allen_1998") ≈ 0.1447462277835135
+    @test VPD_to_e(1.5, 25.0, formula= "Sonntag_1990") ≈ 1.6600569164883336
+    @test virtual_temp(20.0,1010.0,1.5) ≈ 20.091375550353973
+    @test pressure_from_elevation(600.0, 25.0, 1.5) ≈ 94.63400648527185
 end;
