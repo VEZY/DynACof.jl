@@ -129,7 +129,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
     
     # Missing rain:
     if is_missing(MetData,"Rain")
-        MetData[:Rain] = 0.0
+        MetData[:Rain] .= 0.0
         warn_var("Rain","constant (= 0, assuming no rain)","warn")
     end
 
@@ -163,7 +163,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     # Missing diffuse fraction:
     if is_missing(MetData,"FDiff")
-        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, formula = "Spitters")
+        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters["Latitude"], formula = "Spitters")
         warn_var("FDiff","DOY, RAD and Latitude using diffuse_fraction()","warn")
     end
 
@@ -172,7 +172,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
     #
   
     # Solar zenithal angle at noon (radian):
-    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters.Latitude)
+    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters["Latitude"])
     
     # # Compute net radiation using the Allen et al. (1998) equation :
     #
