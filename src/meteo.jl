@@ -161,35 +161,19 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
         warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
     end
 
-    # # Missing diffuse fraction:
-    # if(is.null(MetData$FDiff)){
-    #   MetData$FDiff=
-    #     Diffuse_d(DOY = MetData$DOY, RAD = MetData$RAD,
-    #               Latitude = Parameters$Latitude,type = "Spitters")
-    #   warn_var("FDiff","DOY, RAD and Latitude using Diffuse_d()","warn")
-    # }
-    #
-    #
+    # Missing diffuse fraction:
+    if is_missing(MetData,"FDiff")
+        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, formula = "Spitters")
+        warn_var("FDiff","DOY, RAD and Latitude using diffuse_fraction()","warn")
+    end
+
     # MetData$year= lubridate::year(MetData$Date)
     # MetData$DOY= lubridate::yday(MetData$Date)
     #
-    # # Correct the noon hour by the Timezone if the user use TZ="UTC":
-    # if(Sys.timezone()=="UTC"|Sys.timezone()=="GMT"){
-    #   cor_tz= Parameters$TimezoneCF*60*60
-    # }else{
-    #   # Else R use the user time zone (with warning).
-    #   warning("Meteo file uses this time-zone: ",Sys.timezone(),". Set it to "UTC" if you want to use ",
-    #           "the timezone from your parameter file")
-    #   cor_tz= 1
-    # }
-    #
-    # # Solar zenithal angle at noon (radian):
-    # MetData$ZEN=
-    #   solartime::computeSunPosition(timestamp = MetData$Date+60*60*12+cor_tz,
-    #                                 latDeg = Parameters$Latitude,
-    #                                 longDeg = Parameters$Longitude)%>%
-    #   as.data.frame()%>%{sin(.$elevation)}%>%acos(.)
-    #
+  
+    # Solar zenithal angle at noon (radian):
+    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters.Latitude)
+    
     # # Compute net radiation using the Allen et al. (1998) equation :
     #
     # if(!is.null(MetData$RH)){

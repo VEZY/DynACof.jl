@@ -1,63 +1,4 @@
 """
-    GDD(25.,5.0,28.0)
-
-Compute the daily growing degree days (GDD) directly from the daily mean
-temperature.
-
-# Arguments
-- `Tmean::Float64`: Optional. Average daily temperature (Celsius degree).
-- `MinTT::Float64`: Minimum temperature threshold, also called base temperature (Celsius degree), default to 5.
-- `MaxTT::Float64`: Maximum temperature threshold (Celsius degree), optional, default to 30.0
-
-# Return
-GDD: Growing degree days (Celsius degree)
-
-# Examples
-```julia
-GDD(25.0,5.0,28.0)
-20.0
-GDD(5.0,5.0,28.0)
-0.0
-```
-"""
-function GDD(Tmean::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
-  DD= Tmean-MinTT
-  if DD<0.0 || DD>(MaxTT-MinTT)
-    DD= 0.0
-  end
-  DD
-end
-
-"""
-    GDD(30.0,27.0,5.0,27.0)
-
-Compute the daily growing degree days (GDD) using the maximum and minimum daily temperature.
-
-# Arguments
-- `Tmax::Float64`: Maximum daily temperature (Celsius degree)
-- `Tmin::Float64`: Minimum daily temperature (Celsius degree)
-- `MinTT::Float64`: Minimum temperature threshold, also called base temperature (Celsius degree), default to 5.
-- `MaxTT::Float64`: Maximum temperature threshold (Celsius degree), optional, default to 30.0
-
-Please keep in mind that this function gives an approximation of the degree days.
-GDD are normally computed as the integral of hourly (or less) values.
-
-# Return
-GDD: Growing degree days (Celsius degree)
-
-# Examples
-```julia
-GDD(30.0,27.0,5.0,27.0)
-0.0
-```
-"""
-function GDD(Tmax::Float64,Tmin::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
- Tmean= (Tmax+Tmin)/2.0
- GDD(Tmean,MinTT,MaxTT)
-end
-
-
-"""
     is_missing(MetData, "Date")
 Find if a column is missing from a DataFrame.
 
@@ -164,3 +105,52 @@ Stop execution if mandatory meteorology input variable is not provided.
 function warn_var(Var::String)
   error("$Var missing from input Meteo. Cannot proceed unless provided.")
 end
+
+function cos°(x::Float64)::Float64
+  cos(x*π/180.0)
+end
+
+function sin°(x::Float64)::Float64
+  sin(x*π/180.0)
+end
+
+function tan°(x::Float64)::Float64
+  tan(x*π/180.0)
+end
+
+function acos°(x::Float64)::Float64
+  acos(x)*180.0/π
+end
+
+function asin°(x::Float64)::Float64
+  asin(x)*180.0/π
+end
+
+
+function atan°(x::Float64)::Float64
+  atan(x)*180.0/π
+end
+
+
+"""
+Trigonometric Functions (degree)
+
+These functions give the obvious trigonometric functions. They respectively compute the cosine, sine, tangent,
+arc-cosine, arc-sine, arc-tangent with input and output in degree.
+
+# Returns
+The output in degree
+
+# Details
+The conversions between radian to degree is: ``x\\cdot \\frac{\\pi,180}``
+
+
+# Examples
+```julia
+# cosinus of an angle of 120 degree:
+cos°(120)
+# should yield -0.5, as in the base version:
+cos(120*π/180)
+```
+"""
+cos°,sin°,tan°,acos°,asin°,atan°

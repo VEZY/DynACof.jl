@@ -117,44 +117,6 @@ function esat_slope(Tair::Float64, formula::String= "Sonntag_1990")::Float64
   ForwardDiff.derivative(esat_fun,Tair) / 1000.0
 end
 
-
-"""
-    pressure_from_elevation(1000.0, 25.0, 1.5)
-
-Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.
-
-# Arguments  
-- `Tair::Float64`: Air temperature (°C)
-- `pressure::Float64`: Atmospheric pressure (kPa)
-- `VPD::Float64`: Vapor pressure deficit (kPa)
-- `formula::String`: (optional) Formula to be used for the calculation of esat. One of "Sonntag_1990" (Default),
-"Alduchov_1996", or "Allen_1998".
-- `C_to_K::Float64`: Celsius degree to Kelvin (*e.g.* 273.15)
-- `pressure0::Float64`: reference atmospheric pressure at sea level (kPa)
-- `Rd::Float64`: gas constant of dry air (``J\\ kg^{-1}\\ K^{-1}``), source : Foken p. 245
-- `g::Float64`: gravitational acceleration (``m\\ s^{-2}``)
-
-# Note
-`C_to_K` and `eps` can be found using `physics_constant()`
-
-# Returns
-The atmospheric pressure (kPa)
-
-# Examples
-```julia
-pressure_from_elevation(600.0, 25.0, 1.5)
-```
-
-"""
-function pressure_from_elevation(elev::Float64, Tair::Float64, VPD::Float64; formula::String="Sonntag_1990",
-  C_to_K::Float64= physics_constant().Kelvin, pressure0::Float64= physics_constant().pressure0, 
-  Rd::Float64= physics_constant().Rd, g::Float64= physics_constant().g)::Float64
-
-  pressure1= pressure0 / exp(g * elev / (Rd * (Tair + C_to_K)))
-  Tv_K= virtual_temp(Tair, pressure1, VPD, formula = formula) + C_to_K
-  pressure0 / exp(g * elev / (Rd * Tv_K))
-end
-
 """
     virtual_temp(25.0, 1.5, "Sonntag_1990")
 Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.
@@ -215,4 +177,64 @@ This function is translated from the R package [bigleaf](https://bitbucket.org/j
 """
 function VPD_to_e(VPD::Float64, Tair::Float64; formula::String="Sonntag_1990")::Float64
   esat(Tair, formula) - VPD
+end
+
+
+
+"""
+    GDD(25.,5.0,28.0)
+
+Compute the daily growing degree days (GDD) directly from the daily mean
+temperature.
+
+# Arguments
+- `Tmean::Float64`: Optional. Average daily temperature (Celsius degree).
+- `MinTT::Float64`: Minimum temperature threshold, also called base temperature (Celsius degree), default to 5.
+- `MaxTT::Float64`: Maximum temperature threshold (Celsius degree), optional, default to 30.0
+
+# Return
+GDD: Growing degree days (Celsius degree)
+
+# Examples
+```julia
+GDD(25.0,5.0,28.0)
+20.0
+GDD(5.0,5.0,28.0)
+0.0
+```
+"""
+function GDD(Tmean::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
+  DD= Tmean-MinTT
+  if DD<0.0 || DD>(MaxTT-MinTT)
+    DD= 0.0
+  end
+  DD
+end
+
+"""
+    GDD(30.0,27.0,5.0,27.0)
+
+Compute the daily growing degree days (GDD) using the maximum and minimum daily temperature.
+
+# Arguments
+- `Tmax::Float64`: Maximum daily temperature (Celsius degree)
+- `Tmin::Float64`: Minimum daily temperature (Celsius degree)
+- `MinTT::Float64`: Minimum temperature threshold, also called base temperature (Celsius degree), default to 5.
+- `MaxTT::Float64`: Maximum temperature threshold (Celsius degree), optional, default to 30.0
+
+Please keep in mind that this function gives an approximation of the degree days.
+GDD are normally computed as the integral of hourly (or less) values.
+
+# Return
+GDD: Growing degree days (Celsius degree)
+
+# Examples
+```julia
+GDD(30.0,27.0,5.0,27.0)
+0.0
+```
+"""
+function GDD(Tmax::Float64,Tmin::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
+ Tmean= (Tmax+Tmin)/2.0
+ GDD(Tmean,MinTT,MaxTT)
 end
