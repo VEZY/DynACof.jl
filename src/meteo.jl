@@ -72,6 +72,16 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
         end
     end
 
+    if is_missing(MetData,"DOY")
+        MetData[:DOY] = dayofyear.(MetData.Date)
+        warn_var("DOY","MetData.Date","warn")
+    end
+
+    if is_missing(MetData,"year")
+        MetData[:year] = year.(MetData.Date)
+        warn_var("year","MetData.Date","warn")
+    end
+
     if period_date != ["0000-01-01", "0000-01-02"]
         if period_date[1]<MetData.Date[1] || period_date[2]>MetData.Date[end]
             error("Given period is not covered by the meteorology file")
@@ -163,53 +173,20 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     # Missing diffuse fraction:
     if is_missing(MetData,"FDiff")
-        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters["Latitude"], formula = "Spitters")
+        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters["Latitude"], "Spitters")
         warn_var("FDiff","DOY, RAD and Latitude using diffuse_fraction()","warn")
     end
 
-    # MetData$year= lubridate::year(MetData$Date)
-    # MetData$DOY= lubridate::yday(MetData$Date)
-    #
-  
     # Solar zenithal angle at noon (radian):
     MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters["Latitude"])
     
-    # # Compute net radiation using the Allen et al. (1998) equation :
-    #
-    # if(!is.null(MetData$RH)){
-    #   MetData$Rn= Rad_net(DOY = MetData$DOY,RAD = MetData$RAD,Tmax = MetData$Tmax,
-    #                       Tmin = MetData$Tmin, Rh =  MetData$RH,
-    #                       Elevation = Parameters$Elevation,Latitude = Parameters$Latitude,
-    #                       albedo = Parameters$albedo)
-    # }else if(!is.null(MetData$VPD)){
-    #   MetData$Rn= Rad_net(DOY = MetData$DOY,RAD = MetData$RAD,Tmax = MetData$Tmax,
-    #                       Tmin = MetData$Tmin, VPD =  MetData$VPD,
-    #                       Elevation = Parameters$Elevation,Latitude = Parameters$Latitude,
-    #                       albedo = Parameters$albedo)
-    # }
-    #
-    # DaysWithoutRain= Rain= NULL # To avoid notes by check
-    # MetData= as.data.table(MetData)
-    # MetData[, DaysWithoutRain := 0]; MetData[Rain > 0, DaysWithoutRain := 1]
-    # MetData$DaysWithoutRain= sequence(MetData[,.N,cumsum(DaysWithoutRain)]$N)-1
-    # MetData= as.data.frame(MetData)
-    #
-    # MetData$Air_Density= bigleaf::air.density(MetData$Tair,MetData$Pressure/10)
-    #
-    # # Force to keep only the input variable the model need to avoid any issues:
-    # Varnames= c('year','DOY','Date','Rain','Tair','RH','RAD','Pressure',
-    #             'WindSpeed','CO2','DegreeDays','PAR','FDiff',
-    #             'VPD','Rn','Tmax','Tmin','DaysWithoutRain','Air_Density','ZEN')
-    # MetData= MetData[colnames(MetData)%in%Varnames]
-    # MetData[,-c(1:3)]= round(MetData[,-c(1:3)],4)
-    #
-    # attr(MetData,"unit")=
-    #   data.frame(Varnames,
-    #              unit=c("year","day","POSIXct date","mm","Celsius","%","MJ m-2 d-1","hPa",
-    #                     "m s-1","ppm","Celsius","MJ m-2 d-1","Fraction","hPa","MJ m-2 d-1",
-    #                     "Celsius","Celsius","day","kg m-3","rad"))
-    #
-    # message("Meteo computation done")
-    # message(paste("n", crayon::green$bold$underline("Meteo computation done")))
+    # Compute net radiation using the Allen et al. (1998) equation :
+    MetData.Rn= Rad_net.(MetData.DOY,MetData.RAD,MetData.Tmax,MetData.Tmin,MetData.VPD/10.0,
+    Parameters["Elevation"],Parameters["Latitude"],Parameters["albedo"])
+    
+    # Number of days without rainfall: 
+    MetData.DaysWithoutRain= days_without_rain(MetData.Rain)
+
+    printstyled("Meteo computation done \n", bold= true, color= :light_green)
     return MetData
 end

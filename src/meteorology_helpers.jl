@@ -88,7 +88,7 @@ diffuse_fraction(1,25.0,35.0)
 ```
 
 """
-function diffuse_fraction(DOY::Int64, RAD::Float64, Latitude::Float64; formula::String="Spitters",
+function diffuse_fraction(DOY::Int64, RAD::Float64, Latitude::Float64, formula::String="Spitters";
     Gsc::Float64=physics_constant().Gsc)::Float64
 
   S0= Rad_ext(DOY,Latitude,Gsc)
@@ -179,7 +179,6 @@ Computes the sun zenithal angle at noon (solar time).
 # Daily extra-terrestrial radiation on january 1st at latitude 35 N :
 sun_zenithal_angle(1,35.0)
 ```
-
 """
 function sun_zenithal_angle(DOY::Int64, Latitude::Float64)::Float64
   fracYearInRad= 2.0 * π * (DOY - 1.0)/365.24
@@ -192,4 +191,106 @@ function sun_zenithal_angle(DOY::Int64, Latitude::Float64)::Float64
 
 SolElevRad= asin(sin(SolDeclRad) * sin(Latitude/180.0 * π) + cos(SolDeclRad) * cos(Latitude/180.0 * π))
 acos(sin(SolElevRad))
+end
+
+
+
+"""
+    Rad_net(DOY::Int64,RAD::Float64,Tmax::Float64,Tmin::Float64,VPD::Float64,Latitude::Float64,
+     Elevation::Float64,albedo::Float64,formula::String;
+     σ::Float64= physics_constant().σ, Gsc::Float64= physics_constant().Gsc)
+
+Compute the daily net radiation of the system using incident radiation, air temperature, wind speed,
+relative humidity and the albedo. A clear description of this methodology can be found in Allen et al. (1998)
+or in An et al. (2017).
+
+# Arguments  
+- `DOY::Int64`: Ordinal day, which is the day of year from 1st January (day)
+- `RAD::Float64`: Incident total radiation (MJ m-2 d-1)- `Tmax::Float64`: Maximum daily air temperature (°C)
+- `Tmin::Float64`: Minimum daily air temperature (°C)
+- `VPD::Float64`: Vapor pressure deficit (kPa)
+- `Latitude::Float64`: Latitude (°)
+- `Elevation::Float64`: Elevation (m)
+- `albedo::Float64`: Shortwave surface albedo (-)
+- `formula::String`: (optional) Formula to be used for the calculation of esat. One of "Sonntag_1990" (Default),
+"Alduchov_1996", or "Allen_1998".
+- `σ::Float64`: (sigma) Stefan-Boltzmann constant (``W\\ m^{-2} K^{-4}``), default to `physics_constant().σ`.
+- `Gsc::Float64`: The solar constant (W m-2), default to `physics_constant().Gsc` (= 1367).
+
+# Returns
+Rn, the daily net radiation (MJ m-2 d-1)
+
+# Details 
+The daily net radiation is computed using the surface albedo. This method is only a simple estimation. Several parameters 
+(ac, bc, a1 and b1) are taken from Evett et al. (2011). The net radiation is computed as: 
+``Rn=(1-\\alpha)\\cdot RAD-(ac\\cdot\\frac{RAD}{Rso}+bc)\\cdot(a1+b1\\cdot ea^{0.5})\\cdot\\sigma\\cdot\\frac{T_{\\max}^4+T_{\\min}^4}{2}``
+And is derived from the equation :
+``Rn= (1-\\alpha)\\cdot RAD-Rln``
+where \\eqn{Rln} is the net upward longwave radiation flux, \\eqn{\\alpha} is the albedo, \\eqn{R_{so}} the daily total clear sky solar
+irradiance, computed as follow:
+``R_{so}= (0.75+0.00002\\cdot Elevation)\\cdot R{sa}``
+where ``R_{sa}`` is the daily extra-terrestrial radiation, computed using [`Rad_ext`](@ref).
+The actual vapor pressure `ea` can be computed using either VPD or the relative humidity and the maximum and minimum daily
+temperature. If both are provided, Rh will be used.
+
+# References
+An, N., S. Hemmati, and Y.-J. Cui, Assessment of the methods for determining net radiation at different time-scales
+of meteorological variables. Journal of Rock Mechanics and Geotechnical Engineering, 2017. 9(2): p. 239-246.
+
+# Examples
+```julia
+dew_point(20.0,1.0)
+```
+
+"""
+function Rad_net(DOY::Int64,RAD::Float64,Tmax::Float64,Tmin::Float64,VPD::Float64,Latitude::Float64,
+  Elevation::Float64,albedo::Float64,formula::String="Sonntag_1990";
+  σ::Float64= physics_constant().σ, Gsc::Float64= physics_constant().Gsc)
+  
+  Rsa= Rad_ext(DOY,Latitude,Gsc)
+  Rso= (0.75 + 0.00002 * Elevation) * Rsa
+  ea= esat(dew_point((Tmax + Tmin) / 2.0, VPD,formula),formula)
+  
+  ac= 1.35
+  bc= -0.35
+  a1= 0.35
+  b1= -0.14
+
+  (1-albedo)*RAD-(ac*(RAD/Rso)+bc)*(a1+b1*ea^0.5)*σ*((Tmax^4+Tmin^4)/2)
+end
+
+
+
+"""
+    days_without_rain(Rain::Array{Float64,1})
+
+Computes the number of days without rain from a rainfall data `Array`. It is assumed the `Array` is sorted following ascending dates.
+
+# Arguments  
+- `Rain::Array{Float64,1}`: An `Array` of daily rainfall data (whatever the unit) in ascending day order.
+
+# Returns
+An `Array{Int64,1}` determining how many days there was without rainfall before the given day.
+
+# Examples
+```julia
+rainfall= [0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.2,0.6]
+days_without_rain(rainfall)
+```
+"""
+function days_without_rain(Rain::Array{Float64,1})::Array{Int64,1}
+  DaysWithoutRain= zeros(length(Rain))
+  is_raining = zeros(length(Rain))
+  is_raining[Rain .> 0.0] .= 1
+  
+  for i in 1:length(Rain)
+      for j in i:-1:1
+          if is_raining[j] == 0
+              DaysWithoutRain[i] += 1
+          else
+              break
+          end
+      end
+  end
+  DaysWithoutRain
 end

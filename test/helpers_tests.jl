@@ -32,8 +32,9 @@ end;
     @test rH_to_VPD(0.5,20.0) ≈ 1.1662980110489036
     @test esat(20.0,"Allen_1998") ≈ 2.3382812709274456
     @test esat_slope(20.0,"Allen_1998") ≈ 0.1447462277835135
-    @test VPD_to_e(1.5, 25.0, formula= "Sonntag_1990") ≈ 1.6600569164883336
+    @test VPD_to_e(1.5, 25.0, "Sonntag_1990") ≈ 1.6600569164883336
     @test virtual_temp(20.0,1010.0,1.5) ≈ 20.091375550353973
+    @test dew_point(20.0, 2.0) ≈ 11.252745464952273
 end;
 
 @testset "Meteorology helpers" begin
@@ -56,4 +57,6 @@ end;
     @test diffuse_fraction(1,1.0,35.0) == 1.0
     @test diffuse_fraction(1,10.0,35.0) ≈ 0.4664679
     @test sun_zenithal_angle(198,43.6109200) ≈ 0.3867544130665691 # considering solar time at noon
+    @test Rad_net(1,5.0,16.0,10.0,1.5,9.0,1000.0,0.146) ≈ 4.2700530171252735
+    @test days_without_rain([0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.2,0.6]) == [1,2,3,4,0,1,2,0,0]
 end;

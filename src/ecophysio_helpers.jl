@@ -1,7 +1,7 @@
 """
     rH_to_VPD(0.5,20,"Allen_1998")
 
-Conversion between vapor pressure (e), vapor pressure deficit (VPD), specific humidity (q), and relative humidity (rH).
+Conversion from relative humidity (rH) to vapor pressure deficit (VPD).
 
 # Arguments
 - `rH::Float64`: Relative humidity (-)
@@ -21,8 +21,8 @@ rH_to_VPD(0.5,20.0,"Allen_1998")
 This function is translated from the R package [bigleaf](https://bitbucket.org/juergenknauer/bigleaf/src/master/).
 """
 function rH_to_VPD(rH::Float64, Tair::Float64, formula::String = "Sonntag_1990")::Float64
-  if rH > 1 || ismissing(rH)
-    error("Relative humidity (rH) has to be between 0 and 1, and no missing values are allowed")
+  if rH > 1.0
+    error("Relative humidity (rH) has to be between 0 and 1")
   end
   Esat = esat(Tair,formula)
   Esat - rH * Esat
@@ -114,11 +114,39 @@ function esat_slope(Tair::Float64, formula::String= "Sonntag_1990")::Float64
   end
 
   esat_fun(Tair::Float64)= a * exp((b * Tair)/(c + Tair))
-  ForwardDiff.derivative(esat_fun,Tair) / 1000.0
+  derivative(esat_fun,Tair) / 1000.0
 end
 
+
 """
-    virtual_temp(25.0, 1.5, "Sonntag_1990")
+    dew_point(Tair::Float64, VPD::Float64, formula::String="Sonntag_1990")
+Computes the dew point, *i.e.* the temperature to which air must be cooled to become saturated 
+
+# Arguments  
+- `Tair::Float64`: Air temperature (°C)
+- `VPD::Float64`: Vapor pressure deficit (kPa)
+- `formula::String`: (optional) Formula to be used for the calculation of esat. One of "Sonntag_1990" (Default),
+"Alduchov_1996", or "Allen_1998".
+
+# Returns
+T_d, the dew point (°C)
+
+# Examples
+```julia
+dew_point(20.0,1.0)
+```
+
+"""
+function dew_point(Tair::Float64, VPD::Float64, formula::String="Sonntag_1990")::Float64
+  ea= VPD_to_e(VPD, Tair, formula)
+  minimizer(optimize(Td -> abs(ea - esat(Td, formula)), -50.0, 50.0))
+  # optimize(f, lower, upper, method; kwargs...)
+end
+
+
+
+"""
+    virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64, formula::String="Sonntag_1990"; C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().eps)
 Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.
 
 # Arguments  
@@ -138,14 +166,12 @@ T_v, the virtual temperature (°C)
 
 # Examples
 ```julia
-dyn_const= physics_constant()
-virtual_temp(20.0,1010.0,1.5)
+virtual_temp(25.0, 1010.0, 1.5, "Sonntag_1990")
 ```
-
 """
-function virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64; formula::String="Sonntag_1990",
+function virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64, formula::String="Sonntag_1990";
    C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().eps)::Float64
-  e = VPD_to_e(VPD, Tair, formula= "Sonntag_1990")
+  e = VPD_to_e(VPD, Tair, "Sonntag_1990")
   Tair = Tair + C_to_K
   Tv = Tair/(1 - (1 - eps) * e/pressure)
   Tv - C_to_K
@@ -168,14 +194,14 @@ e, the vapor pressure (kPa)
 
 # Examples
 ```julia
-VPD_to_e(1.5, 25.0, formula= "Sonntag_1990")
+VPD_to_e(1.5, 25.0, "Sonntag_1990")
 ```
 
 # Reference
 This function is translated from the R package [bigleaf](https://bitbucket.org/juergenknauer/bigleaf/src/master/).
 
 """
-function VPD_to_e(VPD::Float64, Tair::Float64; formula::String="Sonntag_1990")::Float64
+function VPD_to_e(VPD::Float64, Tair::Float64, formula::String="Sonntag_1990")::Float64
   esat(Tair, formula) - VPD
 end
 
