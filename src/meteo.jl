@@ -57,7 +57,7 @@ A daily meteorology data.frame (invisibly).
 Met_c= Meteorology()
 ```
 """
-function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["0000-01-01", "0000-01-02"])
+function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["0000-01-01", "0000-01-02"])::DataFrame
     period_date= Dates.Date.(period)
 
     MetData= CSV.read(file; copycols=true);
