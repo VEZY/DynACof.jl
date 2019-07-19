@@ -264,3 +264,49 @@ function GDD(Tmax::Float64,Tmin::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)
  Tmean= (Tmax+Tmin)/2.0
  GDD(Tmean,MinTT,MaxTT)
 end
+
+
+"""
+    paliv_dis(Age_Max::Int64,P_Start::Float64,P_End::Float64,k::Float64)
+
+Distributes the percentage of living tissue alonf the lifespan
+
+# Arguments
+- `Age_Max::Int64`: Maximum age of the organ (year)
+- `P_Start::Float64`: Percentage of living tissue at first age (% of dry mass)
+- `P_End::Float64`: Percentage of living tissue at last age (% of dry mass)
+- `k::Float64`: Rate between P_Start and P_End
+
+The percentage of living tissue is computed as follows:
+``P_{End}+\\left((P_{Start}-P_{End})\\cdot e^{seq(0,-k,length.out=Age_{Max})}\\right)``
+
+# Return
+The living tissue at each age in % of organ dry mass in the form of a `DataFrame`
+
+# Examples
+```julia
+paliv_dis(40,0.4,0.05,5.0)
+
+40×2 DataFrame
+│ Row │ Age   │ Palive          │
+│     │ Int64 │ Float64         │
+├─────┼───────┼─────────────────┤
+│ 1   │ 1     │ 0.4             │
+│ 2   │ 2     │ 0.357886        │
+│ 3   │ 3     │ 0.320839        │
+│ 4   │ 4     │ 0.288249        │
+⋮
+│ 36  │ 36    │ 0.0539383       │
+│ 37  │ 37    │ 0.0534644       │
+│ 38  │ 38    │ 0.0530476       │
+│ 39  │ 39    │ 0.0526809       │
+│ 40  │ 40    │ 0.0523583       │
+
+```
+"""
+function paliv_dis(Age_Max::Int64,P_Start::Float64,P_End::Float64,k::Float64)::DataFrame
+  DataFrame(Age= 1:Age_Max,
+            Palive= P_End .+ ((P_Start .- P_End) .* exp.(collect(range(0, stop = -k, length = Age_Max)))))
+end
+
+

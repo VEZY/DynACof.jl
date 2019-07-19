@@ -1,6 +1,6 @@
 function DynACof(period=NULL, write_it= F,parallel= TRUE,output_f=".RData",input_path="package",
     output_path= Inpath, simulation_name="DynACof",
-    file_name= Dict["Site"=>"site.jl","meteo"=>"meteorology.txt","soil"=>"soil.jl","coffee"=>"coffee.jl","tree"=>"tree.jl"])
+    file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
 
     # Read in package parameter files (default): 
     if input_path=="package"
