@@ -146,7 +146,7 @@ end
 
 
 """
-    virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64, formula::String="Sonntag_1990"; C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().eps)
+    virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64, formula::String="Sonntag_1990"; C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().epsi)
 Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.
 
 # Arguments  
@@ -170,7 +170,7 @@ virtual_temp(25.0, 1010.0, 1.5, "Sonntag_1990")
 ```
 """
 function virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64, formula::String="Sonntag_1990";
-   C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().eps)::Float64
+   C_to_K::Float64=physics_constant().Kelvin, eps::Float64= physics_constant().epsi)::Float64
   e = VPD_to_e(VPD, Tair, "Sonntag_1990")
   Tair = Tair + C_to_K
   Tv = Tair/(1 - (1 - eps) * e/pressure)

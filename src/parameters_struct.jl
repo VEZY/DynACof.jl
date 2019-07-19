@@ -3,7 +3,7 @@ Physical constants used in the DynACof package
 
 This function defines the following constants:
 - Cp: specific heat of air for constant pressure (``J\\ K^{-1}\\ kg^{-1}``), Source: Allen 1998 FAO Eq. 8 p. 32
-- eps: Ratio of the molecular weight of water vapor to dry air (=Mw/Md)
+- epsi: Ratio of the molecular weight of water vapor to dry air (=Mw/Md)
 - pressure0: reference atmospheric pressure at sea level (kPa)
 - FPAR: Fraction of global radiation that is PAR (source: MAESPA model)
 - g: gravitational acceleration (``m\\ s^{-2}``)
@@ -29,7 +29,7 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 """
 Base.@kwdef struct physics_constant
     cp::Float64= 1013*10^-6
-    eps::Float64= 0.622 
+    epsi::Float64= 0.622 
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
     g::Float64         = 9.81
@@ -41,10 +41,20 @@ Base.@kwdef struct physics_constant
     Gsc::Float64       = 1367.0            # also found 1366 in Kalogirou (2013)
     σ::Float64         = 5.670367e-08
     H2OMW::Float64     = 18.e-3
-    W_umol::Float64    = 4.57
+    W_umol::Float64    = 4.57 
     λ::Float64         = 2.45
     cl::Float64        = 0.4
     Dheat::Float64     = 21.5e-6
 end
 
-# Put other parameter structures here
+Base.@kwdef struct site
+    Location::String   = "Aquiares"     # Site location name (optional)
+    Start_Date::String = "1979/01/01"   # Start date of the meteo data only used if "Date" is missing from input Meteorology (optionnal)
+    Latitude::Float64  = 9.93833        # Latitude (degree)
+    Longitude::Float64 = -83.72861      # Longitude (degredd)
+    TimezoneCF::Int64  = 6              # Time Zone
+    Elevation::Float64 = 1040.0         # Elevation (m)
+    ZHT::Float64       = 25.0           # Measurment height (m)
+    extwind::Float64   = 0.58           # Wind extinction coefficient (-) used to compute the wind speed in the considered layer. Measured on site.
+    albedo::Float64    = 0.144          # Site albedo computed using MAESPA.
+end
