@@ -4,7 +4,7 @@ function DynACof(period=NULL, write_it= F,parallel= TRUE,output_f=".RData",input
 
     # Read in package parameter files (default): 
     if input_path=="package"
-        physics= physics_constant()
+        physics= constants()
         # put other parameters here
     else
         physics= read_constants(filepath)

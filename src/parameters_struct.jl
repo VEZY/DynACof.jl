@@ -27,7 +27,7 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 - Foken, T, 2008: Micrometeorology. Springer, Berlin, Germany.
 - Khorasanizadeh, H. and K. Mohammadi (2016). "Diffuse solar radiation on a horizontal surface: Reviewing and categorizing the empirical models." Renewable and Sustainable Energy Reviews 53: 338-362.
 """
-Base.@kwdef struct physics_constant
+Base.@kwdef struct constants
     cp::Float64= 1013*10^-6
     epsi::Float64= 0.622 
     pressure0::Float64 = 101.325

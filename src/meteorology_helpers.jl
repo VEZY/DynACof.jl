@@ -15,7 +15,7 @@ Computes the virtual temperature, *i.e.* the temperature at which dry air would 
 - `g::Float64`: gravitational acceleration (``m\\ s^{-2}``)
 
 # Note
-`C_to_K` and `eps` can be found using `physics_constant()`
+`C_to_K` and `eps` can be found using `constants()`
 
 # Returns
 The atmospheric pressure (kPa)
@@ -27,8 +27,8 @@ pressure_from_elevation(600.0, 25.0, 1.5)
 
 """
 function pressure_from_elevation(elev::Float64, Tair::Float64, VPD::Float64; formula::String="Sonntag_1990",
-  C_to_K::Float64= physics_constant().Kelvin, pressure0::Float64= physics_constant().pressure0, 
-  Rd::Float64= physics_constant().Rd, g::Float64= physics_constant().g)::Float64
+  C_to_K::Float64= constants().Kelvin, pressure0::Float64= constants().pressure0, 
+  Rd::Float64= constants().Rd, g::Float64= constants().g)::Float64
 
   pressure1= pressure0 / exp(g * elev / (Rd * (Tair + C_to_K)))
   Tv_K= virtual_temp(Tair, pressure1, VPD, formula = formula) + C_to_K
@@ -37,7 +37,7 @@ end
 
 
 """
-    diffuse_fraction(DOY::Int64, RAD::Float64, Latitude::Float64; formula::String="Spitters",Gsc::Float64=physics_constant().Gsc)
+    diffuse_fraction(DOY::Int64, RAD::Float64, Latitude::Float64; formula::String="Spitters",Gsc::Float64=constants().Gsc)
 
 Computes the daily diffuse fraction from the total daily incident radiation
 
@@ -46,7 +46,7 @@ Computes the daily diffuse fraction from the total daily incident radiation
 - `RAD::Float64`: Incident total radiation (MJ m-2 d-1)
 - `Latitude::Float64`: Latitude (deg)
 - `formula::String`: (Optionnal) Model type, one of `Spitters`, `Page` or `Gopinathan`
-- `Gsc::Float64`: (Optionnal) The solar constant (W m-2), default to `physics_constant().Gsc` (= 1367).
+- `Gsc::Float64`: (Optionnal) The solar constant (W m-2), default to `constants().Gsc` (= 1367).
 
 # Details 
 The daily extra-terrestrial radiation at a plane parallel to the earth surface (`S0` or `H0` depending on the source) is computed following
@@ -59,7 +59,7 @@ valid for a wide range of climate conditions
 * Gopinathan and Soler (1995) from 40 widely distributed locations in the latitude range of 36S to 60N.  
 
 # Note
-`C_to_K` and `eps` can be found using `physics_constant()`
+`C_to_K` and `eps` can be found using `constants()`
 
 # Returns
 ``Hd/H``: the daily diffuse fraction of light (%)
@@ -89,7 +89,7 @@ diffuse_fraction(1,25.0,35.0)
 
 """
 function diffuse_fraction(DOY::Int64, RAD::Float64, Latitude::Float64, formula::String="Spitters";
-    Gsc::Float64=physics_constant().Gsc)::Float64
+    Gsc::Float64=constants().Gsc)::Float64
 
   S0= Rad_ext(DOY,Latitude,Gsc)
 
@@ -128,7 +128,7 @@ Computes the virtual temperature, *i.e.* the temperature at which dry air would 
 # Arguments  
 - `DOY::Int64`: Ordinal date (integer): day of year from 1st January (day)
 - `Latitude::Float64`: Latitude (deg)
-- `Gsc::Float64`: The solar constant (W m-2), default to `physics_constant().Gsc` (= 1367).
+- `Gsc::Float64`: The solar constant (W m-2), default to `constants().Gsc` (= 1367).
 
 # Returns
 `S0`, the daily extra-terrestrial radiation (``MJ\\ m^{-2}\\ d^{-1}``)
@@ -147,7 +147,7 @@ Rad_ext(1,35.0)
 ```
 
 """
-function Rad_ext(DOY::Int64,Latitude::Float64,Gsc::Float64=physics_constant().Gsc)::Float64
+function Rad_ext(DOY::Int64,Latitude::Float64,Gsc::Float64=constants().Gsc)::Float64
     solar_declin= 23.45*sin°(((float(DOY)+284.0)*360.0)/365.0)
     sunset_hour_angle= acos°(-tan°(Latitude) * tan°(solar_declin))
     S0= (86400.0/π) * Gsc * (1.0 + 0.033 * cos°(float(360*DOY)/365.0)) * (cos°(Latitude) * 
@@ -198,7 +198,7 @@ end
 """
     Rad_net(DOY::Int64,RAD::Float64,Tmax::Float64,Tmin::Float64,VPD::Float64,Latitude::Float64,
      Elevation::Float64,albedo::Float64,formula::String;
-     σ::Float64= physics_constant().σ, Gsc::Float64= physics_constant().Gsc)
+     σ::Float64= constants().σ, Gsc::Float64= constants().Gsc)
 
 Compute the daily net radiation of the system using incident radiation, air temperature, wind speed,
 relative humidity and the albedo. A clear description of this methodology can be found in Allen et al. (1998)
@@ -214,8 +214,8 @@ or in An et al. (2017).
 - `albedo::Float64`: Shortwave surface albedo (-)
 - `formula::String`: (optional) Formula to be used for the calculation of esat. One of "Sonntag_1990" (Default),
 "Alduchov_1996", or "Allen_1998".
-- `σ::Float64`: (sigma) Stefan-Boltzmann constant (``W\\ m^{-2} K^{-4}``), default to `physics_constant().σ`.
-- `Gsc::Float64`: The solar constant (W m-2), default to `physics_constant().Gsc` (= 1367).
+- `σ::Float64`: (sigma) Stefan-Boltzmann constant (``W\\ m^{-2} K^{-4}``), default to `constants().σ`.
+- `Gsc::Float64`: The solar constant (W m-2), default to `constants().Gsc` (= 1367).
 
 # Returns
 Rn, the daily net radiation (MJ m-2 d-1)
@@ -245,7 +245,7 @@ dew_point(20.0,1.0)
 """
 function Rad_net(DOY::Int64,RAD::Float64,Tmax::Float64,Tmin::Float64,VPD::Float64,Latitude::Float64,
   Elevation::Float64,albedo::Float64,formula::String="Sonntag_1990";
-  σ::Float64= physics_constant().σ, Gsc::Float64= physics_constant().Gsc)
+  σ::Float64= constants().σ, Gsc::Float64= constants().Gsc)
   
   Rsa= Rad_ext(DOY,Latitude,Gsc)
   Rso= (0.75 + 0.00002 * Elevation) * Rsa
