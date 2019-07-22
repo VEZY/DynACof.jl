@@ -154,3 +154,14 @@ cos(120*π/180)
 ```
 """
 cos°,sin°,tan°,acos°,asin°,atan°
+
+
+
+
+
+function struct_to_tuple(structure,instance)
+  structure_names= fieldnames(structure)
+  eval_names= map(x -> :($(instance).$x), structure_names)
+  # (; zip(structure_names, structure_values)...)
+  NamedTuple{structure_names}(map(eval,eval_names))
+end

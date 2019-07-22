@@ -18,7 +18,8 @@ export Rad_ext,diffuse_fraction,pressure_from_elevation,sun_zenithal_angle
 export Rad_net,days_without_rain
 # Parameters-related functions
 export import_parameters
-export constants,site,coffee
+export constants,site,coffee,soil,tree
+export struct_to_tuple
 export read_constants,read_site,read_soil,read_coffee,read_tree,read_param_file
 export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
 export light_extinction_K_Tree,tree_allometries,metamodels_tree

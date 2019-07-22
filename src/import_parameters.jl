@@ -1,5 +1,11 @@
 
-function import_parameters(path,Names)
+function import_parameters(path::String,Names)
+    if Names.tree==""
+        param_struct= [:constants,:site, :soil, :coffee]
+    else
+        param_struct= [:constants,:site, :soil, :coffee, :tree]
+    end
+
     if path == "package"
         paths= repeat(["package"],length(Names))
         paths_names= keys(Names)
@@ -7,15 +13,9 @@ function import_parameters(path,Names)
     else
         paths= map(x -> normpath(string(path,"/",x)),Names)
     end
-    if Names.tree==""
-        Parameters= (constants= read_param_file(:constants,paths.constants), site= read_param_file(:site, paths.site),
-                     soil= read_param_file(:soil, paths.soil), coffee= read_param_file(:coffee,paths.coffee), tree= ())
-    else
-        Parameters= (constants= read_param_file(:constants,paths.constants), site= read_param_file(:site, paths.site),
-                     soil= read_param_file(:soil, paths.soil), coffee= read_param_file(:coffee,paths.coffee), 
-                     tree= read_param_file(:tree,paths.tree))
-    end
-    Parameters
+
+    params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
+    return merge(map(eval, params)...)
 end
 
 

@@ -229,7 +229,7 @@ function H_Coffee(sim::DataFrame,met::DataFrame,i::Int64)
 end
 
 # Light use efficiency:
-function lue(sim::DataFrame,met::DataFrame,i::Int64)                       
+function lue(sim::DataFrame,met::DataFrame,i::Int64)::Float64                       
 2.784288 + 0.009667*met.Tair[i] + 0.010561*met.VPD[i] - 0.710361*sqrt(sim.PAR_Trans_Tree[i])
 end
 
@@ -363,3 +363,4 @@ function tree_allometries(sim::DataFrame,met::DataFrame,i::Int64)
         sim.LAD_Tree[i]= 0.76
     end
 end
+
