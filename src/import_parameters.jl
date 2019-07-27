@@ -1,10 +1,39 @@
+"""
+    import_parameters(path::String,Names)
 
-function import_parameters(path::String,Names)
+Import the model parameters from local files, or from default values in the parameter structures: 
+- constants
+- site
+- soil
+- coffee
+- tree
+
+# Arguments 
+- `path::String`: The path to the parameter files folder. If `path= "package"`, take the default files from the package
+- `Names::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: list the file names. 
+
+# Details
+For the full list of parameters and the format of the parameter files, see [`site()`](@ref).
+
+# Rturn
+A list of all input parameters for DynACof
+
+# Examples
+```julia
+# Default from package: 
+import_parameters("package")
+
+# Reading it from local files: 
+import_parameters("D:/parameter_files",(constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
+```
+"""
+function import_parameters(path::String= "package",Names= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
     if Names.tree==""
         param_struct= [:constants,:site, :soil, :coffee]
     else
         param_struct= [:constants,:site, :soil, :coffee, :tree]
     end
+
 
     if path == "package"
         paths= repeat(["package"],length(Names))
@@ -13,9 +42,12 @@ function import_parameters(path::String,Names)
     else
         paths= map(x -> normpath(string(path,"/",x)),Names)
     end
-
-    params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
-    return merge(map(eval, params)...)
+    
+    # This code is more elegant but eval only works at REPL. Keep the other one until I find a solution.
+    # params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
+    # eval_params= map(eval, params)
+    params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),param_struct,(constants,site,soil,coffee,tree))
+    return merge(params...)
 end
 
 

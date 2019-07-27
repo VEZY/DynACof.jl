@@ -4,7 +4,7 @@ Find if a column is missing from a DataFrame.
 
 # Arguments
 - `data::DataFrame`: a DataFrame
-- `column::String`: a column name
+- `key::String`: a column name
 
 # Return
 A boolean: `true` if the column is missing, `false` if it is present.
@@ -18,10 +18,10 @@ is_missing(df,"B")
 true
 ```
 """
-function is_missing(data::DataFrame,column::String)::Bool
+function is_missing(data::DataFrame,key::String)::Bool
   columns= names(data)
   for i in 1:length(columns)
-    is_in_col= columns[i] == Symbol(column)
+    is_in_col= columns[i] == Symbol(key)
     if is_in_col
       return false
     end
@@ -31,12 +31,12 @@ end
 
 
 """
-    is_missing(Dict("test"=> 2), "test")
-Find if a key is missing from a dictionary.
+    is_missing(data::NamedTuple,key::String)
+Find if a key is missing from a tuple.
 
 # Arguments
-- `data::Dict`: a dictionary
-- `column::String`: a key (parameter) name
+- `data::NamedTuple`: a named tuple
+- `key::String`: a key (parameter) name
 
 # Return
 A boolean: `true` if the key is missing, `false` if it is present.
@@ -50,11 +50,11 @@ is_missing(Parameters,"B")
 true
 ```
 """
-function is_missing(data::Dict,column::String)::Bool
+function is_missing(data::NamedTuple,key::String)::Bool
   try
-    data[column]
+    getfield(data,Symbol(key))
   catch error
-    if isa(error, KeyError)
+    if isa(error, ErrorException)
       return true
     end
   end
@@ -158,10 +158,25 @@ cos°,sin°,tan°,acos°,asin°,atan°
 
 
 
+"""
+    struct_to_tuple(structure::DataType,instance)
+Transform a `struct` instance into a tuple, keeping the field names and values.  
+    
+# Arguments 
+- `structure::DataType`: Any `struct`
+- `instance`: An instance of `structure`.
 
-function struct_to_tuple(structure,instance)
+# Returns
+A named tuple with names and values from the structure. 
+
+# Examples
+```julia
+struct_to_tuple(constants, constants())
+```
+"""
+function struct_to_tuple(structure::DataType,instance)
   structure_names= fieldnames(structure)
-  eval_names= map(x -> :($(instance).$x), structure_names)
-  # (; zip(structure_names, structure_values)...)
-  NamedTuple{structure_names}(map(eval,eval_names))
+  structure_values= map(x -> getfield(instance, x), structure_names)
+  NamedTuple{structure_names}(structure_values)
 end
+

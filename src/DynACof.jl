@@ -26,6 +26,8 @@ export light_extinction_K_Tree,tree_allometries,metamodels_tree
 # Main functions:
 export Meteorology
 
+export dynacof
+
 include("test.jl")
 include("helpers.jl")
 include("meteo.jl")
@@ -33,5 +35,6 @@ include("parameters_struct.jl")
 include("ecophysio_helpers.jl")
 include("meteorology_helpers.jl")
 include("import_parameters.jl")
+include("main.jl")
 
 end # module

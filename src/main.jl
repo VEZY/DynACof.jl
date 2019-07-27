@@ -1,16 +1,19 @@
-function DynACof(period=NULL, write_it= F,parallel= TRUE,output_f=".RData",input_path="package",
-    output_path= Inpath, simulation_name="DynACof",
-    file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
+function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
+                 output_path= input_path, simulation_name="DynACof",
+                 file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",
+                             coffee="coffee.jl",tree="tree.jl"))
 
-    # Read in package parameter files (default): 
-    if input_path=="package"
-        physics= constants()
-        # put other parameters here
-    else
-        physics= read_constants(filepath)
-        # Put reading functions for parameters here
-    end
-    # Parameters= Import_Parameters(path = Inpath, Names= FileName[-grep("Meteo",FileName)])
+
+    Parameters= import_parameters(input_path, file_name)
+    Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
+    # Setting up the simulation -----------------------------------------------
+    # Number of cycles (rotations) to do over the period (given by the Meteo file):
+    
+    # NCycles= ceiling((max(Meteo$year)-min(Meteo$year))/Parameters$AgeCoffeeMax)
+    
+    # if NCycles==0
+    #   error("Carefull, minimum allowed simulation length is one year")
+    # end
 
 end
 

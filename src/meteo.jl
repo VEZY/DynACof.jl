@@ -51,20 +51,21 @@ from the parameter files to set it. When in doubt, set it to UTC (`Sys.setenv(TZ
 # Returns
 A daily meteorology data.frame (invisibly).
 
+See also: [`DynACof()`](@ref)
 
 # Examples
 ```julia
 Met_c= Meteorology()
 ```
 """
-function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["0000-01-01", "0000-01-02"])::DataFrame
+function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-01-01", "0000-01-02"])::DataFrame
     period_date= Dates.Date.(period)
 
     MetData= CSV.read(file; copycols=true);
 
     if is_missing(MetData,"Date")
         if !is_missing(Parameters,"Start_Date")
-            MetData[:Date] = collect(Dates.Date(Parameters["Start_Date"]):Dates.Day(1):(Dates.Date(Parameters["Start_Date"]) + Dates.Day(nrow(MetData)-1)))
+            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date):Dates.Day(1):(Dates.Date(Parameters.Start_Date) + Dates.Day(nrow(MetData)-1)))
             warn_var("Date","Start_Date from Parameters","warn")
         else
             MetData[:Date] = collect(Dates.Date("2000-01-01"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01")) + Dates.Day(nrow(MetData)-1)))
@@ -82,7 +83,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
         warn_var("year","MetData.Date","warn")
     end
 
-    if period_date != ["0000-01-01", "0000-01-02"]
+    if period != ["0000-01-01", "0000-01-02"]
         if period_date[1]<MetData.Date[1] || period_date[2]>MetData.Date[end]
             error("Given period is not covered by the meteorology file")
         else
@@ -92,7 +93,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     if is_missing(MetData,"RAD")
         if !is_missing(MetData,"PAR")
-            MetData[:RAD] = MetData[:PAR] ./ Parameters["FPAR"]
+            MetData[:RAD] = MetData[:PAR] ./ Parameters.FPAR
             warn_var("RAD", "PAR", "warn")
         else
             warn_var("RAD", "PAR", "error")
@@ -101,7 +102,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     if is_missing(MetData,"PAR")
         if !is_missing(MetData,"RAD")
-            MetData[:PAR] = MetData[:RAD] .* Parameters["FPAR"]
+            MetData[:PAR] = MetData[:RAD] .* Parameters.FPAR
             warn_var("PAR", "RAD", "warn")
         else
             warn_var("PAR", "RAD", "error")
@@ -129,7 +130,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     if is_missing(MetData,"Pressure")
         if !is_missing(Parameters,"Elevation")
-            MetData[:Pressure] = pressure_from_elevation.(Parameters["Elevation"], MetData.Tair, MetData.VPD) .* 10
+            MetData[:Pressure] = pressure_from_elevation.(Parameters.Elevation, MetData.Tair, MetData.VPD) .* 10
             # Return in kPa
             warn_var("Pressure","Elevation, Tair and VPD using pressure_from_elevation","warn")
         else
@@ -146,7 +147,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
     # Missing wind speed:
     if is_missing(MetData,"WindSpeed")
         if !is_missing(Parameters,"WindSpeed")
-            MetData[:WindSpeed] = Parameters["WindSpeed"] # assume constant windspeed
+            MetData[:WindSpeed] = Parameters.WindSpeed # assume constant windspeed
             warn_var("WindSpeed","constant (= WindSpeed from Parameters )","warn")
         else
             warn_var("WindSpeed",  "WindSpeed from Parameters (constant value)","error")
@@ -158,7 +159,7 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
     # Missing atmospheric CO2 concentration:
     if is_missing(MetData,"CO2")
         if !is_missing(Parameters,"CO2")
-            MetData[:CO2] = Parameters["CO2"] # assume constant CO2
+            MetData[:CO2] = Parameters.CO2 # assume constant CO2
             warn_var("CO2","constant (= CO2 from Parameters)","warn")
         else
             warn_var("WindSpeed",  "CO2 from Parameters (constant value)","error")
@@ -167,22 +168,22 @@ function Meteorology(file::String, Parameters::Dict, period::Array{String,1}= ["
 
     # Missing DegreeDays:
     if is_missing(MetData,"DegreeDays")
-        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters["MinTT"], Parameters["MaxTT"])
+        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT, Parameters.MaxTT)
         warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
     end
 
     # Missing diffuse fraction:
     if is_missing(MetData,"FDiff")
-        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters["Latitude"], "Spitters")
+        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, "Spitters")
         warn_var("FDiff","DOY, RAD and Latitude using diffuse_fraction()","warn")
     end
 
     # Solar zenithal angle at noon (radian):
-    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters["Latitude"])
+    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters.Latitude)
     
     # Compute net radiation using the Allen et al. (1998) equation :
     MetData.Rn= Rad_net.(MetData.DOY,MetData.RAD,MetData.Tmax,MetData.Tmin,MetData.VPD/10.0,
-    Parameters["Elevation"],Parameters["Latitude"],Parameters["albedo"])
+    Parameters.Elevation,Parameters.Latitude,Parameters.albedo)
     
     # Number of days without rainfall: 
     MetData.DaysWithoutRain= days_without_rain(MetData.Rain)
