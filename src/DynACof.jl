@@ -23,10 +23,10 @@ export struct_to_tuple
 export read_param_file
 export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
 export light_extinction_K_Tree,tree_allometries,metamodels_tree
+
 # Main functions:
 export meteorology
-
-export dynacof
+export dynacof, mainfun
 
 include("test.jl")
 include("helpers.jl")
@@ -35,6 +35,7 @@ include("parameters_struct.jl")
 include("ecophysio_helpers.jl")
 include("meteorology_helpers.jl")
 include("import_parameters.jl")
+include("initialization.jl")
 include("main.jl")
 
 end # module

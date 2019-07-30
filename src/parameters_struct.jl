@@ -263,6 +263,7 @@ Base.@kwdef struct tree
     lambda_CR_Tree       = 0.10                      # Allocation coefficient to the coarse roots. Source: Litton (2007)
     lambda_Leaf_Tree     = 0.26                      # Allocation coefficient to the Leaves. Source: Litton (2007)
     lambda_FRoot_Tree    = 0.05                      # Allocation coefficient to the fine roots. Source: Litton (2007)
+    Wood_alloc= lambda_Stem_Tree + lambda_CR_Tree + lambda_Branch_Tree
     kres_max_Tree        = 1.2                       # Maximum carbon extracted from reserves compared to maintenance respiration
     Res_max_Tree         = 150.0                     # Maximum reserve until Tree always use it for growth
     CC_Leaf_Tree         = 0.47                      # Leaf carbon content in gC gDM-1. Source: Van Oijen et al. (2010)

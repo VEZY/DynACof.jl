@@ -31,7 +31,7 @@ is kept for information for the moment.
 | Tair            | Celsius     | Air temperature (above canopy)               | Computed from Tmax and Tmin                                        |
 | Tmax            | Celsius     | Maximum air temperature during the day       | Required (error)                                                   |
 | Tmin            | Celsius     | Minimum air temperature during the day       | Required (error)                                                   |
-| RH              | `%`          | Relative humidity                            | Not used, but prefered over VPD for Rn computation                 |
+| RH              | `%`          | Relative humidity                            | Not used, but prefered over VPD for Rn computation                |
 | RAD             | MJ m-2 d-1  | Incident shortwave radiation                 | Computed from PAR                                                  |
 | Pressure        | hPa         | Atmospheric pressure                         | Computed from VPD, Tair and Elevation, or alternatively from Tair and Elevation. |
 | WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                          |
@@ -42,20 +42,21 @@ is kept for information for the moment.
 | VPD             | hPa         | Vapor pressure deficit                       | Computed from RH                                                   |
 | Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [Rad_net()] with RH, or VPD                         |
 | DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
-| Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                      |
+| Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                       |
 | ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
 
-Note: It is highly recommended to set the system environment timezone to the one from the meteorology file. If not, the function try to use the Timezone
-from the parameter files to set it. When in doubt, set it to UTC (`Sys.setenv(TZ="UTC")`), as for [Aquiares()].
-
 # Returns
-A daily meteorology data.frame (invisibly).
+A daily meteorology DataFrame.
 
-See also: [`DynACof()`](@ref)
+See also: [`dynacof`](@ref)
 
 # Examples
 ```julia
-Met_c= Meteorology()
+# Using the example meteorology from the `DynACof.jl_inputs` repository:
+file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
+Meteo= meteorology(file,import_parameters())
+# NB: `import_parameters` without arguments uses the package default values
+rm(file)
 ```
 """
 function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-01-01", "0000-01-02"])::DataFrame

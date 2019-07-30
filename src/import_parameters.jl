@@ -13,7 +13,7 @@ Import the model parameters from local files, or from default values in the para
 - `Names::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: list the file names. 
 
 # Details
-For the full list of parameters and the format of the parameter files, see [`site()`](@ref).
+For the full list of parameters and the format of the parameter files, see [`site`](@ref).
 
 # Rturn
 A list of all input parameters for DynACof
