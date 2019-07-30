@@ -18,7 +18,7 @@ period to be returned. The default value ["0000-01-01", "0000-01-02"] makes the 
 - `file_name::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: A list of input file names :
 
     + **constants**: Physical constants file. Default: "constants.jl". More info in the corresponding structure: [`constants`](@ref).
-    + **site**: Site parameters file name, see details. Default: "site.jl"
+    + **site**: Site parameters file name, see details. Default: "site.jl". More info in the corresponding structure: [`site`](@ref)
     + **meteo**: Meteorology file name, see details section. Default: "meteorology.txt". More info in the meteorology reading function [`meteorology`](@ref).
     + **Soil**: Soil parameters file name, see details. Default: "soil.jl". More info in the corresponding structure: [`soil`](@ref). 
     + **Coffee**: Coffee parameters file name, see details. Default: "coffee.jl". More info in the corresponding structure: [`coffee`](@ref). 
@@ -249,48 +249,50 @@ function mainfun(cy,Direction,Meteo,Parameters)
   
   Init_Sim!(Sim,Met_c,Parameters)
   
+  # Compute cumulative degree-days based on previous daily DD from semi-hourly data:
+  CumulDegreeDays= cumsum(Met_c.DegreeDays)
+  
+  ## Bud induction window computation ##
+  # Bud induction can start only at F_Tffb degree-days after vegetative growth stops.
+  # Source: Rodriguez et al. (2011).
+  # The following module finds the vegetative growth end day, and add the F_Tffb parameter
+  # (Time of first floral buds, in dd), then find the very first flowering of the year
+  # and set the vector BudInitPeriod to TRUE between the two dates. So buds will appear
+  # between plant F_Tffb parameter and the first flowering day only.
+
+  # Day of vegetative growth end:
+  VegetGrowthEndDay= findall(x -> x == Parameters.DVG2, Met_c.DOY)
+  # Temporary variables declaration:
+  CumsumRelativeToVeget= Array{Float64,2}(undef, length(VegetGrowthEndDay), length(Met_c.Date))
+  CumsumRelativeToBudinit= Array{Float64,2}(undef, length(VegetGrowthEndDay), length(Met_c.Date))
+
+  DateBudinit= zeros(Int64, length(VegetGrowthEndDay))
+  DateFFlowering= zeros(Int64, length(VegetGrowthEndDay))
+  
+  for i in 1:length(VegetGrowthEndDay)
+    CumsumRelativeToVeget[i,:]= CumulDegreeDays .- CumulDegreeDays[VegetGrowthEndDay[i]-1]
+    # Date of first bud initialisation:
+    DateBudinit[i]= findlast(CumsumRelativeToVeget[i,:] .< Parameters.F_Tffb)
+    CumsumRelativeToBudinit[i,:]= CumulDegreeDays .- CumulDegreeDays[DateBudinit[i]-1]
+    # Minimum date of first bud development end (i.e. without dormancy):
+    BudDevelEnd= findlast(CumsumRelativeToBudinit[i,:] .< Parameters.F_buds1) - 1
+    # Maximum date of first bud development end (i.e. with maximum dormancy):
+    MaxDormancy= findlast(CumsumRelativeToBudinit[i,:] .< Parameters.F_buds2) - 1
+    # Cumulative rainfall within the period of potential dormancy:
+    CumRain= cumsum(Met_c.Rain[BudDevelEnd:MaxDormancy])
+    # Effective (real) day of first buds breaking dormancy:
+    BudDormancyBreakDay= BudDevelEnd + sum(CumRain .< Parameters.F_rain) - 1
+    # Effective day of first flowers:
+    DateFFlowering[i]= findlast(CumsumRelativeToBudinit[i,:] .< CumsumRelativeToBudinit[i,BudDormancyBreakDay] .+
+                                Parameters.BudInitEnd)
+    # Effective dates between which buds can appear
+    Sim.BudInitPeriod[DateBudinit[i]:DateFFlowering[i]] .= true
+  end
+
+  Sim.BudInitPeriod[CumulDegreeDays .< Parameters.VF_Flowering] .= false
+
+
   return Sim
-  # # Compute cumulative degree-days based on previous daily DD from semi-hourly data:
-  # CumulDegreeDays= cumsum(Met_c.DegreeDays)
-
-  # ## Bud induction window computation ##
-  # # Bud induction can start only at F_Tffb degree-days after vegetative growth stops.
-  # # Source: Rodriguez et al. (2011).
-  # # The following module finds the vegetative growth end day, and add the F_Tffb parameter
-  # # (Time of first floral buds, in dd), then find the very first flowering of the year
-  # # and set the vector BudInitPeriod to TRUE between the two dates. So buds will appear
-  # # between plant F_Tffb parameter and the first flowering day only.
-
-  # # Day of vegetative growth end:
-  # VegetGrowthEndDay= which(Met_c.DOY==Parameters.DVG2)
-  # # Temporary variables declaration:
-  # CumsumRelativeToVeget= CumsumRelativeToBudinit=
-  #   matrix(data = NA, nrow = length(VegetGrowthEndDay), ncol = length(Met_c.Date))
-  # DateBudinit= DateFFlowering= NULL
-  # for (i in 1:length(VegetGrowthEndDay)){
-  #   CumsumRelativeToVeget[i,]=
-  #     CumulDegreeDays-CumulDegreeDays[VegetGrowthEndDay[i]-1]
-  #   # Date of first bud initialisation:
-  #   DateBudinit[i]= tail(which(CumsumRelativeToVeget[i,]<Parameters.F_Tffb),1)
-  #   CumsumRelativeToBudinit[i,]=
-  #     CumulDegreeDays-CumulDegreeDays[DateBudinit[i]-1]
-  #   # Minimum date of first bud development end (i.e. without dormancy):
-  #   BudDevelEnd= tail(which(CumsumRelativeToBudinit[i,]<Parameters.F_buds1),1)-1
-  #   # Maximum date of first bud development end (i.e. with maximum dormancy):
-  #   MaxDormancy= tail(which(CumsumRelativeToBudinit[i,]<Parameters.F_buds2),1)-1
-  #   # Cumulative rainfall within the period of potential dormancy:
-  #   CumRain= cumsum(Met_c.Rain[BudDevelEnd:MaxDormancy])
-  #   # Effective (real) day of first buds breaking dormancy:
-  #   BudDormancyBreakDay= BudDevelEnd + sum(CumRain<Parameters.F_rain)-1
-  #   # Effective day of first flowers:
-  #   DateFFlowering[i]=
-  #     tail(which(CumsumRelativeToBudinit[i,]<
-  #                  CumsumRelativeToBudinit[i,BudDormancyBreakDay]+Parameters.BudInitEnd),1)
-  #   # Effective dates between which buds can appear
-  #   Sim.BudInitPeriod[DateBudinit[i]:DateFFlowering[i]]= TRUE
-  # }
-  # Sim.BudInitPeriod[CumulDegreeDays<Parameters.VF_Flowering]= FALSE
-
   # # Search for the species specific tree function:
   # if(Parameters.Tree_Species=="No_Shade"){
   #   Treefun= No_Shade

@@ -47,6 +47,7 @@ Base.@kwdef struct constants
     Dheat::Float64     = 21.5e-6
 end
 
+
 Base.@kwdef struct site
     Location::String   = "Aquiares"     # Site location name (optional)
     Start_Date::String = "1979/01/01"   # Start date of the meteo data only used if "Date" is missing from input Meteorology (optionnal)
@@ -238,7 +239,7 @@ end
 
 
 Base.@kwdef struct tree
-    Tree_Species         = "Erythrina poeppigiana"   # Names of the shade Tree species
+    Tree_Species::String         = "Erythrina poeppigiana"   # Names of the shade Tree species
     Species_ID           = "Erythrina_Aquiares"      # Optional species ID
     StockingTree_treeha1 = 250.0                     # density at planting (trees ha-1). Source: Taugourdeau et al. (2014)
     SLA_Tree             = 17.4                      # Specific leaf area (m2 kg-1). Source: Van Oijen et al. (2010 I)
@@ -365,3 +366,47 @@ function tree_allometries(sim::DataFrame,met::DataFrame,i::Int64)
     end
 end
 
+"""
+Parameter structures
+
+Those structures are used to make the parameter inputs to DynACof. Default values are provided to the user (the struct are Base.@kwdef).
+They are mainly used under the hood from [Import_Parameters()], but can still be called by the user for conveniance (but not needed 
+for a model run). The parameters are divided into five structures: `constants`, `site`, `soil`, `coffee`, and `tree`.
+
+## site:
+
+The site structure. The default values comes from a stand from the Aquiares farm located in Costa Rica. It is a *Coffea arabica*
+plantation in agroforestry management under *Erythrina poeppigiana* shade trees. The plot is visible
+at this [address](https://goo.gl/7FRNXg), and a full desciption is available [here](https://www.researchgate.net/publication/323398728_Measuring_and_modelling_energy_partitioning_in_canopies_of_varying_complexity_using_MAESPA_model)
+and [here](https://www.researchgate.net/publication/333776631_DynACof_a_process-based_model_to_study_growth_yield_and_ecosystem_services_of_coffee_agroforestry_systems).
+
+## constants
+
+See [`constants`](@ref).
+
+## soil
+
+The soil structure.
+
+## coffee
+
+The coffee structure. The default values comes from a high density plantation (5580 coffee plants per hectares) of *Coffea arabica var. Caturra* pruned
+every year to sustain the production on three resprouts per stump in average (see same references than site).
+
+# tree
+
+The shade tree structure. The default values come from *Erythrina poeppigiana* shade trees from Aquiares. They were planted at high density 
+(250 trees ha-1) pruned to optimize light transmitted to the *Coffea*, and were thinned in 2000 to a low density of ~7.4 trees ha-1.
+Starting from 2000, these trees made a relatively large crown with an average height of 26 m in 2018 on this site. 
+NB: the tree parameter structure is optional, and not needed for monospecific coffee plantations.
+
+# Return 
+
+An instance of a structure with parameters needed for a DynACof simulation.
+
+# Details
+The values of the instance can be read from files using [`import_parameters`](@ref). In that case, the user 
+can provide only the parameter values that need to be changed, and all others will be taken as the default values. Example files are provided in
+a specific Github repository [here](https://github.com/VEZY/DynACof.jl_inputs).
+"""
+site, soil, coffee, tree

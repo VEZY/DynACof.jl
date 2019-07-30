@@ -138,7 +138,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
             warn_var("Pressure","Elevation","error")
         end
     end
-    
+
     # Missing rain:
     if is_missing(MetData,"Rain")
         MetData[:Rain] .= 0.0
@@ -156,7 +156,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
     end
 
     MetData.WindSpeed[MetData.WindSpeed.<0.01, :] .= 0.01
-    
+
     # Missing atmospheric CO2 concentration:
     if is_missing(MetData,"CO2")
         if !is_missing(Parameters,"CO2")
@@ -181,12 +181,12 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
 
     # Solar zenithal angle at noon (radian):
     MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters.Latitude)
-    
+
     # Compute net radiation using the Allen et al. (1998) equation :
     MetData.Rn= Rad_net.(MetData.DOY,MetData.RAD,MetData.Tmax,MetData.Tmin,MetData.VPD/10.0,
     Parameters.Elevation,Parameters.Latitude,Parameters.albedo)
-    
-    # Number of days without rainfall: 
+
+    # Number of days without rainfall:
     MetData.DaysWithoutRain= days_without_rain(MetData.Rain)
 
     printstyled("Meteo computation done \n", bold= true, color= :light_green)

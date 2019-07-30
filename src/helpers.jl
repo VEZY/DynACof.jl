@@ -142,7 +142,11 @@ arc-cosine, arc-sine, arc-tangent with input and output in degree.
 The output in degree
 
 # Details
-The conversions between radian to degree is: ``x\\cdot \\frac{\\pi,180}``
+The conversions between radian to degree is: 
+
+```math
+x \\cdot \\frac{pi,180}
+```
 
 
 # Examples
