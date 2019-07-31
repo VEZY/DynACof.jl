@@ -6,7 +6,7 @@ Import the model parameters from local files, or from default values in the para
 - site
 - soil
 - coffee
-- tree
+- tree (for a simulation of a monocrop coffee plantation, use an empty string for the tree, see example)
 
 # Arguments 
 - `path::String`: The path to the parameter files folder. If `path= "package"`, take the default files from the package
@@ -15,7 +15,7 @@ Import the model parameters from local files, or from default values in the para
 # Details
 For the full list of parameters and the format of the parameter files, see [`site`](@ref).
 
-# Rturn
+# Return
 A list of all input parameters for DynACof
 
 # Examples
@@ -25,15 +25,12 @@ import_parameters("package")
 
 # Reading it from local files: 
 import_parameters("D:/parameter_files",(constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
+
+# For a coffee monocrop (without shade trees)
+import_parameters("D:/parameter_files",(constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree=""))
 ```
 """
 function import_parameters(path::String= "package",Names= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
-    if Names.tree==""
-        param_struct= [:constants,:site, :soil, :coffee]
-    else
-        param_struct= [:constants,:site, :soil, :coffee, :tree]
-    end
-
 
     if path == "package"
         paths= repeat(["package"],length(Names))
@@ -42,12 +39,23 @@ function import_parameters(path::String= "package",Names= (constants= "constants
     else
         paths= map(x -> normpath(string(path,"/",x)),Names)
     end
+
+    if Names.tree==""
+        # This code is more elegant but eval only works at REPL. Keep the other one until I find a solution.
+        # params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
+        # eval_params= map(eval, params)
+        params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),
+                    [:constants,:site, :soil, :coffee],
+                    (constants,site,soil,coffee))
+        params= merge(params...,(Tree_Species= "No_Shade",))
+    else
+        params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),
+                    [:constants,:site, :soil, :coffee, :tree],
+                    (constants,site,soil,coffee,tree))
+        params= merge(params...)
+    end
     
-    # This code is more elegant but eval only works at REPL. Keep the other one until I find a solution.
-    # params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
-    # eval_params= map(eval, params)
-    params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),param_struct,(constants,site,soil,coffee,tree))
-    return merge(params...)
+    return params
 end
 
 

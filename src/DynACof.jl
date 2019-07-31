@@ -25,6 +25,8 @@ export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
 export light_extinction_K_Tree,tree_allometries,metamodels_tree
 # initialization
 export Init_Sim!
+# Conductances
+export GetWind,G_bulk,Gb_h
 # Main functions:
 export meteorology
 export dynacof, mainfun
@@ -37,6 +39,7 @@ include("ecophysio_helpers.jl")
 include("meteorology_helpers.jl")
 include("import_parameters.jl")
 include("initialization.jl")
+include("conductances.jl")
 include("main.jl")
 
 end # module

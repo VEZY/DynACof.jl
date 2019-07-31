@@ -247,7 +247,7 @@ Base.@kwdef struct tree
     DELM_Tree            = 778.5                     # Max Leaf carbon demand (gC tree d-1).
     LAI_max_Tree         = 1.0                       # Max measured LAI to compute leaf demand. Should be ~1.5*higher than measured.
     Leaf_fall_rate_Tree  = [0.07,0.02,0.015,0.04]    # Mortality during leaf fall (fraction of the leaf mass).
-    Fall_Period_Tree     = [1:55;175:240;300:354;355:365] # Time period were leaves fall at high rate (DOY). List of length= Leaf_fall_rate_Tree
+    Fall_Period_Tree     = (1:55,175:240,300:354,355:365) # Time period were leaves fall at high rate (DOY). List of length= Leaf_fall_rate_Tree
     Thin_Age_Tree        = 22                        # Ages at which thinning is made (age). Set to NULL if no thinning
     ThinThresh           = 0.0                       # (option) Lowest transmittance threshold under wich thinning is triggered (0-1)
     RateThinning_Tree    = 0.97072                   # How many trees are thinned per thinning event in percentage.

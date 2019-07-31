@@ -291,15 +291,14 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   Sim.BudInitPeriod[CumulDegreeDays .< Parameters.VF_Flowering] .= false
 
+  # Search for the species specific tree function:
+  if Parameters.Tree_Species == "No_Shade"
+    Treefun= No_Shade
+  else
+    Treefun= Shade_Tree
+  end
 
   return Sim
-  # # Search for the species specific tree function:
-  # if(Parameters.Tree_Species=="No_Shade"){
-  #   Treefun= No_Shade
-  # }else{
-  #   Treefun= Shade.Tree
-  # }
-
   # Sim.ALS=
   #   suppressMessages(ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut,
   #                        Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
@@ -316,7 +315,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   #   setTxtProgressBar(pb, i)
   #   # Shade Tree computation if any
-  #   Treefun(S,i)
+  #   Treefun(Sim,Parameters,Met_c,i)
   #   # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree,
   #   # LE_Tree (sum of transpiration + leaf evap)
 

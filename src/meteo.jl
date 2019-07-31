@@ -85,7 +85,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
     end
 
     if period != ["0000-01-01", "0000-01-02"]
-        if period_date[1]<MetData.Date[1] || period_date[2]>MetData.Date[end]
+        if period_date[1] < minimum(MetData.Date) || period_date[2] > maximum(MetData.Date)
             error("Given period is not covered by the meteorology file")
         else
             MetData= MetData[period_date[1] .<= MetData.Date .<= period_date[2], :]

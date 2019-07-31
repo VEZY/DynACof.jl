@@ -184,3 +184,30 @@ function struct_to_tuple(structure::DataType,instance)
   NamedTuple{structure_names}(structure_values)
 end
 
+
+
+"""
+Find the ith previous index, avoiding 0 or negative indexes.
+
+# Arguments
+- `i::DataType`: Current index
+- `n`: Target number of indexes before x
+
+# Details
+This function is used to find the nth previous index without making an error with negative or 0 index.
+
+  # Examples
+```julia
+# Find the 10th index before 15:
+previous_i(15,10)
+5
+# Find the 10th index before 5:
+previous_i(5,10)
+1
+```
+"""
+function previous_i(x::Int64,n::Int64=1)
+  x-n<=0 ? 1 : x-n
+end
+
+
