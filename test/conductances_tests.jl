@@ -17,3 +17,10 @@ end;
     @test GetWind(Wind=3.0,LAI_lay= 2.0,LAI_abv=5.0,extwind= 0.58,Z_top = 24.0,ZHT = 25.0) ≈ 0.08534069619361286
 end;
 
+@testset "G_soilcan()" begin
+    @test G_soilcan(Wind= 1.0, ZHT= 25.0, Z_top= 24.0,LAI= 4.5, extwind= 0.58) ≈ 1.1728894648078738
+end;
+
+@testset "G_interlay()" begin
+    @test G_interlay(Wind = 3.0,ZHT = 25.0,Z_top = 2.0,LAI_top = 0.5,LAI_bot = 4.0) ≈ 0.10995838732573818
+end;

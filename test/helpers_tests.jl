@@ -39,6 +39,12 @@ end;
     @test VPD_to_e(1.5, 25.0, "Sonntag_1990") ≈ 1.6600569164883336
     @test virtual_temp(20.0,1010.0,1.5) ≈ 20.091375550353973
     @test dew_point(20.0, 2.0) ≈ 11.252745464952273
+    @test LE_to_ET(200.0,25.0) ≈ 8.190846728780588e-5
+    @test ET_to_LE(8.190846728780588e-5, 25.0) ≈ 200.0
+    @test air_density(25.0,101.325) ≈ 1.1838896840018194
+    @test latent_heat_vaporization(20.0) ≈ 2.4536e6
+    @test psychrometric_constant(20.0, 100.0) ≈ 6.63766450661906e-8
+    @test PENMON(Rn=12.0,Wind=0.5,Tair=16.0,ZHT=26.0,Z_top=25.0,Pressure=900.0,Gs=1E09,VPD=2.41,LAI=3.0,extwind=0.58,wleaf=0.068) ≈ 4.8719439498348045
 end;
 
 @testset "Meteorology helpers" begin

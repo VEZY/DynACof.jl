@@ -6,7 +6,7 @@
 
 The DynACof process-based model computes plot-scale Net Primary Productivity, carbon allocation, growth, yield, energy, and water balance 
 of coffee plantations according to management, while accounting for spatial effects using metamodels from the 3D process-based model
-[MAESPA](https://maespa.github.io/). The model also uses cohorts for the development of the coffee buds and fruits to better represent fruit
+[MAESPA](https: /  / maespa.github.io / ). The model also uses cohorts for the development of the coffee buds and fruits to better represent fruit
 carbon demand distribution along the year.
 
 # Arguments
@@ -58,8 +58,8 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | Rn_Coffee              | MJ m-2 d-1          | Coffee net radiation                                                                |
 |                              | Rn_Soil                | MJ m-2 d-1          | Soil net radiation                                                                  |
 |                              | Rn_Soil_SW             | MJ m-2 d-1          | Soil net radiation computed using Shuttleworth & Wallace (1985) for reference       |
-|                              | LE_x                   | MJ m-2 d-1          | System/Coffee/Tree/Soil latent heat                                                 |
-|                              | H_x                    | MJ m-2 d-1          | System/Coffee/Tree/Soil sensible heat                                               |
+|                              | LE_x                   | MJ m-2 d-1          | System / Coffee / Tree / Soil latent heat                                                 |
+|                              | H_x                    | MJ m-2 d-1          | System / Coffee / Tree / Soil sensible heat                                               |
 |                              | Q_Soil                 | MJ m-2 d-1          | Soil heat transport                                                                 |
 |                              | Transmittance_Tree     | fraction            | Fraction of light transmitted by the shade trees                                    |
 |                              | PAR_Trans_Tree         | MJ m-2 d-1          | Light transmitted by the shade trees canopy                                         |
@@ -127,7 +127,7 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | SWD                    | mm                  | soil water deficit                                                                  |
 |                              | RootWaterExtract_[1-3] | mm                  | Root water extraction for soil layer 1 to 3                                         |
 |                              | IntercRevapor          | mm                  | Evaporation by canopy                                                               |
-|                              | T_x                    | mm                  | Transpiration at system/Coffee/Tree scale                                           |
+|                              | T_x                    | mm                  | Transpiration at system / Coffee / Tree scale                                           |
 |                              | E_Soil                 | mm                  | Soil evaporation                                                                    |
 |                              | ETR                    | mm                  | System evapotranspiration                                                           |
 |                              | SoilWaterPot           | MPa                 | Soil water potential                                                                |
@@ -160,13 +160,13 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 | Pressure        | hPa         | Atmospheric pressure                         | Computed from VPD, Tair and Elevation, or alternatively from Tair and Elevation. |
 | WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                       |
 | CO2             | ppm         | Atmospheric CO2 concentration                | Taken as constant: `Parameters -> CO2`                             |
-| DegreeDays      | Celsius     | Growing degree days                          | Computed using [GDD()]                                             |
+| DegreeDays      | Celsius     | Growing degree days                          | Computed using [`GDD`](@ref)                                             |
 | PAR             | MJ m-2 d-1  | Incident photosynthetically active radiation | Computed from RAD                                                  |
-| FDiff           | Fraction    | Diffuse light fraction                       | Computed using [Diffuse_d()] using Spitters et al. (1986) formula  |
+| FDiff           | Fraction    | Diffuse light fraction                       | Computed using [`diffuse_fraction`](@ref) using Spitters et al. (1986) formula  |
 | VPD             | hPa         | Vapor pressure deficit                       | Computed from RH                                                   |
-| Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [Rad_net()] with RH, or VPD                         |
+| Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [`Rad_net`](@ref) with RH, or VPD                         |
 | DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
-| Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                       |
+| Air_Density     | kg m-3      | Air density of moist air (ρ) above canopy | Computed using [`air_density`](@ref)                       |
 | ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
 
 - Parameters: A list of the input parameters (see [`import_parameters`](@ref), [`constants`](@ref), [`soil`](@ref), [`coffee`](@ref), [`tree`](@ref))
@@ -180,7 +180,7 @@ variables upon parameterization because variables can be added in the parameter 
 # Examples
 ```julia
 # A simulation with the default parameter files from the package, and an example meteorology file from the `DynACof.jl_inputs` repository:
-file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
+file= download("https: /  / raw.githubusercontent.com / VEZY / DynACof.jl_inputs / master / meteorology.txt")
 Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",
 coffee="package",tree="package"))
 rm(file)
@@ -193,11 +193,11 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
 
 
     Parameters= import_parameters(input_path, file_name)
-    Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
+    Meteo= meteorology(normpath(string(input_path," / ",file_name.meteo)), Parameters, period)
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
     
-    NCycles= ceil(Int64,(maximum(Meteo.year)-minimum(Meteo.year))/Parameters.AgeCoffeeMax)
+    NCycles= ceil(Int64,(maximum(Meteo.year) - minimum(Meteo.year)) / Parameters.AgeCoffeeMax)
 
     if NCycles==0
       error("Carefull, minimum allowed simulation length is one year")
@@ -216,7 +216,7 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
     cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
     age_year= collect(Parameters.AgeCoffeeMin:min(Parameters.AgeCoffeeMax,length(years)))
     age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
-    age_day_num= vcat(map((x,y) -> collect(x:(1/y):(x+1.0-1/y)),age_year,ndaysYear)...)
+    age_day_num= vcat(map((x,y) -> collect(x:(1 / y):(x + 1.0 - 1 / y)),age_year,ndaysYear)...)
 
     Direction= DataFrame(Cycle= cycle_day, Plot_Age= age_day, Plot_Age_num= age_day_num)
 
@@ -293,535 +293,457 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   # Search for the species specific tree function:
   if Parameters.Tree_Species == "No_Shade"
-    Treefun= No_Shade
+    Treefun! = No_Shade
   else
-    Treefun= Shade_Tree
+    Treefun! = Shade_Tree
   end
 
-  return Sim
-  # Sim.ALS=
-  #   suppressMessages(ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut,
-  #                        Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
-  #                        Shade= Parameters.Shade, CanopyHeight.Coffee= Parameters.Height_Coffee,
-  #                        Fertilization= Parameters.Fertilization, ShadeType= Parameters.ShadeType,
-  #                        CoffeePruning= Parameters.CoffeePruning,
-  #                        df_rain= data.frame(year=Met_c.year,DOY=Met_c.DOY,Rain=Met_c.Rain)))
+  
+  Sim.ALS= ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
+               Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
+               ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning, 
+               df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
 
-  # # Main Loop -----------------------------------------------------------------------------------
+  return Sim
+  # Main Loop -----------------------------------------------------------------------------------
 
   # pb= txtProgressBar(max= length(Sim.LAI), style=3)
 
-  # for (i in 1:length(Sim.LAI)){
-
-  #   setTxtProgressBar(pb, i)
-  #   # Shade Tree computation if any
-  #   Treefun(Sim,Parameters,Met_c,i)
-  #   # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree,
-  #   # LE_Tree (sum of transpiration + leaf evap)
-
-  #   # Coffea computation:
-
-  #   # CM is in gC m-2soil, so use C content to transform in dry mass
-  #   Sim.LAI[i]= Sim.CM_Leaf[previous_i(i,1)]*Parameters.SLA/1000/
-  #     Parameters.CC_Leaf
-  #   Sim.LAIplot[i]= Sim.LAIplot[i]+Sim.LAI[i]
-
-  #   # Light interception ------------------------------------------------------
-
-  #   Sim.K_Dif[i]= Parameters.k_Dif
-  #   Sim.K_Dir[i]= Parameters.k_Dir
-
-  #   #APAR coffee
-  #   Sim.PAR_Trans_Tree[i]= Met_c.PAR[i]-Sim.APAR_Tree[i] # PAR above coffee layer
-  #   Sim.APAR_Dif[i]=
-  #     max(0,(Sim.PAR_Trans_Tree[i]*Met_c.FDiff[i])*
-  #           (1-exp(-Sim.K_Dif[i]*Sim.LAI[i])))
-  #   APAR_Dir= max(0,(Sim.PAR_Trans_Tree[i]*(1-Met_c.FDiff[i]))*
-  #                   (1-exp(-Sim.K_Dir[i]*Sim.LAI[i])))
-  #   # APAR_Dir is not part of Sim because it can be easily computed by
-  #   # Met_c.PARm2d1-Sim.APAR_Dif
-  #   Sim.APAR[i]= APAR_Dir+Sim.APAR_Dif[i]
-  #   Sim.PAR_Trans[i]= Sim.PAR_Trans_Tree[i]-Sim.APAR[i] # PAR above soil layer
-
-  #   # soil (+canopy evap) water balance ---------------------------------------
-
-  #   Soilfun(S,i)
-
-  #   # Metamodel Coffee leaf water potential
-  #   Sim.LeafWaterPotential[i]= Parameters.LeafWaterPotential(S,i)
-
-
-  #   # Energy balance ----------------------------------------------------------
-
-  #   # Transpiration Coffee
-  #   Sim.T_Coffee[i]= Parameters.T_Coffee(S,i)
-
-  #   # Plot transpiration
-  #   Sim.T_tot[i]= Sim.T_Tree[i]+Sim.T_Coffee[i]
-
-  #   # Evapo-Transpiration
-  #   Sim.ETR[i]=
-  #     Sim.T_tot[i]+Sim.E_Soil[i]+Sim.IntercRevapor[i]
-
-  #   # Latent and Sensible heat fluxes
-  #   Sim.LE_Plot[i]= Sim.ETR[i]*Parameters.lambda
-
-  #   Sim.LE_Coffee[i]=
-  #     (Sim.T_Coffee[i]+Sim.IntercRevapor[i]*
-  #        (Sim.LAI[i]/Sim.LAIplot[i]))*Parameters.lambda
-
-  #   Sim.H_Coffee[i]= Parameters.H_Coffee(S,i)
-
-  #   # Coffea layer net radiation
-  #   Sim.Rn_Coffee[i]=
-  #     Sim.H_Coffee[i] + Sim.LE_Coffee[i]
-
-  #   # Tree LE and Rn (can not compute them in the Tree function because we need IntercRevapor)
-  #   Sim.LE_Tree[i]=
-  #     (Sim.T_Tree[i]+Sim.IntercRevapor[i]*
-  #        (Sim.LAI_Tree[i]/Sim.LAIplot[i]))*Parameters.lambda
-  #   Sim.Rn_Tree[i]= Sim.H_Tree[i] + Sim.LE_Tree[i]
-
-  #   # Total plot energy:
-  #   Sim.H_tot[i]= Sim.H_Coffee[i]+Sim.H_Tree[i]+Sim.H_Soil[i]
-  #   Sim.LE_tot[i]= Sim.LE_Coffee[i]+Sim.LE_Tree[i]+Sim.LE_Soil[i]
-  #   Sim.Rn_tot[i]= Sim.Rn_Coffee[i]+Sim.Rn_Tree[i]+Sim.Rn_Soil[i]
-
-  #   # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
-  #   # Source: Van de Griend and Van Boxel 1989.
-  #   if(Sim.Height_Tree[i]>Parameters.Height_Coffee){
-
-  #     Sim.TairCanopy[i]=
-  #       Sim.TairCanopy_Tree[i]+((Sim.H_Coffee[i]+Sim.H_Soil[i])*Parameters.MJ_to_W)/
-  #       (bigleaf::air.density(Sim.TairCanopy_Tree[i],Met_c.Pressure[i]/10)*
-  #          Parameters.Cp*
-  #          G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT,
-  #                     LAI_top= Sim.LAI_Tree[i],
-  #                     LAI_bot= Sim.LAI[i],
-  #                     Z_top= Sim.Height_Tree[i],
-  #                     extwind = Parameters.extwind))
-
-  #     Sim.Tleaf_Coffee[i]=
-  #       Sim.TairCanopy[i]+(Sim.H_Coffee[i]*Parameters.MJ_to_W)/
-  #       (bigleaf::air.density(Sim.TairCanopy[i],Met_c.Pressure[i]/10)*
-  #          Parameters.Cp*
-  #          Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf,
-  #               LAI_lay=Sim.LAI[i],
-  #               LAI_abv=Sim.LAI_Tree[i],
-  #               ZHT = Parameters.ZHT,
-  #               Z_top = Sim.Height_Tree[i],
-  #               extwind= Parameters.extwind))
-
-  #   }else{
-
-  #     Sim.TairCanopy[i]=
-  #       Met_c.Tair[i]+((Sim.H_Coffee[i]+Sim.H_Soil[i])*Parameters.MJ_to_W)/
-  #       (bigleaf::air.density(Sim.TairCanopy_Tree[i],Met_c.Pressure[i]/10)*
-  #          Parameters.Cp*
-  #          G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT,
-  #                 Z_top = Parameters.Height_Coffee,
-  #                 LAI = Sim.LAI[i],
-  #                 extwind = Parameters.extwind))
-
-  #     Sim.Tleaf_Coffee[i]=
-  #       Sim.TairCanopy[i]+(Sim.H_Coffee[i]*Parameters.MJ_to_W)/
-  #       (bigleaf::air.density(Sim.TairCanopy[i],Met_c.Pressure[i]/10)*
-  #          Parameters.Cp *
-  #          Gb_h(Wind= Met_c.WindSpeed[i], wleaf= Parameters.wleaf,
-  #               LAI_lay= Sim.LAI[i],
-  #               LAI_abv= Sim.LAI_Tree[i],
-  #               ZHT= Parameters.ZHT,
-  #               Z_top= Parameters.Height_Coffee,
-  #               extwind= Parameters.extwind))
-  #   }
-  #   # NB: if no trees, TairCanopy_Tree= Tair
-
-  #   # Recomputing soil temperature knowing TairCanopy
-
-  #   Sim.TSoil[i]=
-  #     Sim.TairCanopy[i]+(Sim.H_Soil[i]*Parameters.MJ_to_W)/
-  #     (bigleaf::air.density(Sim.TairCanopy[i],Met_c.Pressure[i]/10)*
-  #        Parameters.Cp*
-  #        G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT,
-  #                  Z_top= max(Sim.Height_Tree[i],
-  #                             Parameters.Height_Coffee, na.rm = T),
-  #                  LAI = Sim.LAI_Tree[i] + Sim.LAI[i],
-  #                  extwind= Parameters.extwind))
-
-  #   Sim.DegreeDays_Tcan[i]=
-  #     GDD(Tmean = Sim.Tleaf_Coffee[i],MinTT = Parameters.MinTT,
-  #         MaxTT = Parameters.MaxTT)
-
-  #   # Metamodel LUE coffee:
-  #   Sim.lue[i]= Parameters.lue(S,i)
-
-  #   #GPP Coffee
-  #   Sim.GPP[i]= Sim.lue[i]*Sim.APAR[i]
-
-  #   # Maintenance respiration -------------------------------------------------
-
-  #   # Rm is computed at the beginning of the day on the drymass of the previous day.
-  #   # This is considered as the highest priority for the plant (to maintain its dry mass)
-
-  #   # Resprout (branches) wood:
-  #   Sim.Rm_Shoot[i]=
-  #     after(i,2)*
-  #     (Parameters.pa_Shoot*Sim.DM_Shoot[previous_i(i,1)]*
-  #        Parameters.NC_Shoot*Parameters.MRN*
-  #        Parameters.Q10_Shoot^((Sim.TairCanopy[i]-Parameters.TMR)/10))
-
-  #   # Stump and Coarse roots (perennial wood):
-  #   Sim.Rm_SCR[i]=
-  #     after(i,2)*
-  #     (Parameters.pa_SCR*
-  #        Sim.DM_SCR[previous_i(i,1)]*
-  #        Parameters.NC_SCR*Parameters.MRN*
-  #        Parameters.Q10_SCR^(
-  #          (Sim.TairCanopy[i]-Parameters.TMR)/10))
-
-  #   # Fruits:
-  #   Sim.Rm_Fruit[i]=
-  #     after(i,2)*
-  #     (Parameters.pa_Fruit*Sim.DM_Fruit[previous_i(i,1)]*
-  #        Parameters.NC_Fruit*Parameters.MRN*
-  #        Parameters.Q10_Fruit^((Sim.TairCanopy[i]-Parameters.TMR)/10))
-
-  #   # Leaves:
-  #   Sim.Rm_Leaf[i]=
-  #     after(i,2)*
-  #     (Parameters.pa_Leaf*Sim.DM_Leaf[previous_i(i,1)]*
-  #        Parameters.NC_Leaf*Parameters.MRN*
-  #        Parameters.Q10_Leaf^((Sim.TairCanopy[i]-Parameters.TMR)/10))
-
-  #   # Fine roots:
-  #   Sim.Rm_FRoot[i]=
-  #     after(i,2)*
-  #     (Parameters.pa_FRoot*Sim.DM_FRoot[previous_i(i,1)]*
-  #        Parameters.NC_FRoot*Parameters.MRN*
-  #        Parameters.Q10_FRoot^((Sim.TairCanopy[i]-Parameters.TMR)/10))
-
-  #   # Total plant maintenance respiration
-  #   Sim.Rm[i]=
-  #     Sim.Rm_Fruit[i]+Sim.Rm_Leaf[i]+
-  #     Sim.Rm_Shoot[i]+Sim.Rm_SCR[i]+
-  #     Sim.Rm_FRoot[i]
-
-
-
-  #   # Coffee Allocation -------------------------------------------------------
-
-  #   # Potential use of reserves:
-  #   Sim.Consumption_RE[i]=
-  #     Parameters.kres*Sim.CM_RE[previous_i(i,1)]
-
-  #   # Supply function
-  #   Sim.Supply[i]=
-  #     max(Sim.GPP[i]-Sim.Rm[i]+Sim.Consumption_RE[i],0)
-
-  #   # If the respiration is greater than the GPP + reserves use, then take this carbon
-  #   # from mortality of each compartments' biomass equally (not for fruits or reserves):
-  #   Sim.Carbon_Lack_Mortality[i]=
-  #     -min(0,Sim.GPP[i]-Sim.Rm[i]+Sim.Consumption_RE[i])
-
-  #   # 1-Resprout wood ---------------------------------------------------------
-  #   # Allocation priority 1, see Charbonnier 2012.
-  #   Sim.Alloc_Shoot[i]= Parameters.lambda_Shoot*Sim.Supply[i]
-  #   Sim.NPP_Shoot[i]= Sim.Alloc_Shoot[i]/Parameters.epsilon_Shoot
-  #   Sim.Rg_Shoot[i]= Sim.Alloc_Shoot[i]-Sim.NPP_Shoot[i]
-  #   Sim.Mnat_Shoot[i]=
-  #     Sim.CM_Shoot[previous_i(i,1)]/Parameters.lifespan_Shoot
-  #   # Pruning
-  #   if(Sim.Plot_Age[i]>=Parameters.MeanAgePruning&
-  #      Met_c.DOY[i]==Parameters.D_pruning){
-  #     Sim.Mprun_Shoot[i]=
-  #       Sim.CM_Shoot[previous_i(i,1)]*Parameters.WoodPruningRate
-  #   }
-  #   Sim.Mortality_Shoot[i]=
-  #     min((Sim.Mnat_Shoot[i]+Sim.Mprun_Shoot[i]),
-  #         Sim.CM_Shoot[previous_i(i,1)])
-
-  #   # 2-Stump and coarse roots (perennial wood) ------------------------------
-  #   Sim.Alloc_SCR[i]= Parameters.lambda_SCR*Sim.Supply[i]
-  #   Sim.NPP_SCR[i]= Sim.Alloc_SCR[i]/Parameters.epsilon_SCR
-  #   Sim.Rg_SCR[i]= Sim.Alloc_SCR[i]-Sim.NPP_SCR[i]
-  #   Sim.Mnat_SCR[i]=
-  #     Sim.CM_SCR[previous_i(i,1)]/Parameters.lifespan_SCR
-  #   Sim.Mortality_SCR[i]= Sim.Mnat_SCR[i]
-
-  #   # Ratio of number of new nodes per LAI unit as affected by canopy air temperature
-  #   # according to Drinnan & Menzel, 1995
-  #   # Source "0 Effect T on yield and vegetative growth.xlsx", sheet
-  #   # "Std20dComposWinterNodeperBr"
-  #   # NB: computed at the end of the vegetatitve growth only to have Tcan of the
-  #   # whole period already computed
-  #   # NB2 : This is the total number of productive nodes on the coffee plant, i.e. the
-  #   # number of green wood nodes that potentially carry flower buds. Green wood mass (and
-  #   # so number of nodes) are related to leaf area (new leaves appear on nodes) :
-  #   # GUTIERREZ et al. (1998)
-  #   if(Met_c.DOY[i]==Parameters.DVG2){
-  #     Sim.ratioNodestoLAI[Met_c.year>=Met_c.year[i]]=
-  #       mean(Sim.Tleaf_Coffee[Met_c.year==Met_c.year[i]&
-  #                                 Met_c.DOY>=Parameters.DVG1&
-  #                                 Met_c.DOY <= Parameters.DVG2])%>%
-  #                                 {Parameters.RNL_base*CN(.)}
-  #   }
-
-  #   # Flower Buds + Flower + Fruits -------------------------------------------
-
-  #   # (1) Buds induction
-  #   # Buds start appearing for the very first time from 5500 dd. After that,
-  #   # they appear every "Parameters.F_Tffb" degree days until flowering starts
-  #   if(Sim.BudInitPeriod[i]){
-  #     Sim.Budinit[i]=
-  #       (Parameters.a_bud+Parameters.b_bud*(Sim.PAR_Trans_Tree[i]/Parameters.FPAR))*
-  #       Sim.LAI[i-1]*Sim.ratioNodestoLAI[i-1]*Sim.DegreeDays_Tcan[i]
-  #     # NB: Number of nodes= Sim.LAI[i-1]*Sim.ratioNodestoLAI[i-1]
-  #     Sim.Bud_available[i]= Sim.Budinit[i]
-  #   }
-  #   # NB: number of fruits ~1200 / year / coffee tree, source : Castro-Tanzi et al. (2014)
-  #   # Sim%>%group_by(Plot_Age)%>%summarise(N_Flowers= sum(BudBreak))
-
-  #   # (2) Cumulative degree days experienced by each bud cohort :
-  #   dd_i= round(cumsum(Sim.DegreeDays_Tcan[i:previous_i(i,1000)]),2)
-
-  #   # (3) Find the window where buds are under dormancy (find the dormant cohorts)
-  #   # Bud develops during F_buds1 (840) degree days after initiation, so they cannot
-  #   # be dormant less than F_buds1 before i. But they can stay under dormancy until
-  #   # F_buds2 dd maximum, so they cannot be older than F_buds2 dd before i.
-  #   OldestDormancy= i - (max(which(dd_i<Parameters.F_buds2))-1)
-  #   YoungestDormancy= i - (max(which(dd_i<Parameters.F_buds1))-1)
-  #   # Idem above (reduce the days computed, F_buds2 is ~300 days and F_buds1
-  #   # ~80-100 days)
-
-  #   # (4) Test if the condition of minimum required rain for budbreak is met, and if
-  #   # not, which cohort  first met the condition (starting from younger to older cohorts):
-  #   CumRain= cumsum(Met_c.Rain[YoungestDormancy:OldestDormancy])
-  #   # (5) Compute the period were all cohorts have encountered all conditions to break
-  #   # dormancy :
-  #   DormancyBreakPeriod= OldestDormancy:(YoungestDormancy-sum(CumRain<Parameters.F_rain))
-
-  #   # (6) Temperature effect on bud phenology
-  #   Sim.Temp_cor_Bud[i]=
-  #     Parameters.Bud_T_correction()(Sim.Tleaf_Coffee[i])
-  #   Sim.Temp_cor_Bud[i][Sim.Temp_cor_Bud[i]<0]= 0
-  #   Sim.Temp_cor_Bud[i][Sim.Temp_cor_Bud[i]>1]= 1
-
-  #   # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
-  #   Sim.pbreak[i]= 1/(1+exp(Parameters.a_p+Parameters.b_p*Sim.LeafWaterPotential[i]))
-  #   # (8) Compute the number of buds that effectively break dormancy in each cohort:
-  #   Sim.BudBreak_cohort[DormancyBreakPeriod]=
-  #     pmin(Sim.Bud_available[DormancyBreakPeriod],
-  #          Sim.Budinit[DormancyBreakPeriod]*Sim.pbreak[i]*
-  #            Sim.Temp_cor_Bud[DormancyBreakPeriod])
-  #   # NB 1: cannot exceed the number of buds of each cohort
-  #   # NB 2: using Budinit and not Bud_available because pbreak is fitted on
-  #   # total bud cohort
-
-  #   # (9) Remove buds that did break dormancy from the pool of dormant buds
-  #   Sim.Bud_available[DormancyBreakPeriod]=
-  #     Sim.Bud_available[DormancyBreakPeriod]-Sim.BudBreak_cohort[DormancyBreakPeriod]
-
-  #   # (10) Sum the buds that break dormancy from each cohort to compute the total number
-  #   # of buds that break dormancy on day i :
-  #   Sim.BudBreak[i]= min(sum(Sim.BudBreak_cohort[DormancyBreakPeriod]),
-  #                          Parameters.Max_Bud_Break)
-  #   # Rodriguez et al. state that the maximum number of buds that may break dormancy
-  #   # during each dormancy-terminating episode was set to 12 (see Table 1).
-
-  #   # Fruits :
-  #   FruitingPeriod= i-which(dd_i<(Parameters.F_over))+1
-  #   # NB : Fruits that are older than the FruitingPeriod are overripped
-
-  #   # Demand from each fruits cohort present on the coffee tree (not overriped),
-  #   # same as Demand_Fruit but keeping each value :
-  #   Demand_Fruit_Cohort_Period=
-  #     Sim.BudBreak[FruitingPeriod]*Parameters.DE_opt*
-  #     logistic_deriv(dd_i[1:length(FruitingPeriod)],
-  #                    Parameters.u_log,Parameters.s_log)
-  #   Demand_Fruit_Cohort_Period[is.na(Demand_Fruit_Cohort_Period)]= 0
-  #   # Total C demand of the fruits :
-  #   Sim.Demand_Fruit[i]= sum(Demand_Fruit_Cohort_Period)
-  #   # C supply to Fruits (i.e. what is left from Supply after removing the consumption
-  #   # by previous compartments and Rm):
-  #   Sim.Supply_Fruit[i]=
-  #     Sim.Supply[i]-Sim.Alloc_Shoot[i]-
-  #     Sim.Alloc_SCR[i]
-
-  #   # Total C allocation to all fruits on day i :
-  #   Sim.Alloc_Fruit[i]= min(Sim.Demand_Fruit[i],Sim.Supply_Fruit[i])
-  #   # Allocation to each cohort, relative to each cohort demand :
-  #   Rel_DE= Demand_Fruit_Cohort_Period/Sim.Demand_Fruit[i]
-  #   Rel_DE[is.nan(Rel_DE)]= 0
-  #   Sim.Alloc_Fruit_Cohort[FruitingPeriod]=
-  #     Sim.Alloc_Fruit[i]*Rel_DE
-  #   Sim.NPP_Fruit_Cohort[FruitingPeriod]=
-  #     Sim.Alloc_Fruit_Cohort[FruitingPeriod]/Parameters.epsilon_Fruit
-  #   Sim.CM_Fruit_Cohort[FruitingPeriod]= Sim.CM_Fruit_Cohort[FruitingPeriod]+
-  #     Sim.NPP_Fruit_Cohort[FruitingPeriod]
-  #   Sim.DM_Fruit_Cohort[FruitingPeriod]=
-  #     Sim.CM_Fruit_Cohort[FruitingPeriod]/Parameters.CC_Fruit
-  #   # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
-  #   Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(min(FruitingPeriod)-1,1)]
-  #   # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[min(FruitingPeriod)-1]*Parameters.epsilon_Fruit
-
-  #   # Duration of the maturation of each cohort born in the ith day (in days):
-  #   Sim.Maturation_duration[FruitingPeriod]=
-  #     seq_along(FruitingPeriod)
-  #   # Sucrose content of each cohort:
-  #   Sim.SC[FruitingPeriod]=
-  #     Sucrose_cont_perc(Sim.Maturation_duration[FruitingPeriod],
-  #                       a= Parameters.S_a, b= Parameters.S_b,
-  #                       x0= Parameters.S_x0, y0=Parameters.S_y0)
-  #   # Sucrose mass of each cohort
-  #   Sim.SM[FruitingPeriod]=
-  #     Sim.DM_Fruit_Cohort[FruitingPeriod]*Sim.SC[FruitingPeriod]
-  #   # Harvest maturity:
-  #   Sim.Harvest_Maturity_Pot[i]=
-  #     round(sum(Sim.SM[FruitingPeriod])/
-  #             sum(Sim.DM_Fruit_Cohort[FruitingPeriod]*
-  #                   ((Parameters.S_y0 + Parameters.S_a)/100)),3)
-  #   Sim.Harvest_Maturity_Pot[i][is.nan(Sim.Harvest_Maturity_Pot[i])]= 0
-
-  #   # NB : here harvest maturity is computed as the average maturity of the cohorts, because
-  #   # all cohorts present in the Coffea are within the 'FruitingPeriod' window.
-  #   # It could be computed as the percentage of cohorts that are fully mature (Pezzopane
-  #   # et al. 2012 say at 221 days after flowering)
-  #   # Optimal sucrose concentration around 8.8% of the dry mass
-
-  #   Sim.NPP_Fruit[i]= Sim.Alloc_Fruit[i]/Parameters.epsilon_Fruit
-  #   Sim.Rg_Fruit[i]= Sim.Alloc_Fruit[i]-Sim.NPP_Fruit[i]
-
-  #   # Harvest. Made one day only for now (TODO: make it a period of harvest)
-
-  #     if(Parameters.harvest=="quantity"){
-  #       is_harvest=
-  #         Sim.Plot_Age[i]>=Parameters.ageMaturity&
-  #         all(Sim.NPP_Fruit[previous_i(i,0:10)]<
-  #               Sim.Overriped_Fruit[previous_i(i,0:10)])&
-  #         Sim.CM_Fruit[previous_i(i,1)]>Parameters.Min_Fruit_CM
-  #       # Made as soon as the fruit dry mass is decreasing for 10 consecutive days.
-  #       # This condition is met when fruit overriping is more important than fruit NPP
-  #       # for 10 days.
-  #       # This option is the best one when fruit maturation is not well known or when the
-  #       # harvest is made throughout several days or weeks with the assumption that fruits
-  #       # are harvested when mature.
-  #     }else{
-  #       is_harvest=
-  #         Sim.Plot_Age[i]>=Parameters.ageMaturity &
-  #         mean(Sim.Harvest_Maturity_Pot[previous_i(i,0:9)])<
-  #         mean(Sim.Harvest_Maturity_Pot[previous_i(i,10:19)])
-  #       # Made as soon as the overall fruit maturation is optimal (all fruits are mature)
-  #     }
-
-
-  #   if(is_harvest){
-  #     # Save the date of harvest:
-  #     Sim.Date_harvest[i]= Met_c.DOY[i]
-  #     Sim.Harvest_Fruit[i]=
-  #       Sim.CM_Fruit[i-1]+Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
-  #     Sim.Harvest_Maturity[i]= Sim.Harvest_Maturity_Pot[i]
-  #     Sim.CM_Fruit[i-1]= Sim.NPP_Fruit[i]= Sim.Overriped_Fruit[i]= 0
-  #     Sim.CM_Fruit_Cohort= rep(0,length(Sim.CM_Fruit_Cohort))
-  #     # RV: could harvest mature fruits only (To do).
-  #   }else{
-  #     Sim.Harvest_Fruit[i]= NA_real_
-  #   }
-
-  #   # Leaves ------------------------------------------------------------------
-
-  #   Sim.Supply_Leaf[i]=
-  #     Parameters.lambda_Leaf_remain*
-  #     (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
-  #        Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
-
-  #   Sim.Alloc_Leaf[i]=
-  #     min(Parameters.DELM*(Parameters.Stocking_Coffee/10000)*
-  #           ((Parameters.LAI_max-Sim.LAI[i])/
-  #              (Sim.LAI[i]+Parameters.LAI_max)),
-  #         Sim.Supply_Leaf[i])
-
-
-  #   Sim.NPP_Leaf[i]= Sim.Alloc_Leaf[i]/Parameters.epsilon_Leaf
-  #   Sim.Rg_Leaf[i]= Sim.Alloc_Leaf[i]-Sim.NPP_Leaf[i]
-  #   Sim.Mnat_Leaf[i]=Sim.CM_Leaf[previous_i(i,1)]/Parameters.lifespan_Leaf
-
-  #   Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_Leaf[i]-Sim.Alloc_Leaf[i])
-
-  #   Sim.M_ALS[i]=
-  #     after(i,2)*max(0,Sim.CM_Leaf[previous_i(i,1)]*Sim.ALS[i])
-
-  #   if(Sim.Plot_Age[i]>=
-  #      Parameters.MeanAgePruning&Met_c.DOY[i]==Parameters.D_pruning){
-  #     Sim.Mprun_Leaf[i]= Sim.CM_Leaf[previous_i(i,1)]*Parameters.LeafPruningRate
-  #   }else{
-  #     Sim.Mprun_Leaf[i]= 0
-  #   }
-
-  #   Sim.Mortality_Leaf[i]= Sim.Mnat_Leaf[i] + Sim.Mprun_Leaf[i] + Sim.M_ALS[i]
-
-  #   # Fine Roots --------------------------------------------------------------
-
-  #   Sim.Supply_FRoot[i]=
-  #     Parameters.lambda_FRoot_remain*
-  #     (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
-  #        Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
-
-  #   Sim.Alloc_FRoot[i]=max(0,min(Sim.Alloc_Leaf[i],Sim.Supply_FRoot[i]))
-
-  #   Sim.NPP_FRoot[i]= Sim.Alloc_FRoot[i]/Parameters.epsilon_FRoot
-
-  #   Sim.Rg_FRoot[i]= Sim.Alloc_FRoot[i]-Sim.NPP_FRoot[i]
-
-  #   Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_FRoot[i]-Sim.Alloc_FRoot[i])
-
-  #   Sim.Mnat_FRoot[i]= Sim.CM_FRoot[previous_i(i,1)]/Parameters.lifespan_FRoot
-  #   Sim.Mprun_FRoot[i]= Parameters.m_FRoot*Sim.Mprun_Leaf[i]
-  #   Sim.Mortality_FRoot[i]= Sim.Mnat_FRoot[i]+Sim.Mprun_FRoot[i]
-
-
-  #   # Biomass -----------------------------------------------------------------
-
-  #   CM_tot=
-  #     Sim.CM_Leaf[previous_i(i,1)] + Sim.CM_Shoot[previous_i(i,1)] +
-  #     Sim.CM_SCR[previous_i(i,1)] + Sim.CM_FRoot[previous_i(i,1)]
-
-  #   Sim.CM_Leaf[i]/CM_tot
-  #   Sim.CM_Leaf[i]= Sim.CM_Leaf[previous_i(i,1)]+
-  #     Sim.NPP_Leaf[i]-Sim.Mortality_Leaf[i]-
-  #     Sim.Carbon_Lack_Mortality[i]*Sim.CM_Leaf[previous_i(i,1)]/CM_tot
-  #   Sim.CM_Shoot[i]= Sim.CM_Shoot[previous_i(i,1)]+
-  #     Sim.NPP_Shoot[i]-Sim.Mortality_Shoot[i]-
-  #     Sim.Carbon_Lack_Mortality[i]*Sim.CM_Shoot[previous_i(i,1)]/CM_tot
-  #   Sim.CM_Fruit[i]=Sim.CM_Fruit[previous_i(i,1)]+
-  #     Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
-  #   Sim.CM_SCR[i]= Sim.CM_SCR[previous_i(i,1)]+
-  #     Sim.NPP_SCR[i]-Sim.Mortality_SCR[i]-
-  #     Sim.Carbon_Lack_Mortality[i]*Sim.CM_SCR[previous_i(i,1)]/CM_tot
-  #   Sim.CM_FRoot[i]= Sim.CM_FRoot[previous_i(i,1)]+
-  #     Sim.NPP_FRoot[i]-Sim.Mortality_FRoot[i]-
-  #     Sim.Carbon_Lack_Mortality[i]*Sim.CM_FRoot[previous_i(i,1)]/CM_tot
-  #   Sim.CM_RE[i]=Sim.CM_RE[previous_i(i,1)]+Sim.NPP_RE[i]-
-  #     Sim.Consumption_RE[i]
-
-  #   Sim.DM_Leaf[i]= Sim.CM_Leaf[i]/Parameters.CC_Leaf
-  #   Sim.DM_Shoot[i]= Sim.CM_Shoot[i]/Parameters.CC_Shoot
-  #   Sim.DM_Fruit[i]=Sim.CM_Fruit[i]/Parameters.CC_Fruit
-  #   Sim.DM_SCR[i]= Sim.CM_SCR[i]/
-  #     Parameters.CC_SCR
-  #   Sim.DM_FRoot[i]= Sim.CM_FRoot[i]/Parameters.CC_FRoots
-  #   Sim.DM_RE[i]=Sim.CM_RE[i]/Parameters.CC_SCR
-
-
-  #   # Total Respiration and NPP -----------------------------------------------
-
-  #   Sim.Rg[i]= Sim.Rg_Fruit[i]+Sim.Rg_Leaf[i]+
-  #     Sim.Rg_Shoot[i]+Sim.Rg_SCR[i]+
-  #     Sim.Rg_FRoot[i]
-  #   Sim.Ra[i]=Sim.Rm[i]+Sim.Rg[i]
-  #   Sim.NPP[i]=Sim.NPP_Shoot[i]+Sim.NPP_SCR[i]+
-  #     Sim.NPP_Fruit[i]+Sim.NPP_Leaf[i]+Sim.NPP_FRoot[i]
-
-  # }
-  # return(Sim%>%as.data.frame)
+  for i in 1:length(Sim.LAI)
+    #   setTxtProgressBar(pb, i)
+    
+    # Shade Tree computation if any
+    Treefun!(Sim,Parameters,Met_c,i)
+    # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
+
+    # Coffea computation:
+    # CM is in gC m-2soil, so use C content to transform in dry mass
+    Sim.LAI[i]= Sim.CM_Leaf[previous_i(i)]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
+    Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI[i]
+
+    # Light interception ------------------------------------------------------
+
+    Sim.K_Dif[i]= Parameters.k_Dif
+    Sim.K_Dir[i]= Parameters.k_Dir
+
+    #APAR coffee
+    Sim.PAR_Trans_Tree[i]= Met_c.PAR[i] - Sim.APAR_Tree[i] # PAR above coffee layer
+    Sim.APAR_Dif[i]= max(0.0, (Sim.PAR_Trans_Tree[i] * Met_c.FDiff[i]) * (1.0 - exp(-Sim.K_Dif[i] * Sim.LAI[i])))
+    APAR_Dir= max(0.0,(Sim.PAR_Trans_Tree[i] * (1.0 - Met_c.FDiff[i])) * (1.0 - exp(-Sim.K_Dir[i] * Sim.LAI[i])))
+    # APAR_Dir is not part of Sim because it can be easily computed by Met_c.PARm2d1-Sim.APAR_Dif
+    Sim.APAR[i]= APAR_Dir + Sim.APAR_Dif[i]
+    Sim.PAR_Trans[i]= Sim.PAR_Trans_Tree[i] - Sim.APAR[i] # PAR above soil layer
+
+    # soil (+canopy evap) water balance ---------------------------------------
+
+    Soilfun!(Sim,Parameters,Met_c,i)
+
+    # Metamodel Coffee leaf water potential
+    Sim.LeafWaterPotential[i]= Parameters.LeafWaterPotential(Sim,Met_c,i)
+
+
+    # Energy balance ----------------------------------------------------------
+
+    # Transpiration Coffee
+    Sim.T_Coffee[i]= Parameters.T_Coffee(Sim,Met_c,i)
+
+    # Plot transpiration
+    Sim.T_tot[i]= Sim.T_Tree[i] + Sim.T_Coffee[i]
+
+    # Evapo-Transpiration
+    Sim.ETR[i]= Sim.T_tot[i] + Sim.E_Soil[i] + Sim.IntercRevapor[i]
+
+    # Latent and Sensible heat fluxes
+    Sim.LE_Plot[i]= Sim.ETR[i] * Parameters.λ
+    Sim.LE_Coffee[i]= (Sim.T_Coffee[i] + Sim.IntercRevapor[i] * (Sim.LAI[i] / Sim.LAIplot[i])) * Parameters.λ
+    Sim.H_Coffee[i]= Parameters.H_Coffee(S,i)
+
+    # Coffea layer net radiation
+    Sim.Rn_Coffee[i]= Sim.H_Coffee[i] + Sim.LE_Coffee[i]
+
+    # Tree LE and Rn (can not compute them in the Tree function because we need IntercRevapor)
+    Sim.LE_Tree[i]= (Sim.T_Tree[i] + Sim.IntercRevapor[i] * (Sim.LAI_Tree[i] / Sim.LAIplot[i])) * Parameters.λ
+    Sim.Rn_Tree[i]= Sim.H_Tree[i] + Sim.LE_Tree[i]
+
+    # Total plot energy:
+    Sim.H_tot[i]= Sim.H_Coffee[i] + Sim.H_Tree[i] + Sim.H_Soil[i]
+    Sim.LE_tot[i]= Sim.LE_Coffee[i] + Sim.LE_Tree[i] + Sim.LE_Soil[i]
+    Sim.Rn_tot[i]= Sim.Rn_Coffee[i] + Sim.Rn_Tree[i] + Sim.Rn_Soil[i]
+
+    # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
+    # Source: Van de Griend and Van Boxel 1989.
+    if Sim.Height_Tree[i] > Parameters.Height_Coffee
+
+      Sim.TairCanopy[i]= Sim.TairCanopy_Tree[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
+        (air_density(Sim.TairCanopy_Tree[i],Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+           G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT, LAI_top= Sim.LAI_Tree[i], LAI_bot= Sim.LAI[i],
+                      Z_top= Sim.Height_Tree[i], extwind = Parameters.extwind))
+      Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i] + (Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
+        (air_density(Sim.TairCanopy[i],Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+           Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay=Sim.LAI[i], LAI_abv=Sim.LAI_Tree[i],
+                ZHT = Parameters.ZHT, Z_top = Sim.Height_Tree[i], extwind= Parameters.extwind))
+
+    else
+
+      Sim.TairCanopy[i]= Met_c.Tair[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
+        (air_density(Sim.TairCanopy_Tree[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+           G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT, Z_top = Parameters.Height_Coffee,
+                  LAI = Sim.LAI[i], extwind = Parameters.extwind))
+
+      Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i]+(Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
+        (air_density(Sim.TairCanopy[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp  * 
+           Gb_h(Wind= Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay= Sim.LAI[i], LAI_abv= Sim.LAI_Tree[i],
+                ZHT= Parameters.ZHT, Z_top= Parameters.Height_Coffee, extwind= Parameters.extwind))
+    end
+    # NB: if no trees, TairCanopy_Tree= Tair
+
+    # Recomputing soil temperature knowing TairCanopy
+
+    Sim.TSoil[i]= Sim.TairCanopy[i]+(Sim.H_Soil[i] * Parameters.MJ_to_W) / 
+      (air_density(Sim.TairCanopy[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+         G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
+                   LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
+
+    Sim.DegreeDays_Tcan[i]= GDD(Tmean = Sim.Tleaf_Coffee[i], MinTT = Parameters.MinTT, MaxTT = Parameters.MaxTT)
+
+    # Metamodel LUE coffee:
+    Sim.lue[i]= Parameters.lue(Sim,Met_c,i)
+
+    #GPP Coffee
+    Sim.GPP[i]= Sim.lue[i] * Sim.APAR[i]
+
+    # Maintenance respiration -------------------------------------------------
+
+    # Rm is computed at the beginning of the day on the drymass of the previous day.
+    # This is considered as the highest priority for the plant (to maintain its dry mass)
+
+    after_2= i <= 2 ? 0 : 1 # used to start respiration after two days so there are some dry mass.
+    # Resprout (branches) wood:
+    Sim.Rm_Shoot[i]=  after_2 * (Parameters.pa_Shoot * Sim.DM_Shoot[previous_i(i)] * Parameters.NC_Shoot * 
+                      Parameters.MRN *  Parameters.Q10_Shoot^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+
+    # Stump and Coarse roots (perennial wood):
+    Sim.Rm_SCR[i]= after_2 *  (Parameters.pa_SCR * Sim.DM_SCR[previous_i(i)] *  Parameters.NC_SCR * Parameters.MRN * 
+         Parameters.Q10_SCR^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+
+    # Fruits:
+    Sim.Rm_Fruit[i]= after_2 * (Parameters.pa_Fruit * Sim.DM_Fruit[previous_i(i)] *  Parameters.NC_Fruit * Parameters.MRN * 
+         Parameters.Q10_Fruit^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+
+    # Leaves:
+    Sim.Rm_Leaf[i]= after_2 * (Parameters.pa_Leaf * Sim.DM_Leaf[previous_i(i)] * Parameters.NC_Leaf * Parameters.MRN * 
+         Parameters.Q10_Leaf^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+
+    # Fine roots:
+    Sim.Rm_FRoot[i]= after_2 * (Parameters.pa_FRoot * Sim.DM_FRoot[previous_i(i)] * Parameters.NC_FRoot * Parameters.MRN * 
+         Parameters.Q10_FRoot^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+
+    # Total plant maintenance respiration
+    Sim.Rm[i]= Sim.Rm_Fruit[i]+Sim.Rm_Leaf[i] + Sim.Rm_Shoot[i]+Sim.Rm_SCR[i] + Sim.Rm_FRoot[i]
+
+
+
+    # Coffee Allocation -------------------------------------------------------
+
+    # Potential use of reserves:
+    Sim.Consumption_RE[i]= Parameters.kres * Sim.CM_RE[previous_i(i)]
+
+    # Supply function
+    Sim.Supply[i]= max(Sim.GPP[i] - Sim.Rm[i] + Sim.Consumption_RE[i], 0.0)
+
+    # If the respiration is greater than the GPP + reserves use, then take this carbon
+    # from mortality of each compartments' biomass equally (not for fruits or reserves):
+    Sim.Carbon_Lack_Mortality[i]= -min(0.0, Sim.GPP[i] - Sim.Rm[i] + Sim.Consumption_RE[i])
+
+    # 1-Resprout wood ---------------------------------------------------------
+    # Allocation priority 1, see Charbonnier 2012.
+    Sim.Alloc_Shoot[i]= Parameters.lambda_Shoot * Sim.Supply[i]
+    Sim.NPP_Shoot[i]= Sim.Alloc_Shoot[i] / Parameters.epsilon_Shoot
+    Sim.Rg_Shoot[i]= Sim.Alloc_Shoot[i] - Sim.NPP_Shoot[i]
+    Sim.Mnat_Shoot[i]= Sim.CM_Shoot[previous_i(i)] / Parameters.lifespan_Shoot
+    # Pruning
+    if (Sim.Plot_Age[i] >= Parameters.MeanAgePruning) & (Met_c.DOY[i] == Parameters.D_pruning)
+      Sim.Mprun_Shoot[i]= Sim.CM_Shoot[previous_i(i)] * Parameters.WoodPruningRate
+    end
+
+    Sim.Mortality_Shoot[i]= min((Sim.Mnat_Shoot[i] + Sim.Mprun_Shoot[i]), Sim.CM_Shoot[previous_i(i)])
+
+    # 2-Stump and coarse roots (perennial wood) ------------------------------
+    Sim.Alloc_SCR[i]= Parameters.lambda_SCR * Sim.Supply[i]
+    Sim.NPP_SCR[i]= Sim.Alloc_SCR[i] / Parameters.epsilon_SCR
+    Sim.Rg_SCR[i]= Sim.Alloc_SCR[i] - Sim.NPP_SCR[i]
+    Sim.Mnat_SCR[i]= Sim.CM_SCR[previous_i(i)] / Parameters.lifespan_SCR
+    Sim.Mortality_SCR[i]= Sim.Mnat_SCR[i]
+
+    # Ratio of number of new nodes per LAI unit as affected by canopy air temperature
+    # according to Drinnan & Menzel, 1995
+    # Source "0 Effect T on yield and vegetative growth.xlsx", sheet
+    # "Std20dComposWinterNodeperBr"
+    # NB: computed at the end of the vegetatitve growth only to have Tcan of the
+    # whole period already computed
+    # NB2 : This is the total number of productive nodes on the coffee plant, i.e. the
+    # number of green wood nodes that potentially carry flower buds. Green wood mass (and
+    # so number of nodes) are related to leaf area (new leaves appear on nodes) :
+    # GUTIERREZ et al. (1998)
+    if Met_c.DOY[i] == Parameters.DVG2
+      T_VG= Sim.Tleaf_Coffee[(Met_c.year .== Met_c.year[i]) .& (Met_c.DOY .>= Parameters.DVG1) .& (Met_c.DOY .<= Parameters.DVG2)]
+      T_VG= sum(T_VG)/length(T_VG)
+      Sim.ratioNodestoLAI[Met_c.year .>= Met_c.year[i]] .= Parameters.RNL_base * CN(T_VG)
+    end
+
+    # Flower Buds + Flower + Fruits -------------------------------------------
+
+    # (1) Buds induction
+    # Buds start appearing for the very first time from 5500 dd. After that,
+    # they appear every "Parameters.F_Tffb" degree days until flowering starts
+    if Sim.BudInitPeriod[i]
+      Sim.Budinit[i]= (Parameters.a_bud+Parameters.b_bud * (Sim.PAR_Trans_Tree[i] / Parameters.FPAR)) *
+                       Sim.LAI[i-1] * Sim.ratioNodestoLAI[i-1] * Sim.DegreeDays_Tcan[i]
+      # NB: Number of nodes= Sim.LAI[i-1] * Sim.ratioNodestoLAI[i-1]
+      Sim.Bud_available[i]= Sim.Budinit[i]
+    end
+    # NB: number of fruits ~1200  /  year  /  coffee tree, source : Castro-Tanzi et al. (2014)
+    # Sim%>%group_by(Plot_Age)%>%summarise(N_Flowers= sum(BudBreak))
+
+    # (2) Cumulative degree days experienced by each bud cohort :
+    dd_i= cumsum(Sim.DegreeDays_Tcan[i:-1:previous_i(i,1000)])
+
+    # (3) Find the window where buds are under dormancy (find the dormant cohorts)
+    # Bud develops during F_buds1 (840) degree days after initiation, so they cannot
+    # be dormant less than F_buds1 before i. But they can stay under dormancy until
+    # F_buds2 dd maximum, so they cannot be older than F_buds2 dd before i.
+    
+    OldestDormancy= i - (maximum(findall(dd_i .< Parameters.F_buds2)) - 1)
+    YoungestDormancy= i - (maximum(findall(dd_i .< Parameters.F_buds1)) - 1)
+    # Idem above (reduce the days computed, F_buds2 is ~300 days and F_buds1 ~80-100 days)
+
+    # (4) Test if the condition of minimum required rain for budbreak is met, and if
+    # not, which cohort first met the condition (starting from younger to older cohorts):
+    CumRain= cumsum(Met_c.Rain[YoungestDormancy:-1:OldestDormancy])
+    # (5) Compute the period were all cohorts have encountered all conditions to break
+    # dormancy :
+    DormancyBreakPeriod= OldestDormancy:(YoungestDormancy-sum(CumRain<Parameters.F_rain))
+
+    # (6) Temperature effect on bud phenology
+    Sim.Temp_cor_Bud[i]= Parameters.Bud_T_correction(Sim.Tleaf_Coffee[i])
+    
+    # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
+    Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.LeafWaterPotential[i]))
+    # (8) Compute the number of buds that effectively break dormancy in each cohort:
+    Sim.BudBreak_cohort[DormancyBreakPeriod]=
+      pmin(Sim.Bud_available[DormancyBreakPeriod],
+           Sim.Budinit[DormancyBreakPeriod] * Sim.pbreak[i] * 
+             Sim.Temp_cor_Bud[DormancyBreakPeriod])
+    # NB 1: cannot exceed the number of buds of each cohort
+    # NB 2: using Budinit and not Bud_available because pbreak is fitted on
+    # total bud cohort
+
+    # # (9) Remove buds that did break dormancy from the pool of dormant buds
+    # Sim.Bud_available[DormancyBreakPeriod]=
+    #   Sim.Bud_available[DormancyBreakPeriod]-Sim.BudBreak_cohort[DormancyBreakPeriod]
+
+    # # (10) Sum the buds that break dormancy from each cohort to compute the total number
+    # # of buds that break dormancy on day i :
+    # Sim.BudBreak[i]= min(sum(Sim.BudBreak_cohort[DormancyBreakPeriod]),
+    #                        Parameters.Max_Bud_Break)
+    # # Rodriguez et al. state that the maximum number of buds that may break dormancy
+    # # during each dormancy-terminating episode was set to 12 (see Table 1).
+
+    # # Fruits :
+    # FruitingPeriod= i-which(dd_i<(Parameters.F_over))+1
+    # # NB : Fruits that are older than the FruitingPeriod are overripped
+
+    # # Demand from each fruits cohort present on the coffee tree (not overriped),
+    # # same as Demand_Fruit but keeping each value :
+    # Demand_Fruit_Cohort_Period=
+    #   Sim.BudBreak[FruitingPeriod] * Parameters.DE_opt * 
+    #   logistic_deriv(dd_i[1:length(FruitingPeriod)],
+    #                  Parameters.u_log,Parameters.s_log)
+    # Demand_Fruit_Cohort_Period[is.na(Demand_Fruit_Cohort_Period)]= 0
+    # # Total C demand of the fruits :
+    # Sim.Demand_Fruit[i]= sum(Demand_Fruit_Cohort_Period)
+    # # C supply to Fruits (i.e. what is left from Supply after removing the consumption
+    # # by previous compartments and Rm):
+    # Sim.Supply_Fruit[i]=
+    #   Sim.Supply[i]-Sim.Alloc_Shoot[i]-
+    #   Sim.Alloc_SCR[i]
+
+    # # Total C allocation to all fruits on day i :
+    # Sim.Alloc_Fruit[i]= min(Sim.Demand_Fruit[i],Sim.Supply_Fruit[i])
+    # # Allocation to each cohort, relative to each cohort demand :
+    # Rel_DE= Demand_Fruit_Cohort_Period / Sim.Demand_Fruit[i]
+    # Rel_DE[is.nan(Rel_DE)]= 0
+    # Sim.Alloc_Fruit_Cohort[FruitingPeriod]=
+    #   Sim.Alloc_Fruit[i] * Rel_DE
+    # Sim.NPP_Fruit_Cohort[FruitingPeriod]=
+    #   Sim.Alloc_Fruit_Cohort[FruitingPeriod] / Parameters.epsilon_Fruit
+    # Sim.CM_Fruit_Cohort[FruitingPeriod]= Sim.CM_Fruit_Cohort[FruitingPeriod]+
+    #   Sim.NPP_Fruit_Cohort[FruitingPeriod]
+    # Sim.DM_Fruit_Cohort[FruitingPeriod]=
+    #   Sim.CM_Fruit_Cohort[FruitingPeriod] / Parameters.CC_Fruit
+    # # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
+    # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(min(FruitingPeriod)-1,1)]
+    # # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[min(FruitingPeriod)-1] * Parameters.epsilon_Fruit
+
+    # # Duration of the maturation of each cohort born in the ith day (in days):
+    # Sim.Maturation_duration[FruitingPeriod]=
+    #   seq_along(FruitingPeriod)
+    # # Sucrose content of each cohort:
+    # Sim.SC[FruitingPeriod]=
+    #   Sucrose_cont_perc(Sim.Maturation_duration[FruitingPeriod],
+    #                     a= Parameters.S_a, b= Parameters.S_b,
+    #                     x0= Parameters.S_x0, y0=Parameters.S_y0)
+    # # Sucrose mass of each cohort
+    # Sim.SM[FruitingPeriod]=
+    #   Sim.DM_Fruit_Cohort[FruitingPeriod] * Sim.SC[FruitingPeriod]
+    # # Harvest maturity:
+    # Sim.Harvest_Maturity_Pot[i]=
+    #   round(sum(Sim.SM[FruitingPeriod]) / 
+    #           sum(Sim.DM_Fruit_Cohort[FruitingPeriod] * 
+    #                 ((Parameters.S_y0 + Parameters.S_a) / 100)),3)
+    # Sim.Harvest_Maturity_Pot[i][is.nan(Sim.Harvest_Maturity_Pot[i])]= 0
+
+    # # NB : here harvest maturity is computed as the average maturity of the cohorts, because
+    # # all cohorts present in the Coffea are within the 'FruitingPeriod' window.
+    # # It could be computed as the percentage of cohorts that are fully mature (Pezzopane
+    # # et al. 2012 say at 221 days after flowering)
+    # # Optimal sucrose concentration around 8.8% of the dry mass
+
+    # Sim.NPP_Fruit[i]= Sim.Alloc_Fruit[i] / Parameters.epsilon_Fruit
+    # Sim.Rg_Fruit[i]= Sim.Alloc_Fruit[i]-Sim.NPP_Fruit[i]
+
+    # # Harvest. Made one day only for now (TODO: make it a period of harvest)
+
+    #   if(Parameters.harvest=="quantity"){
+    #     is_harvest=
+    #       Sim.Plot_Age[i]>=Parameters.ageMaturity&
+    #       all(Sim.NPP_Fruit[previous_i(i,0:10)]<
+    #             Sim.Overriped_Fruit[previous_i(i,0:10)])&
+    #       Sim.CM_Fruit[previous_i(i)]>Parameters.Min_Fruit_CM
+    #     # Made as soon as the fruit dry mass is decreasing for 10 consecutive days.
+    #     # This condition is met when fruit overriping is more important than fruit NPP
+    #     # for 10 days.
+    #     # This option is the best one when fruit maturation is not well known or when the
+    #     # harvest is made throughout several days or weeks with the assumption that fruits
+    #     # are harvested when mature.
+    #   }else{
+    #     is_harvest=
+    #       Sim.Plot_Age[i]>=Parameters.ageMaturity &
+    #       mean(Sim.Harvest_Maturity_Pot[previous_i(i,0:9)])<
+    #       mean(Sim.Harvest_Maturity_Pot[previous_i(i,10:19)])
+    #     # Made as soon as the overall fruit maturation is optimal (all fruits are mature)
+    #   }
+
+
+    # if(is_harvest){
+    #   # Save the date of harvest:
+    #   Sim.Date_harvest[i]= Met_c.DOY[i]
+    #   Sim.Harvest_Fruit[i]=
+    #     Sim.CM_Fruit[i-1]+Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
+    #   Sim.Harvest_Maturity[i]= Sim.Harvest_Maturity_Pot[i]
+    #   Sim.CM_Fruit[i-1]= Sim.NPP_Fruit[i]= Sim.Overriped_Fruit[i]= 0
+    #   Sim.CM_Fruit_Cohort= rep(0,length(Sim.CM_Fruit_Cohort))
+    #   # RV: could harvest mature fruits only (To do).
+    # }else{
+    #   Sim.Harvest_Fruit[i]= NA_real_
+    # }
+
+    # # Leaves ------------------------------------------------------------------
+
+    # Sim.Supply_Leaf[i]=
+    #   Parameters.lambda_Leaf_remain * 
+    #   (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
+    #      Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
+
+    # Sim.Alloc_Leaf[i]=
+    #   min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000) * 
+    #         ((Parameters.LAI_max-Sim.LAI[i]) / 
+    #            (Sim.LAI[i]+Parameters.LAI_max)),
+    #       Sim.Supply_Leaf[i])
+
+
+    # Sim.NPP_Leaf[i]= Sim.Alloc_Leaf[i] / Parameters.epsilon_Leaf
+    # Sim.Rg_Leaf[i]= Sim.Alloc_Leaf[i]-Sim.NPP_Leaf[i]
+    # Sim.Mnat_Leaf[i]=Sim.CM_Leaf[previous_i(i)] / Parameters.lifespan_Leaf
+
+    # Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_Leaf[i]-Sim.Alloc_Leaf[i])
+
+    # Sim.M_ALS[i]=
+    #   after_2 * max(0,Sim.CM_Leaf[previous_i(i)] * Sim.ALS[i])
+
+    # if(Sim.Plot_Age[i]>=
+    #    Parameters.MeanAgePruning&Met_c.DOY[i]==Parameters.D_pruning){
+    #   Sim.Mprun_Leaf[i]= Sim.CM_Leaf[previous_i(i)] * Parameters.LeafPruningRate
+    # }else{
+    #   Sim.Mprun_Leaf[i]= 0
+    # }
+
+    # Sim.Mortality_Leaf[i]= Sim.Mnat_Leaf[i] + Sim.Mprun_Leaf[i] + Sim.M_ALS[i]
+
+    # # Fine Roots --------------------------------------------------------------
+
+    # Sim.Supply_FRoot[i]=
+    #   Parameters.lambda_FRoot_remain * 
+    #   (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
+    #      Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
+
+    # Sim.Alloc_FRoot[i]=max(0,min(Sim.Alloc_Leaf[i],Sim.Supply_FRoot[i]))
+
+    # Sim.NPP_FRoot[i]= Sim.Alloc_FRoot[i] / Parameters.epsilon_FRoot
+
+    # Sim.Rg_FRoot[i]= Sim.Alloc_FRoot[i]-Sim.NPP_FRoot[i]
+
+    # Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_FRoot[i]-Sim.Alloc_FRoot[i])
+
+    # Sim.Mnat_FRoot[i]= Sim.CM_FRoot[previous_i(i)] / Parameters.lifespan_FRoot
+    # Sim.Mprun_FRoot[i]= Parameters.m_FRoot * Sim.Mprun_Leaf[i]
+    # Sim.Mortality_FRoot[i]= Sim.Mnat_FRoot[i]+Sim.Mprun_FRoot[i]
+
+
+    # # Biomass -----------------------------------------------------------------
+
+    # CM_tot=
+    #   Sim.CM_Leaf[previous_i(i)] + Sim.CM_Shoot[previous_i(i)] +
+    #   Sim.CM_SCR[previous_i(i)] + Sim.CM_FRoot[previous_i(i)]
+
+    # Sim.CM_Leaf[i] / CM_tot
+    # Sim.CM_Leaf[i]= Sim.CM_Leaf[previous_i(i)]+
+    #   Sim.NPP_Leaf[i]-Sim.Mortality_Leaf[i]-
+    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_Leaf[previous_i(i)] / CM_tot
+    # Sim.CM_Shoot[i]= Sim.CM_Shoot[previous_i(i)]+
+    #   Sim.NPP_Shoot[i]-Sim.Mortality_Shoot[i]-
+    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_Shoot[previous_i(i)] / CM_tot
+    # Sim.CM_Fruit[i]=Sim.CM_Fruit[previous_i(i)]+
+    #   Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
+    # Sim.CM_SCR[i]= Sim.CM_SCR[previous_i(i)]+
+    #   Sim.NPP_SCR[i]-Sim.Mortality_SCR[i]-
+    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_SCR[previous_i(i)] / CM_tot
+    # Sim.CM_FRoot[i]= Sim.CM_FRoot[previous_i(i)]+
+    #   Sim.NPP_FRoot[i]-Sim.Mortality_FRoot[i]-
+    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_FRoot[previous_i(i)] / CM_tot
+    # Sim.CM_RE[i]=Sim.CM_RE[previous_i(i)]+Sim.NPP_RE[i]-
+    #   Sim.Consumption_RE[i]
+
+    # Sim.DM_Leaf[i]= Sim.CM_Leaf[i] / Parameters.CC_Leaf
+    # Sim.DM_Shoot[i]= Sim.CM_Shoot[i] / Parameters.CC_Shoot
+    # Sim.DM_Fruit[i]=Sim.CM_Fruit[i] / Parameters.CC_Fruit
+    # Sim.DM_SCR[i]= Sim.CM_SCR[i] / 
+    #   Parameters.CC_SCR
+    # Sim.DM_FRoot[i]= Sim.CM_FRoot[i] / Parameters.CC_FRoots
+    # Sim.DM_RE[i]=Sim.CM_RE[i] / Parameters.CC_SCR
+
+
+    # # Total Respiration and NPP -----------------------------------------------
+
+    # Sim.Rg[i]= Sim.Rg_Fruit[i]+Sim.Rg_Leaf[i]+
+    #   Sim.Rg_Shoot[i]+Sim.Rg_SCR[i]+
+    #   Sim.Rg_FRoot[i]
+    # Sim.Ra[i]=Sim.Rm[i]+Sim.Rg[i]
+    # Sim.NPP[i]=Sim.NPP_Shoot[i]+Sim.NPP_SCR[i]+
+    #   Sim.NPP_Fruit[i]+Sim.NPP_Leaf[i]+Sim.NPP_FRoot[i]
+
+  end
+
+  return Sim
 
 end

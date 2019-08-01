@@ -3,21 +3,22 @@ Meteorology(file = NULL, period = NULL, Parameters = Import_Parameters())
 
 Import the meteorology data, check its format, and eventually compute missing variables.
 # Arguments
-- `file::String`: The meteorology file path.
+- `file::String`: The daily time-step meteorology file path.
 - `period::Array{String,1}`: A vector of two character string as POSIX dates that correspond to the min and max dates for the desired time period to be returned.
 The default value ["0000-01-01", "0000-01-02"] makes the function take the min and max values from the meteorology file.
-- `Parameters::Date`: A list of parameters
-* Start_Date: optional, the Posixct date of the first meteo file record. Only needed if the Date column is missing.
-* FPAR      : Fraction of global radiation corresponding to PAR radiation, only needed if either RAD or PAR is missing.
-* Elevation : elevation of the site (m), only needed if atmospheric pressure is missing
-* Latitude  : latitude of the site (degree), only needed if the diffuse fraction of light is missing
-* WindSpeed : constant wind speed (m s-1), only needed if windspeed is missing
-* CO2       : constant atmospheric ``CO_2`` concentration (ppm), only needed if ``CO_2`` is missing
-* MinTT     : minimum temperature threshold for degree days computing (Celsius), see [GDD()]
-* MaxTT     : maximum temperature threshold for degree days computing (Celsius), see [GDD()]
-* albedo    : site shortwave surface albedo, only needed if net radiation is missing, see [Rad_net()]
+- `Parameters`: A named tuple with parameter values (see [`import_parameters`](@ref)):
+    + Start_Date: optional, the Posixct date of the first meteo file record. Only needed if the Date column is missing.
+    + FPAR      : Fraction of global radiation corresponding to PAR radiation, only needed if either RAD or PAR is missing.
+    + Elevation : elevation of the site (m), only needed if atmospheric pressure is missing
+    + Latitude  : latitude of the site (degree), only needed if the diffuse fraction of light is missing
+    + WindSpeed : constant wind speed (m s-1), only needed if windspeed is missing
+    + CO2       : constant atmospheric ``CO_2`` concentration (ppm), only needed if ``CO_2`` is missing
+    + MinTT     : minimum temperature threshold for degree days computing (Celsius), see [GDD()]
+    + MaxTT     : maximum temperature threshold for degree days computing (Celsius), see [GDD()]
+    + albedo    : site shortwave surface albedo, only needed if net radiation is missing, see [Rad_net()]
 
-Details: The imported file is expected to be at daily time-step. The albedo is used to compute the system net radiation that is then
+# Details
+The imported file is expected to be at daily time-step. The albedo is used to compute the system net radiation that is then
 used to compute the soil net radiation using an extinction coefficient with the plot LAI following the Shuttleworth & Wallace (1985)
 formulation. This computation is likely to be depreciated in the near future as the computation has been replaced by a metamodel. It
 is kept for information for the moment.
@@ -34,17 +35,17 @@ is kept for information for the moment.
 | RH              | `%`          | Relative humidity                            | Not used, but prefered over VPD for Rn computation                |
 | RAD             | MJ m-2 d-1  | Incident shortwave radiation                 | Computed from PAR                                                  |
 | Pressure        | hPa         | Atmospheric pressure                         | Computed from VPD, Tair and Elevation, or alternatively from Tair and Elevation. |
-| WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                          |
-| CO2             | ppm         | Atmospheric CO2 concentration                | Taken as constant: `Parameters -> CO2`                                |
-| DegreeDays      | Celsius     | Growing degree days                          | Computed using [GDD()]                                             |
+| WindSpeed       | m s-1       | Wind speed                                   | Taken as constant: `Parameters -> WindSpeed`                       |
+| CO2             | ppm         | Atmospheric CO2 concentration                | Taken as constant: `Parameters -> CO2`                             |
+| DegreeDays      | Celsius     | Growing degree days                          | Computed using [`GDD`](@ref)                                             |
 | PAR             | MJ m-2 d-1  | Incident photosynthetically active radiation | Computed from RAD                                                  |
-| FDiff           | Fraction    | Diffuse light fraction                       | Computed using [Diffuse_d()] using Spitters et al. (1986) formula  |
+| FDiff           | Fraction    | Diffuse light fraction                       | Computed using [`diffuse_fraction`](@ref) using Spitters et al. (1986) formula  |
 | VPD             | hPa         | Vapor pressure deficit                       | Computed from RH                                                   |
-| Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [Rad_net()] with RH, or VPD                         |
+| Rn              | MJ m-2 d-1  | Net radiation (will be depreciated)          | Computed using [`Rad_net`](@ref) with RH, or VPD                         |
 | DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
-| Air_Density     | kg m-3      | Air density of moist air (``\\rho``) above canopy | Computed using [bigleaf::air.density()]                       |
+| Air_Density     | kg m-3      | Air density of moist air (ρ) above canopy | Computed using [`air_density`](@ref)                       |
 | ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
-
+    
 # Returns
 A daily meteorology DataFrame.
 

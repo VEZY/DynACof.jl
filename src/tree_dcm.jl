@@ -179,124 +179,76 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     # Pruning -----------------------------------------------------------------
   
     # NB: several dates of pruning are allowed
-    if(Sim.TimetoPrun_Tree[i]){
+    if Sim.TimetoPrun_Tree[i]
       # Leaves pruning :
-      Sim.Mprun_Leaf_Tree[i]=
-        Sim.CM_Leaf_Tree[previous_i(i)]*Parameters.pruningIntensity_Tree
+      Sim.Mprun_Leaf_Tree[i]= Sim.CM_Leaf_Tree[previous_i(i)] * Parameters.pruningIntensity_Tree
       # Total mortality (cannot exceed total leaf dry mass):
-      Sim.Mact_Leaf_Tree[i]=
-        max(0,min(Sim.Mact_Leaf_Tree[i] + Sim.Mprun_Leaf_Tree[i],
-                  Sim.CM_Leaf_Tree[previous_i(i)]))
+      Sim.Mact_Leaf_Tree[i]= max(0.0, min(Sim.Mact_Leaf_Tree[i] + Sim.Mprun_Leaf_Tree[i], Sim.CM_Leaf_Tree[previous_i(i)]))
   
       # Branch pruning:
-      Sim.Mprun_Branch_Tree[i]=
-        Sim.CM_Branch_Tree[previous_i(i)]*Parameters.pruningIntensity_Tree
-      Sim.Mact_Branch_Tree[i]=
-        max(0,min((Sim.Mact_Branch_Tree[i]+Sim.Mprun_Branch_Tree[i]),
-                  Sim.CM_Branch_Tree[previous_i(i)]))
-      Sim.Mprun_FRoot_Tree[i]=
-        Parameters.m_FRoot_Tree*Sim.Mprun_Leaf_Tree[i]
-      Sim.Mact_FRoot_Tree[i]=
-        max(0,min(Sim.Mact_FRoot_Tree[i]+Sim.Mprun_FRoot_Tree[i],
-                  Sim.CM_FRoot_Tree[previous_i(i)]))
-    }
+      Sim.Mprun_Branch_Tree[i]= Sim.CM_Branch_Tree[previous_i(i)] * Parameters.pruningIntensity_Tree
+      Sim.Mact_Branch_Tree[i]= max(0.0,min((Sim.Mact_Branch_Tree[i] + Sim.Mprun_Branch_Tree[i]), Sim.CM_Branch_Tree[previous_i(i)]))
+      Sim.Mprun_FRoot_Tree[i]= Parameters.m_FRoot_Tree * Sim.Mprun_Leaf_Tree[i]
+      Sim.Mact_FRoot_Tree[i]= max(0.0, min(Sim.Mact_FRoot_Tree[i] + Sim.Mprun_FRoot_Tree[i], Sim.CM_FRoot_Tree[previous_i(i)]))
+    end
   
     # Thinning ----------------------------------------------------------------
   
-    if(Sim.TimetoThin_Tree[i]){
+    if Sim.TimetoThin_Tree[i]
       # First, reduce stocking by the predefined rate of thining:
-      Sim.Stocking_Tree[i:length(Sim.LAI)]=
-        Sim.Stocking_Tree[i-1]*(1-Parameters.RateThinning_Tree)
+      Sim.Stocking_Tree[i:end]= Sim.Stocking_Tree[i-1] .* (1.0 - Parameters.RateThinning_Tree)
       # Then add mortality (removing) due to thining :
-      Sim.MThinning_Stem_Tree[i]=
-        Sim.CM_Stem_Tree[previous_i(i)]*Parameters.RateThinning_Tree
-      Sim.MThinning_CR_Tree[i]=
-        Sim.CM_CR_Tree[previous_i(i)]*Parameters.RateThinning_Tree
-      Sim.MThinning_Branch_Tree[i]=
-        Sim.CM_Branch_Tree[previous_i(i)]*Parameters.RateThinning_Tree
-      Sim.MThinning_Leaf_Tree[i]=
-        Sim.CM_Leaf_Tree[previous_i(i)]*Parameters.RateThinning_Tree
-      Sim.MThinning_FRoot_Tree[i]=
-        Sim.CM_FRoot_Tree[previous_i(i)]*Parameters.RateThinning_Tree
-    }
+      Sim.MThinning_Stem_Tree[i]= Sim.CM_Stem_Tree[previous_i(i)] * Parameters.RateThinning_Tree
+      Sim.MThinning_CR_Tree[i]= Sim.CM_CR_Tree[previous_i(i) ] * Parameters.RateThinning_Tree
+      Sim.MThinning_Branch_Tree[i]= Sim.CM_Branch_Tree[previous_i(i)] * Parameters.RateThinning_Tree
+      Sim.MThinning_Leaf_Tree[i]= Sim.CM_Leaf_Tree[previous_i(i)] * Parameters.RateThinning_Tree
+      Sim.MThinning_FRoot_Tree[i]= Sim.CM_FRoot_Tree[previous_i(i)] * Parameters.RateThinning_Tree
+    end
   
     # Mortality update --------------------------------------------------------
   
-    Sim.Mortality_Leaf_Tree[i]=
-      Sim.M_Rm_Leaf_Tree[i]+Sim.Mact_Leaf_Tree[i]+Sim.MThinning_Leaf_Tree[i]
-    Sim.Mortality_Branch_Tree[i]=
-      Sim.M_Rm_Branch_Tree[i]+Sim.Mact_Branch_Tree[i]+Sim.MThinning_Branch_Tree[i]
-    Sim.Mortality_Stem_Tree[i]=
-      Sim.M_Rm_Stem_Tree[i]+Sim.Mact_Stem_Tree[i]+Sim.MThinning_Stem_Tree[i]
-    Sim.Mortality_CR_Tree[i]=
-      Sim.M_Rm_CR_Tree[i]+Sim.Mact_CR_Tree[i]+Sim.MThinning_CR_Tree[i]
-    Sim.Mortality_FRoot_Tree[i]=
-      Sim.M_Rm_FRoot_Tree[i]+Sim.Mact_FRoot_Tree[i]+
-      Sim.MThinning_FRoot_Tree[i]
+    Sim.Mortality_Leaf_Tree[i]= Sim.M_Rm_Leaf_Tree[i] + Sim.Mact_Leaf_Tree[i] + Sim.MThinning_Leaf_Tree[i]
+    Sim.Mortality_Branch_Tree[i]= Sim.M_Rm_Branch_Tree[i] + Sim.Mact_Branch_Tree[i] + Sim.MThinning_Branch_Tree[i]
+    Sim.Mortality_Stem_Tree[i]= Sim.M_Rm_Stem_Tree[i] + Sim.Mact_Stem_Tree[i] + Sim.MThinning_Stem_Tree[i]
+    Sim.Mortality_CR_Tree[i]= Sim.M_Rm_CR_Tree[i] + Sim.Mact_CR_Tree[i] + Sim.MThinning_CR_Tree[i]
+    Sim.Mortality_FRoot_Tree[i]= Sim.M_Rm_FRoot_Tree[i] + Sim.Mact_FRoot_Tree[i] + Sim.MThinning_FRoot_Tree[i]
   
     # C mass update -----------------------------------------------------------
   
-    Sim.CM_Leaf_Tree[i]=
-      max(0,Sim.CM_Leaf_Tree[previous_i(i)]+Sim.NPP_Leaf_Tree[i]-Sim.Mortality_Leaf_Tree[i])
-  
-    Sim.CM_Branch_Tree[i]=
-      max(0,Sim.CM_Branch_Tree[previous_i(i)]+Sim.NPP_Branch_Tree[i]-
-            Sim.Mortality_Branch_Tree[i])
-  
-    Sim.CM_Stem_Tree[i]=
-      max(0,Sim.CM_Stem_Tree[previous_i(i)]+Sim.NPP_Stem_Tree[i]-
-            Sim.Mortality_Stem_Tree[i])
-  
-    Sim.CM_CR_Tree[i]=
-      max(0,Sim.CM_CR_Tree[previous_i(i)]+
-            Sim.NPP_CR_Tree[i]-Sim.Mortality_CR_Tree[i])
-  
-    Sim.CM_FRoot_Tree[i]=
-      max(0,Sim.CM_FRoot_Tree[previous_i(i)]+
-            Sim.NPP_FRoot_Tree[i]-Sim.Mortality_FRoot_Tree[i])
-  
-    Sim.CM_RE_Tree[i]=
-      max(0,Sim.CM_RE_Tree[previous_i(i)]+
-            Sim.NPP_RE_Tree[i]-Sim.Consumption_RE_Tree[i]-Sim.M_Rm_RE_Tree[i])
+    Sim.CM_Leaf_Tree[i]= max(0.0, Sim.CM_Leaf_Tree[previous_i(i)] + Sim.NPP_Leaf_Tree[i] - Sim.Mortality_Leaf_Tree[i])
+    Sim.CM_Branch_Tree[i]= max(0.0, Sim.CM_Branch_Tree[previous_i(i)] + Sim.NPP_Branch_Tree[i] - Sim.Mortality_Branch_Tree[i])
+    Sim.CM_Stem_Tree[i]= max(0.0, Sim.CM_Stem_Tree[previous_i(i)] + Sim.NPP_Stem_Tree[i] - Sim.Mortality_Stem_Tree[i])
+    Sim.CM_CR_Tree[i]= max(0.0, Sim.CM_CR_Tree[previous_i(i)] + Sim.NPP_CR_Tree[i] - Sim.Mortality_CR_Tree[i])
+    Sim.CM_FRoot_Tree[i]= max(0.0, Sim.CM_FRoot_Tree[previous_i(i)] + Sim.NPP_FRoot_Tree[i] - Sim.Mortality_FRoot_Tree[i])
+    Sim.CM_RE_Tree[i]= max(0.0, Sim.CM_RE_Tree[previous_i(i)] + Sim.NPP_RE_Tree[i] - Sim.Consumption_RE_Tree[i] - Sim.M_Rm_RE_Tree[i])
   
     # Dry Mass update ---------------------------------------------------------
   
-    Sim.DM_Leaf_Tree[i]=
-      Sim.CM_Leaf_Tree[i]/Parameters.CC_Leaf_Tree
-    Sim.DM_Branch_Tree[i]=
-      Sim.CM_Branch_Tree[i]/Parameters.CC_wood_Tree
-    Sim.DM_Stem_Tree[i]=
-      Sim.CM_Stem_Tree[i]/Parameters.CC_wood_Tree
-    Sim.DM_CR_Tree[i]=
-      Sim.CM_CR_Tree[i]/Parameters.CC_wood_Tree
-    Sim.DM_FRoot_Tree[i]=
-      Sim.CM_FRoot_Tree[i]/Parameters.CC_wood_Tree
+    Sim.DM_Leaf_Tree[i]= Sim.CM_Leaf_Tree[i] / Parameters.CC_Leaf_Tree
+    Sim.DM_Branch_Tree[i]= Sim.CM_Branch_Tree[i] / Parameters.CC_wood_Tree
+    Sim.DM_Stem_Tree[i]= Sim.CM_Stem_Tree[i] / Parameters.CC_wood_Tree
+    Sim.DM_CR_Tree[i]= Sim.CM_CR_Tree[i] / Parameters.CC_wood_Tree
+    Sim.DM_FRoot_Tree[i]= Sim.CM_FRoot_Tree[i] / Parameters.CC_wood_Tree
   
     # Respiration -------------------------------------------------------------
   
-    Sim.Rg_Tree[i]=
-      Sim.Rg_CR_Tree[i]+Sim.Rg_Leaf_Tree[i]+
-      Sim.Rg_Branch_Tree[i]+Sim.Rg_Stem_Tree[i]+
-      Sim.Rg_FRoot_Tree[i]+Sim.Rg_RE_Tree[i]
+    Sim.Rg_Tree[i]= Sim.Rg_CR_Tree[i] + Sim.Rg_Leaf_Tree[i] + Sim.Rg_Branch_Tree[i] + Sim.Rg_Stem_Tree[i] +
+      Sim.Rg_FRoot_Tree[i] + Sim.Rg_RE_Tree[i]
   
-    Sim.Ra_Tree[i]=
-      Sim.Rm_Tree[i]+Sim.Rg_Tree[i]
+    Sim.Ra_Tree[i]= Sim.Rm_Tree[i] + Sim.Rg_Tree[i]
   
     # Total NPP ---------------------------------------------------------------
   
-    Sim.NPP_Tree[i]=
-      Sim.NPP_Stem_Tree[i]+Sim.NPP_Branch_Tree[i]+
-      Sim.NPP_Leaf_Tree[i]+Sim.NPP_CR_Tree[i]+
-      Sim.NPP_FRoot_Tree[i]+Sim.NPP_RE_Tree[i]
+    Sim.NPP_Tree[i]= Sim.NPP_Stem_Tree[i] + Sim.NPP_Branch_Tree[i] + Sim.NPP_Leaf_Tree[i] + Sim.NPP_CR_Tree[i] +
+      Sim.NPP_FRoot_Tree[i] + Sim.NPP_RE_Tree[i]
   
     # Daily C balance that should be nil every day:
-    Sim.Cbalance_Tree[i]=
-      Sim.Supply_Total_Tree[i]-(Sim.NPP_Tree[i]+Sim.Rg_Tree[i])
+    Sim.Cbalance_Tree[i]= Sim.Supply_Total_Tree[i] - (Sim.NPP_Tree[i] + Sim.Rg_Tree[i])
   
-    Sim.LAI_Tree[i]= Sim.DM_Leaf_Tree[i]*(Parameters.SLA_Tree/1000)
+    Sim.LAI_Tree[i]= Sim.DM_Leaf_Tree[i] * (Parameters.SLA_Tree / 1000.0)
   
     # Allometries ------------------------------------------------------------
-    Parameters.Allometries(S,i)
+    Parameters.Allometries(Sim,Met_c,Parameters,i)
   
     Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI_Tree[i]
 end  
@@ -308,7 +260,10 @@ end
 Make all computations for shade trees (similar to coffee, but no fruits) for the ith day by modifying the `S` list in place.
 
 # Arguments 
-- `Sim::DataFrame`: The simulation list of class "Simulation".
+
+- `Sim::DataFrame`: The main simulation DataFrame to make the computation. Is modified in place.
+- `Parameters`: A named tuple with parameter values (see [`import_parameters`](@ref)).
+- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref)).
 - `i::Int64`: The index of the day since the first day of the simulation.
 
 # Return

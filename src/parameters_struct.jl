@@ -32,6 +32,7 @@ Base.@kwdef struct constants
     epsi::Float64= 0.622 
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
+    eps::Float64       = 0.622
     g::Float64         = 9.81
     Rd::Float64        = 287.0586
     Rgas::Float64      = 8.314
@@ -179,7 +180,7 @@ Base.@kwdef struct coffee
     pa_FRoot::Float64          = 1.0        # Fine root living tissue (fraction)
     DE_opt::Float64            = 0.164      # optimum demand in total carbon for each berry (including growth respiration)
     # = Optimum_Berry_DM*CC_Fruit+Optimum_Berry_DM*CC_Fruit*(1-epsilonFruit)
-    Bud_T_correction           =  CB        # function to predict the temperature-dependent coefficient giving the mean T in input
+    Bud_T_correction           =  CB()      # function to predict the temperature-dependent coefficient giving the mean T in input
     # Parameters for American Leaf Spot
     SlopeAzimut::Float64       = 180.0      # site slope azimuth (deg)
     Slope::Float64             = 5.0        # Percentage slope (%)
@@ -198,14 +199,16 @@ Base.@kwdef struct coffee
 end
 
 function CB()
-    Data_Buds_day= DataFrame(Air_T= [10,15.5,20.5,25.5,30.5],
-                             Inflo_per_Node= [0,2.6,3.2,1.5,0],
-                             Buds_per_Inflo= [0,1.2,1.2,0.15,0])
-    Data_Buds_day.Inflo_per_Node_standard= Data_Buds_day.Inflo_per_Node ./ findmax(Data_Buds_day.Inflo_per_Node)[1]
-    Data_Buds_day.Buds_per_Inflo_standard= Data_Buds_day.Buds_per_Inflo ./ findmax(Data_Buds_day.Inflo_per_Node)[1]
+    Data_Buds_day= DataFrame(Air_T= [-100.0,10,15.5,20.5,25.5,30.5,100.0],
+                             Inflo_per_Node= [0.0,0,2.6,3.2,1.5,0,0.0],
+                             Buds_per_Inflo= [0.0,0,1.2,1.2,0.15,0,0.0])
+                             # We add artificial values at -100 and 100°C so LinearInterpolation works at low and high values
+    Data_Buds_day.Inflo_per_Node_standard= Data_Buds_day.Inflo_per_Node ./ maximum(Data_Buds_day.Inflo_per_Node)
+    Data_Buds_day.Buds_per_Inflo_standard= Data_Buds_day.Buds_per_Inflo ./ maximum(Data_Buds_day.Buds_per_Inflo)
     Data_Buds_day.T_cor_Flower= Data_Buds_day.Inflo_per_Node_standard .* Data_Buds_day.Buds_per_Inflo_standard
   
-    LinearInterpolation(Data_Buds_day.Air_T, Data_Buds_day.T_cor_Flower)
+    CB_fun= LinearInterpolation(Data_Buds_day.Air_T, Data_Buds_day.T_cor_Flower);
+    return CB_fun
 end
 
 
@@ -309,8 +312,8 @@ function metamodels_tree(sim::DataFrame,met::DataFrame,i::Int64)
     sim.lue_Tree[i]= 2.87743 + 0.07595 * met.Tair[i] - 0.03390 * met.VPD[i] - 0.24565*met.PAR[i]
   
     sim.T_Tree[i]= -0.2366 + 0.6591 * sim.APAR_Tree[i] + 0.1324*sim.LAI_Tree[i]
-    if sim.T_Tree < 0.0
-        sim.T_Tree= 0.0
+    if sim.T_Tree[i] < 0.0
+        sim.T_Tree[i]= 0.0
     end
 
     sim.H_Tree[i]=
@@ -328,8 +331,8 @@ function light_extinction_K_Tree(sim::DataFrame,met::DataFrame,i::Int64)
     sim.K_Dir_Tree[i]= 0.4721 - 0.3973 * sim.LAD_Tree[previous_i(i,1)]
 end
 
-function tree_allometries(sim::DataFrame,met::DataFrame,i::Int64)
-    sim.DBH_Tree[i]= ((sim.DM_Stem_Tree[i]/ (parameters.CC_wood_Tree * 1000 * sim.Stocking_Tree[i]) / 0.5)^0.625) / 100.0
+function tree_allometries(sim::DataFrame,met::DataFrame,Parameters,i::Int64)
+    sim.DBH_Tree[i]= ((sim.DM_Stem_Tree[i] / (parameters.CC_wood_Tree * 1000 * sim.Stocking_Tree[i]) / 0.5)^0.625) / 100.0
     # Source: Rojas-García et al. (2015) DOI: 10.1007/s13595-015-0456-y
     # /!\ DBH is an average DBH among trees.
     #Tree Height. Source:  CAF2007 used in Van Oijen et al. (2011). With no pruning :
