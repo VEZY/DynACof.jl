@@ -45,7 +45,7 @@ argument. A separate [Github repository](https://github.com/VEZY/DynACof.jl_inpu
 
 Example of a simulation without shade trees:
 
-``` r
+``` julia
 Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_data/DynACof.jl_inputs",
                                 file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",
                                             soil="soil.jl",coffee="coffee.jl",tree=""));
