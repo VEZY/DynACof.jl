@@ -10,7 +10,7 @@ import Interpolations.LinearInterpolation
 
 
 # Helper functions:
-export is_missing
+export is_missing, warn_var
 export cos°,sin°,tan°,acos°,asin°,atan°
 export logistic,logistic_deriv,mean,diff
 # ecophysio helpers:
