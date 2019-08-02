@@ -196,7 +196,7 @@ Find the ith previous index, avoiding 0 or negative indexes.
 # Details
 This function is used to find the nth previous index without making an error with negative or 0 index.
 
-  # Examples
+# Examples
 ```julia
 # Find the 10th index before 15:
 previous_i(15,10)
@@ -211,3 +211,42 @@ function previous_i(x::Int64,n::Int64=1)
 end
 
 
+
+"""
+Compute a logistic function or its derivative
+
+# Arguments
+- `x::Float`:       The x value
+- `u_log::Float64`:  Inflexion point (x-value of the sigmoid's midpoint)
+- `s_log::Float64`:  Steepness of the curve
+
+# Return
+- logistic: the logistic function
+- logistic_deriv: the derivative of the logistic function
+
+# Seealso
+More informations can be found in [the wikipedia page](https://en.wikipedia.org/wiki/Logistic_function)
+
+# Examples
+```julia
+logistic(1:10,5,0.1)
+logistic_deriv(1:10,5,0.1)
+```
+"""
+logistic,logistic_deriv
+
+function logistic(x,u_log,s_log)
+  1.0 / (1.0 + exp(-((x - u_log) / s_log)))
+end
+
+function logistic_deriv(x,u_log,s_log)
+  logistic(x,u_log,s_log) * (1.0 - logistic(x,u_log,s_log))
+end
+
+"""
+    mean(x)
+ Mean of a vector
+"""
+function mean(x)
+ sum(x)/length(x)
+end

@@ -530,217 +530,158 @@ function mainfun(cy,Direction,Meteo,Parameters)
     # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
     Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.LeafWaterPotential[i]))
     # (8) Compute the number of buds that effectively break dormancy in each cohort:
-    Sim.BudBreak_cohort[DormancyBreakPeriod]=
-      pmin(Sim.Bud_available[DormancyBreakPeriod],
-           Sim.Budinit[DormancyBreakPeriod] * Sim.pbreak[i] * 
-             Sim.Temp_cor_Bud[DormancyBreakPeriod])
+    Sim.BudBreak_cohort[DormancyBreakPeriod] .=
+        map(min, Sim.Bud_available[DormancyBreakPeriod], 
+                 Sim.Budinit[DormancyBreakPeriod] .* Sim.pbreak[i] .* Sim.Temp_cor_Bud[DormancyBreakPeriod])
     # NB 1: cannot exceed the number of buds of each cohort
-    # NB 2: using Budinit and not Bud_available because pbreak is fitted on
-    # total bud cohort
+    # NB 2: using Budinit and not Bud_available because pbreak is fitted on total bud cohort
 
-    # # (9) Remove buds that did break dormancy from the pool of dormant buds
-    # Sim.Bud_available[DormancyBreakPeriod]=
-    #   Sim.Bud_available[DormancyBreakPeriod]-Sim.BudBreak_cohort[DormancyBreakPeriod]
+    # (9) Remove buds that did break dormancy from the pool of dormant buds
+    Sim.Bud_available[DormancyBreakPeriod]= Sim.Bud_available[DormancyBreakPeriod] .- Sim.BudBreak_cohort[DormancyBreakPeriod]
 
-    # # (10) Sum the buds that break dormancy from each cohort to compute the total number
-    # # of buds that break dormancy on day i :
-    # Sim.BudBreak[i]= min(sum(Sim.BudBreak_cohort[DormancyBreakPeriod]),
-    #                        Parameters.Max_Bud_Break)
-    # # Rodriguez et al. state that the maximum number of buds that may break dormancy
-    # # during each dormancy-terminating episode was set to 12 (see Table 1).
+    # (10) Sum the buds that break dormancy from each cohort to compute the total number
+    # of buds that break dormancy on day i :
+    Sim.BudBreak[i]= min(sum(Sim.BudBreak_cohort[DormancyBreakPeriod]),Parameters.Max_Bud_Break)
+    # Rodriguez et al. state that the maximum number of buds that may break dormancy
+    # during each dormancy-terminating episode was set to 12 (see Table 1).
 
-    # # Fruits :
-    # FruitingPeriod= i-which(dd_i<(Parameters.F_over))+1
-    # # NB : Fruits that are older than the FruitingPeriod are overripped
+    # Fruits :
+    FruitingPeriod= i .- findall(dd_i .< Parameters.F_over) .+ 1
+    # NB : Fruits that are older than the FruitingPeriod are overripped
 
-    # # Demand from each fruits cohort present on the coffee tree (not overriped),
-    # # same as Demand_Fruit but keeping each value :
-    # Demand_Fruit_Cohort_Period=
-    #   Sim.BudBreak[FruitingPeriod] * Parameters.DE_opt * 
-    #   logistic_deriv(dd_i[1:length(FruitingPeriod)],
-    #                  Parameters.u_log,Parameters.s_log)
-    # Demand_Fruit_Cohort_Period[is.na(Demand_Fruit_Cohort_Period)]= 0
-    # # Total C demand of the fruits :
-    # Sim.Demand_Fruit[i]= sum(Demand_Fruit_Cohort_Period)
-    # # C supply to Fruits (i.e. what is left from Supply after removing the consumption
-    # # by previous compartments and Rm):
-    # Sim.Supply_Fruit[i]=
-    #   Sim.Supply[i]-Sim.Alloc_Shoot[i]-
-    #   Sim.Alloc_SCR[i]
+    # Demand from each fruits cohort present on the coffee tree (not overriped),
+    # same as Demand_Fruit but keeping each value :
+    Demand_Fruit_Cohort_Period = Sim.BudBreak[FruitingPeriod] .* Parameters.DE_opt .*
+                                logistic_deriv.(dd_i[1:length(FruitingPeriod)], Parameters.u_log, Parameters.s_log)
+    # Total C demand of the fruits :
+    Sim.Demand_Fruit[i]= sum(Demand_Fruit_Cohort_Period)
+    # C supply to Fruits (i.e. what is left from Supply after removing the consumption
+    # by previous compartments and Rm):
+    Sim.Supply_Fruit[i]= Sim.Supply[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i]
 
-    # # Total C allocation to all fruits on day i :
-    # Sim.Alloc_Fruit[i]= min(Sim.Demand_Fruit[i],Sim.Supply_Fruit[i])
-    # # Allocation to each cohort, relative to each cohort demand :
-    # Rel_DE= Demand_Fruit_Cohort_Period / Sim.Demand_Fruit[i]
-    # Rel_DE[is.nan(Rel_DE)]= 0
-    # Sim.Alloc_Fruit_Cohort[FruitingPeriod]=
-    #   Sim.Alloc_Fruit[i] * Rel_DE
-    # Sim.NPP_Fruit_Cohort[FruitingPeriod]=
-    #   Sim.Alloc_Fruit_Cohort[FruitingPeriod] / Parameters.epsilon_Fruit
-    # Sim.CM_Fruit_Cohort[FruitingPeriod]= Sim.CM_Fruit_Cohort[FruitingPeriod]+
-    #   Sim.NPP_Fruit_Cohort[FruitingPeriod]
-    # Sim.DM_Fruit_Cohort[FruitingPeriod]=
-    #   Sim.CM_Fruit_Cohort[FruitingPeriod] / Parameters.CC_Fruit
-    # # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
-    # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(min(FruitingPeriod)-1,1)]
-    # # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[min(FruitingPeriod)-1] * Parameters.epsilon_Fruit
+    # Total C allocation to all fruits on day i :
+    Sim.Alloc_Fruit[i]= min(Sim.Demand_Fruit[i], Sim.Supply_Fruit[i])
+    # Allocation to each cohort, relative to each cohort demand :
+    Rel_DE= Demand_Fruit_Cohort_Period ./ Sim.Demand_Fruit[i]
+    Sim.Alloc_Fruit_Cohort[FruitingPeriod] .= Sim.Alloc_Fruit[i] .* Rel_DE
+    Sim.NPP_Fruit_Cohort[FruitingPeriod] .= Sim.Alloc_Fruit_Cohort[FruitingPeriod] ./ Parameters.epsilon_Fruit
+    Sim.CM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] .+ Sim.NPP_Fruit_Cohort[FruitingPeriod]
+    Sim.DM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] ./ Parameters.CC_Fruit
+    # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
+    Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(minimum(FruitingPeriod) - 1.0, 1.0)]
+    # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[minimum(FruitingPeriod)-1.0] * Parameters.epsilon_Fruit
 
-    # # Duration of the maturation of each cohort born in the ith day (in days):
-    # Sim.Maturation_duration[FruitingPeriod]=
-    #   seq_along(FruitingPeriod)
-    # # Sucrose content of each cohort:
-    # Sim.SC[FruitingPeriod]=
-    #   Sucrose_cont_perc(Sim.Maturation_duration[FruitingPeriod],
-    #                     a= Parameters.S_a, b= Parameters.S_b,
-    #                     x0= Parameters.S_x0, y0=Parameters.S_y0)
-    # # Sucrose mass of each cohort
-    # Sim.SM[FruitingPeriod]=
-    #   Sim.DM_Fruit_Cohort[FruitingPeriod] * Sim.SC[FruitingPeriod]
-    # # Harvest maturity:
-    # Sim.Harvest_Maturity_Pot[i]=
-    #   round(sum(Sim.SM[FruitingPeriod]) / 
-    #           sum(Sim.DM_Fruit_Cohort[FruitingPeriod] * 
-    #                 ((Parameters.S_y0 + Parameters.S_a) / 100)),3)
-    # Sim.Harvest_Maturity_Pot[i][is.nan(Sim.Harvest_Maturity_Pot[i])]= 0
+    # Duration of the maturation of each cohort born in the ith day (in days):
+    Sim.Maturation_duration[FruitingPeriod] .= 1:length(FruitingPeriod)
+    # Sucrose content of each cohort:
+    Sim.SC[FruitingPeriod] .= Sucrose_cont_perc.(Sim.Maturation_duration[FruitingPeriod], Parameters.S_a, Parameters.S_b,
+                                                 Parameters.S_x0, Parameters.S_y0)
+    # Sucrose mass of each cohort
+    Sim.SM[FruitingPeriod] .= Sim.DM_Fruit_Cohort[FruitingPeriod] .* Sim.SC[FruitingPeriod]
+    # Harvest maturity:
+    Sim.Harvest_Maturity_Pot[i]= sum(Sim.SM[FruitingPeriod]) / sum(Sim.DM_Fruit_Cohort[FruitingPeriod] .* ((Parameters.S_y0 .+ Parameters.S_a) ./ 100.0))
+    # NB : here harvest maturity is computed as the average maturity of the cohorts, because
+    # all cohorts present in the Coffea are within the 'FruitingPeriod' window.
+    # It could be computed as the percentage of cohorts that are fully mature (Pezzopane
+    # et al. 2012 say at 221 days after flowering)
+    # Optimal sucrose concentration around 8.8% of the dry mass
 
-    # # NB : here harvest maturity is computed as the average maturity of the cohorts, because
-    # # all cohorts present in the Coffea are within the 'FruitingPeriod' window.
-    # # It could be computed as the percentage of cohorts that are fully mature (Pezzopane
-    # # et al. 2012 say at 221 days after flowering)
-    # # Optimal sucrose concentration around 8.8% of the dry mass
+    Sim.NPP_Fruit[i]= Sim.Alloc_Fruit[i] / Parameters.epsilon_Fruit
+    Sim.Rg_Fruit[i]= Sim.Alloc_Fruit[i] - Sim.NPP_Fruit[i]
 
-    # Sim.NPP_Fruit[i]= Sim.Alloc_Fruit[i] / Parameters.epsilon_Fruit
-    # Sim.Rg_Fruit[i]= Sim.Alloc_Fruit[i]-Sim.NPP_Fruit[i]
+    # Harvest. Made one day only for now (TODO: make it a period of harvest)
 
-    # # Harvest. Made one day only for now (TODO: make it a period of harvest)
+    if Parameters.harvest == "quantity"
+      is_harvest= (Sim.Plot_Age[i] >= Parameters.ageMaturity) & 
+                  all(Sim.NPP_Fruit[previous_i.(i,0:10)] .< Sim.Overriped_Fruit[previous_i.(i,0:10)]) &
+                  (Sim.CM_Fruit[previous_i(i)] > Parameters.Min_Fruit_CM)
+      # Made as soon as the fruit dry mass is decreasing for 10 consecutive days.
+      # This condition is met when fruit overriping is more important than fruit NPP
+      # for 10 days.
+      # This option is the best one when fruit maturation is not well known or when the
+      # harvest is made throughout several days or weeks with the assumption that fruits
+      # are harvested when mature.
+    else
+      is_harvest= (Sim.Plot_Age[i]>=Parameters.ageMaturity) &
+                  (mean(Sim.Harvest_Maturity_Pot[previous_i.(i,0:9)]) < mean(Sim.Harvest_Maturity_Pot[previous_i.(i,10:19)]))
+      # Made as soon as the overall fruit maturation is optimal (all fruits are mature)
+    end
 
-    #   if(Parameters.harvest=="quantity"){
-    #     is_harvest=
-    #       Sim.Plot_Age[i]>=Parameters.ageMaturity&
-    #       all(Sim.NPP_Fruit[previous_i(i,0:10)]<
-    #             Sim.Overriped_Fruit[previous_i(i,0:10)])&
-    #       Sim.CM_Fruit[previous_i(i)]>Parameters.Min_Fruit_CM
-    #     # Made as soon as the fruit dry mass is decreasing for 10 consecutive days.
-    #     # This condition is met when fruit overriping is more important than fruit NPP
-    #     # for 10 days.
-    #     # This option is the best one when fruit maturation is not well known or when the
-    #     # harvest is made throughout several days or weeks with the assumption that fruits
-    #     # are harvested when mature.
-    #   }else{
-    #     is_harvest=
-    #       Sim.Plot_Age[i]>=Parameters.ageMaturity &
-    #       mean(Sim.Harvest_Maturity_Pot[previous_i(i,0:9)])<
-    #       mean(Sim.Harvest_Maturity_Pot[previous_i(i,10:19)])
-    #     # Made as soon as the overall fruit maturation is optimal (all fruits are mature)
-    #   }
+    if is_harvest
+      # Save the date of harvest:
+      Sim.Date_harvest[i]= Met_c.DOY[i]
+      Sim.Harvest_Fruit[i]= Sim.CM_Fruit[i-1] + Sim.NPP_Fruit[i] - Sim.Overriped_Fruit[i]
+      Sim.Harvest_Maturity[i]= Sim.Harvest_Maturity_Pot[i]
+      Sim.CM_Fruit[i-1]= 0.0
+      Sim.NPP_Fruit[i]= 0.0
+      Sim.Overriped_Fruit[i]= 0.0
+      Sim.CM_Fruit_Cohort= zeros(length(Sim.CM_Fruit_Cohort))
+      # RV: could harvest mature fruits only (To do).
+    else
+      Sim.Harvest_Fruit[i]= 0.0
+    end
 
+    # Leaves ------------------------------------------------------------------
 
-    # if(is_harvest){
-    #   # Save the date of harvest:
-    #   Sim.Date_harvest[i]= Met_c.DOY[i]
-    #   Sim.Harvest_Fruit[i]=
-    #     Sim.CM_Fruit[i-1]+Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
-    #   Sim.Harvest_Maturity[i]= Sim.Harvest_Maturity_Pot[i]
-    #   Sim.CM_Fruit[i-1]= Sim.NPP_Fruit[i]= Sim.Overriped_Fruit[i]= 0
-    #   Sim.CM_Fruit_Cohort= rep(0,length(Sim.CM_Fruit_Cohort))
-    #   # RV: could harvest mature fruits only (To do).
-    # }else{
-    #   Sim.Harvest_Fruit[i]= NA_real_
-    # }
+    Sim.Supply_Leaf[i]= Parameters.lambda_Leaf_remain * (Sim.Supply[i]-Sim.Alloc_Fruit[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i])
 
-    # # Leaves ------------------------------------------------------------------
+    Sim.Alloc_Leaf[i]= min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000.0) * ((Parameters.LAI_max-Sim.LAI[i]) /
+                            (Sim.LAI[i] + Parameters.LAI_max)), 
+                           Sim.Supply_Leaf[i])
 
-    # Sim.Supply_Leaf[i]=
-    #   Parameters.lambda_Leaf_remain * 
-    #   (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
-    #      Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
+    Sim.NPP_Leaf[i]= Sim.Alloc_Leaf[i] / Parameters.epsilon_Leaf
+    Sim.Rg_Leaf[i]= Sim.Alloc_Leaf[i] - Sim.NPP_Leaf[i]
+    Sim.Mnat_Leaf[i]= Sim.CM_Leaf[previous_i(i)] / Parameters.lifespan_Leaf
+    Sim.NPP_RE[i]= Sim.NPP_RE[i] + (Sim.Supply_Leaf[i] - Sim.Alloc_Leaf[i])
 
-    # Sim.Alloc_Leaf[i]=
-    #   min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000) * 
-    #         ((Parameters.LAI_max-Sim.LAI[i]) / 
-    #            (Sim.LAI[i]+Parameters.LAI_max)),
-    #       Sim.Supply_Leaf[i])
+    Sim.M_ALS[i]= after_2 * max(0.0, Sim.CM_Leaf[previous_i(i)] * Sim.ALS[i])
 
+    if (Sim.Plot_Age[i]>= Parameters.MeanAgePruning) & (Met_c.DOY[i] == Parameters.D_pruning)
+      Sim.Mprun_Leaf[i]= Sim.CM_Leaf[previous_i(i)] * Parameters.LeafPruningRate
+    else
+      Sim.Mprun_Leaf[i]= 0.0
+    end
 
-    # Sim.NPP_Leaf[i]= Sim.Alloc_Leaf[i] / Parameters.epsilon_Leaf
-    # Sim.Rg_Leaf[i]= Sim.Alloc_Leaf[i]-Sim.NPP_Leaf[i]
-    # Sim.Mnat_Leaf[i]=Sim.CM_Leaf[previous_i(i)] / Parameters.lifespan_Leaf
+    Sim.Mortality_Leaf[i]= Sim.Mnat_Leaf[i] + Sim.Mprun_Leaf[i] + Sim.M_ALS[i]
 
-    # Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_Leaf[i]-Sim.Alloc_Leaf[i])
+    # Fine Roots --------------------------------------------------------------
 
-    # Sim.M_ALS[i]=
-    #   after_2 * max(0,Sim.CM_Leaf[previous_i(i)] * Sim.ALS[i])
+    Sim.Supply_FRoot[i]= Parameters.lambda_FRoot_remain * (Sim.Supply[i] - Sim.Alloc_Fruit[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i])
+    Sim.Alloc_FRoot[i]=max(0.0, min(Sim.Alloc_Leaf[i], Sim.Supply_FRoot[i]))
+    Sim.NPP_FRoot[i]= Sim.Alloc_FRoot[i] / Parameters.epsilon_FRoot
+    Sim.Rg_FRoot[i]= Sim.Alloc_FRoot[i] - Sim.NPP_FRoot[i]
+    Sim.NPP_RE[i]= Sim.NPP_RE[i] + (Sim.Supply_FRoot[i] - Sim.Alloc_FRoot[i])
+    Sim.Mnat_FRoot[i]= Sim.CM_FRoot[previous_i(i)] / Parameters.lifespan_FRoot
+    Sim.Mprun_FRoot[i]= Parameters.m_FRoot * Sim.Mprun_Leaf[i]
+    Sim.Mortality_FRoot[i]= Sim.Mnat_FRoot[i] + Sim.Mprun_FRoot[i]
 
-    # if(Sim.Plot_Age[i]>=
-    #    Parameters.MeanAgePruning&Met_c.DOY[i]==Parameters.D_pruning){
-    #   Sim.Mprun_Leaf[i]= Sim.CM_Leaf[previous_i(i)] * Parameters.LeafPruningRate
-    # }else{
-    #   Sim.Mprun_Leaf[i]= 0
-    # }
+    # Biomass -----------------------------------------------------------------
 
-    # Sim.Mortality_Leaf[i]= Sim.Mnat_Leaf[i] + Sim.Mprun_Leaf[i] + Sim.M_ALS[i]
+    CM_tot= Sim.CM_Leaf[previous_i(i)] + Sim.CM_Shoot[previous_i(i)] + Sim.CM_SCR[previous_i(i)] + Sim.CM_FRoot[previous_i(i)]
 
-    # # Fine Roots --------------------------------------------------------------
+    Sim.CM_Leaf[i]= Sim.CM_Leaf[previous_i(i)] + Sim.NPP_Leaf[i] - Sim.Mortality_Leaf[i] - 
+                    Sim.Carbon_Lack_Mortality[i] * Sim.CM_Leaf[previous_i(i)] / CM_tot
+    Sim.CM_Shoot[i]= Sim.CM_Shoot[previous_i(i)] + Sim.NPP_Shoot[i]-Sim.Mortality_Shoot[i] -
+                     Sim.Carbon_Lack_Mortality[i] * Sim.CM_Shoot[previous_i(i)] / CM_tot
+    Sim.CM_Fruit[i]= Sim.CM_Fruit[previous_i(i)]+ Sim.NPP_Fruit[i] - Sim.Overriped_Fruit[i]
+    Sim.CM_SCR[i]= Sim.CM_SCR[previous_i(i)] + Sim.NPP_SCR[i] - Sim.Mortality_SCR[i] -
+                   Sim.Carbon_Lack_Mortality[i] * Sim.CM_SCR[previous_i(i)] / CM_tot
+    Sim.CM_FRoot[i]= Sim.CM_FRoot[previous_i(i)] + Sim.NPP_FRoot[i] - Sim.Mortality_FRoot[i] -
+                     Sim.Carbon_Lack_Mortality[i] * Sim.CM_FRoot[previous_i(i)] / CM_tot
+    Sim.CM_RE[i]= Sim.CM_RE[previous_i(i)] + Sim.NPP_RE[i] - Sim.Consumption_RE[i]
 
-    # Sim.Supply_FRoot[i]=
-    #   Parameters.lambda_FRoot_remain * 
-    #   (Sim.Supply[i]-Sim.Alloc_Fruit[i]-
-    #      Sim.Alloc_Shoot[i]-Sim.Alloc_SCR[i])
+    Sim.DM_Leaf[i]= Sim.CM_Leaf[i] / Parameters.CC_Leaf
+    Sim.DM_Shoot[i]= Sim.CM_Shoot[i] / Parameters.CC_Shoot
+    Sim.DM_Fruit[i]= Sim.CM_Fruit[i] / Parameters.CC_Fruit
+    Sim.DM_SCR[i]= Sim.CM_SCR[i] / Parameters.CC_SCR
+    Sim.DM_FRoot[i]= Sim.CM_FRoot[i] / Parameters.CC_FRoots
+    Sim.DM_RE[i]=Sim.CM_RE[i] / Parameters.CC_SCR
 
-    # Sim.Alloc_FRoot[i]=max(0,min(Sim.Alloc_Leaf[i],Sim.Supply_FRoot[i]))
+    # Total Respiration and NPP -----------------------------------------------
 
-    # Sim.NPP_FRoot[i]= Sim.Alloc_FRoot[i] / Parameters.epsilon_FRoot
-
-    # Sim.Rg_FRoot[i]= Sim.Alloc_FRoot[i]-Sim.NPP_FRoot[i]
-
-    # Sim.NPP_RE[i]= Sim.NPP_RE[i]+(Sim.Supply_FRoot[i]-Sim.Alloc_FRoot[i])
-
-    # Sim.Mnat_FRoot[i]= Sim.CM_FRoot[previous_i(i)] / Parameters.lifespan_FRoot
-    # Sim.Mprun_FRoot[i]= Parameters.m_FRoot * Sim.Mprun_Leaf[i]
-    # Sim.Mortality_FRoot[i]= Sim.Mnat_FRoot[i]+Sim.Mprun_FRoot[i]
-
-
-    # # Biomass -----------------------------------------------------------------
-
-    # CM_tot=
-    #   Sim.CM_Leaf[previous_i(i)] + Sim.CM_Shoot[previous_i(i)] +
-    #   Sim.CM_SCR[previous_i(i)] + Sim.CM_FRoot[previous_i(i)]
-
-    # Sim.CM_Leaf[i] / CM_tot
-    # Sim.CM_Leaf[i]= Sim.CM_Leaf[previous_i(i)]+
-    #   Sim.NPP_Leaf[i]-Sim.Mortality_Leaf[i]-
-    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_Leaf[previous_i(i)] / CM_tot
-    # Sim.CM_Shoot[i]= Sim.CM_Shoot[previous_i(i)]+
-    #   Sim.NPP_Shoot[i]-Sim.Mortality_Shoot[i]-
-    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_Shoot[previous_i(i)] / CM_tot
-    # Sim.CM_Fruit[i]=Sim.CM_Fruit[previous_i(i)]+
-    #   Sim.NPP_Fruit[i]-Sim.Overriped_Fruit[i]
-    # Sim.CM_SCR[i]= Sim.CM_SCR[previous_i(i)]+
-    #   Sim.NPP_SCR[i]-Sim.Mortality_SCR[i]-
-    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_SCR[previous_i(i)] / CM_tot
-    # Sim.CM_FRoot[i]= Sim.CM_FRoot[previous_i(i)]+
-    #   Sim.NPP_FRoot[i]-Sim.Mortality_FRoot[i]-
-    #   Sim.Carbon_Lack_Mortality[i] * Sim.CM_FRoot[previous_i(i)] / CM_tot
-    # Sim.CM_RE[i]=Sim.CM_RE[previous_i(i)]+Sim.NPP_RE[i]-
-    #   Sim.Consumption_RE[i]
-
-    # Sim.DM_Leaf[i]= Sim.CM_Leaf[i] / Parameters.CC_Leaf
-    # Sim.DM_Shoot[i]= Sim.CM_Shoot[i] / Parameters.CC_Shoot
-    # Sim.DM_Fruit[i]=Sim.CM_Fruit[i] / Parameters.CC_Fruit
-    # Sim.DM_SCR[i]= Sim.CM_SCR[i] / 
-    #   Parameters.CC_SCR
-    # Sim.DM_FRoot[i]= Sim.CM_FRoot[i] / Parameters.CC_FRoots
-    # Sim.DM_RE[i]=Sim.CM_RE[i] / Parameters.CC_SCR
-
-
-    # # Total Respiration and NPP -----------------------------------------------
-
-    # Sim.Rg[i]= Sim.Rg_Fruit[i]+Sim.Rg_Leaf[i]+
-    #   Sim.Rg_Shoot[i]+Sim.Rg_SCR[i]+
-    #   Sim.Rg_FRoot[i]
-    # Sim.Ra[i]=Sim.Rm[i]+Sim.Rg[i]
-    # Sim.NPP[i]=Sim.NPP_Shoot[i]+Sim.NPP_SCR[i]+
-    #   Sim.NPP_Fruit[i]+Sim.NPP_Leaf[i]+Sim.NPP_FRoot[i]
+    Sim.Rg[i]= Sim.Rg_Fruit[i] + Sim.Rg_Leaf[i] + Sim.Rg_Shoot[i]+Sim.Rg_SCR[i] + Sim.Rg_FRoot[i]
+    Sim.Ra[i]=Sim.Rm[i] + Sim.Rg[i]
+    Sim.NPP[i]= Sim.NPP_Shoot[i] + Sim.NPP_SCR[i] + Sim.NPP_Fruit[i] + Sim.NPP_Leaf[i] + Sim.NPP_FRoot[i]
 
   end
 

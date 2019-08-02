@@ -11,9 +11,10 @@ import Interpolations.LinearInterpolation
 # Helper functions:
 export is_missing
 export cos°,sin°,tan°,acos°,asin°,atan°
+export logistic,logistic_deriv
 # ecophysio helpers:
 export rH_to_VPD,esat,esat_slope,GDD
-export virtual_temp,VPD_to_e,dew_point,paliv_dis,CN
+export virtual_temp,VPD_to_e,dew_point,paliv_dis,CN,Sucrose_cont_perc
 export PENMON,psychrometric_constant,latent_heat_vaporization,air_density,LE_to_ET,ET_to_LE
 # Meteorology helpers
 export Rad_ext,diffuse_fraction,pressure_from_elevation,sun_zenithal_angle

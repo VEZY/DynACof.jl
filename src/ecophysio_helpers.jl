@@ -539,7 +539,6 @@ The correction coefficient to compute the number of green nodes in the coffee (s
 - Drinnan, J. and C. Menzel, Temperature affects vegetative growth and flowering of coffee (Coffea arabica L.). 
 Journal of Horticultural Science, 1995. 70(1): p. 25-34.
 
-
 # Examples
 ```julia
 CN(25.0)
@@ -547,4 +546,34 @@ CN(25.0)
 """
 function CN(Tair)
   (0.4194773 + 0.2631364*Tair - 0.0226364*Tair^2 + 0.0005455*Tair^3)
+end
+
+
+"""
+Fruit sucrose accumulation
+
+Computes a the sucrose accumulation into coffee fruits through time following a logistic curve
+
+# Arguments 
+
+- `x::Float64`:  Cumulated degree days
+- `a::Float64`:  Parameter
+- `b::Float64`:  Parameter
+- `x0::Float64`: Mid-maturation (logistic function inflexion point)
+- `y0::Float64`: Sucrose content at the beginning (in %, 1-100)
+
+# Return
+The sucrose content, in % of fruit total dry mass.
+
+# References
+Pezzopane, J., et al., Agrometeorological parameters for prediction of the maturation period of Arabica coffee cultivars. 
+International Journal of Biometeorology, 2012. 56(5): p. 843-851.
+
+# Examples
+```julia
+Sucrose_cont_perc(1:10,5.3207,-28.5561,191,3.5)
+```
+"""
+function Sucrose_cont_perc(x,a,b,x0,y0)
+  (y0 + a / (1.0 + (x / x0)^b)) / 100
 end

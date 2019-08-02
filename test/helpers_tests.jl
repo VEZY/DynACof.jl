@@ -29,6 +29,10 @@ end;
 
 @testset "helpers" begin
     @test struct_to_tuple(constants, constants()) == (cp = 0.0010130000000000007, epsi = 0.622, pressure0 = 101.325, FPAR = 0.5, g = 9.81, Rd = 287.0586, Rgas = 8.314, Kelvin = 273.15, vonkarman = 0.41, MJ_to_W = 1.0000000000000006e-6, Gsc = 1367.0, σ = 5.670367e-8, H2OMW = 0.018, W_umol = 4.57, λ = 2.45, cl = 0.4, Dheat = 2.15e-5)
+    @test logistic(1.0,5.0,0.1) ≈ 4.24835425529159e-18
+    @test logistic(5.0,5.0,0.1) ≈ 0.5
+    @test logistic_deriv(1.0,5.0,0.1) ≈ 4.24835425529159e-18
+    @test logistic_deriv(5.0,5.0,0.1) ≈ 0.25
 end;
 
 
@@ -45,6 +49,8 @@ end;
     @test latent_heat_vaporization(20.0) ≈ 2.4536e6
     @test psychrometric_constant(20.0, 100.0) ≈ 6.63766450661906e-8
     @test PENMON(Rn=12.0,Wind=0.5,Tair=16.0,ZHT=26.0,Z_top=25.0,Pressure=900.0,Gs=1E09,VPD=2.41,LAI=3.0,extwind=0.58,wleaf=0.068) ≈ 4.8719439498348045
+    @test Sucrose_cont_perc(1000.0,5.3207,-28.5561,191,3.5) ≈ 0.08820700000000001
+    @test Sucrose_cont_perc(1.0,5.3207,-28.5561,191,3.5) == 0.035
 end;
 
 @testset "Meteorology helpers" begin
