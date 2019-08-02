@@ -12,6 +12,7 @@ function Init_Sim!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim.LAIplot= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,
     # otherwise, GPP does not start and nothing grows
+    Sim.PAR_Trans= 0.0
     Sim.CM_RE= 0.0
     Sim.Rm= 0.0
     Sim.CM_SCR= 0.0
@@ -102,7 +103,7 @@ function Init_Sim!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim.Cbalance= 0.0
     Sim.BudInitPeriod= false
     Sim.Rn_tot= 0.0
-    Sim.Date_harvest= missing
+    Sim.Date_harvest= 0
 
     Sim.Throughfall= 0.0
     Sim.IntercRevapor= 0.0
@@ -153,6 +154,7 @@ function Init_Sim!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim.Rn_Coffee= 0.0
     Sim.LE_Coffee= 0.0
     Sim.Rn_Soil_SW= 0.0  
+    Sim.TSoil= 0.0
     Sim.W_1= 290.0
     Sim.W_2= 66.0
     Sim.W_3= 69.0
@@ -185,6 +187,7 @@ function Tree_init_no_shade!(Sim)
     Sim.LE_Tree= 0.0
     Sim.Height_Tree= 0.0
     Sim.TairCanopy_Tree= 0.0
+    Sim.PAR_Trans_Tree= 0.0
 end
 
 
@@ -230,7 +233,6 @@ function Tree_init!(Sim,Met_c,Parameters)
     Sim.APAR_Tree= 0.0
     Sim.Transmittance_Tree= 0.0
     Sim.PAR_Trans_Tree= 0.0
-    Sim.PAR_Trans= 0.0
     Sim.lue_Tree= 0.0
     Sim.T_Tree= 0.0
     Sim.H_Tree= 0.0

@@ -228,9 +228,9 @@ GDD(5.0,5.0,28.0)
 0.0
 ```
 """
-function GDD(Tmean::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
+function GDD(Tmean::Float64,MinTT::Float64,MaxTT::Float64)::Float64
   DD= Tmean-MinTT
-  if DD<0.0 || DD>(MaxTT-MinTT)
+  if (DD < 0.0) || (DD > (MaxTT-MinTT))
     DD= 0.0
   end
   DD
@@ -259,8 +259,8 @@ GDD(30.0,27.0,5.0,27.0)
 0.0
 ```
 """
-function GDD(Tmax::Float64,Tmin::Float64,MinTT::Float64=5.0,MaxTT::Float64=30.0)::Float64
- Tmean= (Tmax+Tmin)/2.0
+function GDD(Tmax::Float64,Tmin::Float64,MinTT::Float64,MaxTT::Float64)::Float64
+ Tmean= (Tmax + Tmin) / 2.0
  GDD(Tmean,MinTT,MaxTT)
 end
 
@@ -304,8 +304,7 @@ paliv_dis(40,0.4,0.05,5.0)
 ```
 """
 function paliv_dis(Age_Max::Int64,P_Start::Float64,P_End::Float64,k::Float64)::DataFrame
-  DataFrame(Age= 1:Age_Max,
-            Palive= P_End .+ ((P_Start .- P_End) .* exp.(collect(range(0, stop = -k, length = Age_Max)))))
+  DataFrame(Age= 1:Age_Max, Palive= P_End .+ ((P_Start .- P_End) .* exp.(collect(range(0, stop = -k, length = Age_Max)))))
 end
 
 
@@ -338,7 +337,7 @@ All arguments are named.
 
 # Details
 The daily evapotranspiration is computed using the Penman-Monteith equation, and a set of conductances as :
-```ET=\\frac{\\Delta\\cdot Rn\\cdot10^6+\\rho\\cdot Cp\\cdot\\frac{VPD}{10\\ }\\cdot GH}{\\ \\Delta+\\frac{\\gamma}{\\lambda\\ }\\cdot(1+\\frac{GH}{GV})}\\ }```
+```ET=\\frac{Δ\\cdot Rn\\cdot10^6+ρ\\cdot cp\\cdot\\frac{VPD}{10\\ }\\cdot GH}{\\ Δ +\\frac{\\gamma}{λ\\ }\\cdot(1+\\frac{GH}{GV})}\\ }```
 where Δ is the slope of the saturation vapor pressure curve (kPa K-1), ρ is the air density (kg m-3), `GH` the canopy boundary
 layer conductance (m s-1), γ the psychrometric constant (kPa K-1) and `GV` the boundary + stomatal conductance to water vapour
 (m s-1). To simulate evaporation, the input stomatal conductance `Gs` can be set to nearly infinite (e.g. ```Gs= 1\\cdot e^9```).
@@ -362,7 +361,6 @@ PENMON(Rn= 12.0, Wind= 0.5, Tair= 16.0, ZHT= 26.0, Z_top= 25.0, Pressure= 900.0,
 ```
 """
 function PENMON(;Rn,Wind,Tair,ZHT,Z_top,Pressure,Gs,VPD,LAI,extwind=0,wleaf=0.068,Parameters= constants())
-
   if Wind < 1E-9
     Wind= 0.01
   end
@@ -415,8 +413,8 @@ psychrometric_constant(20.0, 100.0)
 ```
 """
 function psychrometric_constant(Tair::Float64, pressure::Float64, Parameters = constants())::Float64
-  lambda= latent_heat_vaporization(Tair)
-  (Parameters.cp * pressure)/(Parameters.epsi * lambda)
+  λ= latent_heat_vaporization(Tair)
+  (Parameters.cp * pressure)/(Parameters.epsi * λ)
 end
 
 """

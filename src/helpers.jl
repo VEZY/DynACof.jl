@@ -240,7 +240,8 @@ function logistic(x,u_log,s_log)
 end
 
 function logistic_deriv(x,u_log,s_log)
-  logistic(x,u_log,s_log) * (1.0 - logistic(x,u_log,s_log))
+  # logistic(x,u_log,s_log) * (1.0 - logistic(x,u_log,s_log))
+  exp(-((x-u_log)/s_log))/(s_log*(1+exp(-((x-u_log)/s_log)))^2)
 end
 
 """

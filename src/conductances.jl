@@ -20,6 +20,7 @@ cumulated LAI above the target point.
 - `α::Float64`:         Alpha, the constant for diffusivity at top canopy. Default: `1.5` following Van de Griend et al (1989).
 - `ZW::Float64`:        Top height of the roughness sublayer (m). Default: `ZPD + α ⋅ (Z2 - ZPD)`
 - `vonkarman::Float64`: Von Karman constant, default to `constants().vonkarman`, 0.41.
+- `verbose::Bool`:      Print information of [`test_ZHT`](@ref)
 
 # Details
 The function computes the average wind speed at the center of the canopy layer. It is considered
@@ -45,13 +46,8 @@ Part of the code is taken from the [MAESPA model](https://maespa.github.io).
 GetWind(Wind=3.0,LAI_lay=4.0,LAI_abv=0.3,extwind= 0.58,Z_top = 24.0,ZHT = 25.0)
 ```
 """
-function GetWind(;Wind,LAI_lay,LAI_abv,Z_top,ZHT,extwind=0,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),vonkarman=constants().vonkarman)
-    if ZHT < Z_top
-        printstyled("Warning: Measurement height lower than canopy height (ZHT < Z_top), forcing ZHT > Z_top \n", bold= true,
-                    color= :yellow)
-        ZHT= 1.01 * Z_top
-    end
-
+function GetWind(;Wind,LAI_lay,LAI_abv,Z_top,ZHT,extwind=0,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),vonkarman=constants().vonkarman, verbose=false)
+    ZHT= test_ZHT(ZHT, Z_top, verbose= false)
     Ustar = Wind * vonkarman / log((ZHT - ZPD) / Z0) # by inverting eq.41 from Van de Griend
     # Wind at the top of the canopy:
     Uh= (Ustar / vonkarman) * log((ZW - ZPD) / Z0) - (Ustar / vonkarman) * (1 - ((Z_top - ZPD) / (ZW - ZPD)))
@@ -61,6 +57,30 @@ function GetWind(;Wind,LAI_lay,LAI_abv,Z_top,ZHT,extwind=0,Z0=Z_top*0.1,ZPD=Z_to
     return WindLay
 end
 
+"""
+    test_ZHT(ZHT::Float64, Z_top::Float64; verbose::Bool= false)::Float64
+
+Test if ZHT is lower than Z_top, and return 1.01 * Z_top if so (or ZHT if not).
+# Arguments 
+
+- `ZHT::Float64`:       Wind measurement height (m)
+- `Z_top::Float64`:     Average canopy height of the taller crop (m)
+- `verbose::Bool`:      Print information if ZHT < Z_top
+
+# Examples
+```julia
+test_ZHT(8.0, 10.0, verbose= true)
+```
+"""
+function test_ZHT(ZHT::Float64, Z_top::Float64; verbose::Bool= false)::Float64
+    if ZHT < Z_top
+        if verbose
+             printstyled("Warning: Measurement height lower than canopy height (ZHT < Z_top), forcing ZHT > Z_top \n", bold= true,color= :yellow)
+        end
+        ZHT= 1.01 * Z_top
+    end
+    return ZHT    
+end
 
 """
 Bulk aerodynamic conductance
@@ -80,6 +100,7 @@ Compute the aerodynamic conductance for sensible and latent heat above the canop
 - `ZW::Float64`:        Top height of the roughness sublayer (m). Default: `ZPD + α ⋅ (Z_top - ZPD)`
 - `extwind::Float64`:   Extinction coefficient. Default: `0`, no extinction.
 - `vonkarman::Float64`: Von Karman constant, default to `constants().vonkarman`, 0.41.
+- `verbose::Bool`:      Print information of [`test_ZHT`](@ref)
 
 # Details
 
@@ -118,12 +139,8 @@ remote sensing purposes. Water Resources Research, 1989. 25(5): p. 949-971.
 G_bulk(Wind=3.0,ZHT=25.0,Z_top=24.0,LAI = 0.5,extwind = 0.58)
 ```
 """
-function G_bulk(;Wind,LAI,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0.0,vonkarman=constants().vonkarman)
-    if ZHT < Z_top
-        printstyled("Warning: Measurement height lower than canopy height (ZHT < Z_top), forcing ZHT > Z_top \n", bold= true,
-                    color= :yellow)
-        ZHT= 1.01*Z_top
-    end
+function G_bulk(;Wind,LAI,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0.0,vonkarman=constants().vonkarman,verbose= false)
+    ZHT= test_ZHT(ZHT, Z_top, verbose= false)
     
     Ustar = Wind * vonkarman / log((ZHT - ZPD) / Z0) # by inverting eq.41 from Van de Griend
     Kh= α * vonkarman * Ustar * (Z_top - ZPD)
@@ -207,6 +224,7 @@ and the soil surface following Van de Griend and Van Boxel (1989).
 - `ZW::Float64`:        Top height of the roughness sublayer (m). Default: `ZPD + α ⋅ (Z_top - ZPD)`
 - `extwind::Float64`:   Extinction coefficient. Default: `0.0`, no extinction.
 - `vonkarman::Float64`: Von Karman constant, default to `constants().vonkarman`, 0.41.
+- `verbose::Bool`:      Print information of [`test_ZHT`](@ref)
 
 All arguments are named.
 
@@ -235,13 +253,9 @@ sensing purposes. Water Resources Research, 1989. 25(5): p. 949-971.
 G_soilcan(Wind= 1.0, ZHT= 25.0, Z_top= 24.0,LAI= 4.5, extwind= 0.58)
 ```
 """
-function G_soilcan(;Wind,LAI,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0,vonkarman=constants().vonkarman)
-    if ZHT < Z_top
-        printstyled("Warning: Measurement height lower than canopy height (ZHT < Z_top), forcing ZHT > Z_top \n", bold= true,
-                    color= :yellow)
-        ZHT= 1.01*Z_top
-    end
-    
+function G_soilcan(;Wind,LAI,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0,vonkarman=constants().vonkarman,verbose= false)
+    ZHT= test_ZHT(ZHT, Z_top, verbose= false)
+
     Ustar = Wind * vonkarman / log((ZHT - ZPD) / Z0) # by inverting eq.41 from Van de Griend
     Kh= α * vonkarman * Ustar * (Z_top - ZPD)
     Uw= (Ustar / vonkarman) * log((ZW - ZPD) / Z0)
@@ -271,6 +285,7 @@ Compute the aerodynamic conductance for sensible and latent heat between canopy 
 - `ZW::Float64`:        Top height of the roughness sublayer (m). Default: `ZPD+α*(Z_top-ZPD)`
 - `extwind::Float64`:   Extinction coefficient. Default: `0`, no extinction.
 - `vonkarman::Float64`: Von Karman constant, default to `constants().vonkarman`, 0.41.
+- `verbose::Bool`:      Print information of [`test_ZHT`](@ref)
 
 All arguments are named. 
 
@@ -298,12 +313,8 @@ sensing purposes. Water Resources Research, 1989. 25(5): p. 949-971.
 G_interlay(Wind = 3,ZHT = 25,Z_top = 2,LAI_top = 0.5,LAI_bot = 4)
 ```
 """
-function G_interlay(;Wind,LAI_top,LAI_bot,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0.58,vonkarman=constants().vonkarman)
-    if ZHT < Z_top
-        printstyled("Warning: Measurement height lower than canopy height (ZHT < Z_top), forcing ZHT > Z_top \n", bold= true,
-                    color= :yellow)
-        ZHT= 1.01*Z_top
-    end
+function G_interlay(;Wind,LAI_top,LAI_bot,ZHT,Z_top,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),extwind=0.58,vonkarman=constants().vonkarman,verbose= false)
+    ZHT= test_ZHT(ZHT, Z_top, verbose= false)
 
     Ustar = Wind * vonkarman / log((ZHT - ZPD) / Z0) # by inverting eq.41 from Van de Griend
     Kh= α * vonkarman * Ustar * (Z_top - ZPD)

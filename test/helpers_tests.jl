@@ -33,6 +33,9 @@ end;
     @test logistic(5.0,5.0,0.1) ≈ 0.5
     @test logistic_deriv(1.0,5.0,0.1) ≈ 4.24835425529159e-18
     @test logistic_deriv(5.0,5.0,0.1) ≈ 0.25
+    @test diff(1:10) ≈ [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    @test diff([1,5,3]) ≈ [0, 4, -2]
+    @test mean(0:10) == 5.0
 end;
 
 

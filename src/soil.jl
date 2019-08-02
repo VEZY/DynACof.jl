@@ -142,7 +142,7 @@ function Soilfun!(Sim,Parameters,Met_c,i)
                     (Parameters.Wf3 - Parameters.Wm3))
 
     # 5/ Evaporation of the Understorey, E_Soil (from W_1 only)
-    Sim.E_Soil[i]= Sim.Rn_Soil[i] * Parameters.Soil_LE_p / Parameters.lambda
+    Sim.E_Soil[i]= Sim.Rn_Soil[i] * Parameters.Soil_LE_p / Parameters.λ
     # Avoid depleting W_1 below Wm1 and udating Wx after retrieving actual E_Soil
     if (Sim.W_1[i] - Sim.E_Soil[i]) >= Parameters.Wm1
         Sim.W_1[i]= Sim.W_1[i] - Sim.E_Soil[i]
@@ -202,7 +202,7 @@ function Soilfun!(Sim,Parameters,Met_c,i)
                             Parameters.PoreFrac)^(-Parameters.B)
 
     # 10/ Energy balance
-    Sim.LE_Soil[i]= Sim.E_Soil[i] * Parameters.lambda
+    Sim.LE_Soil[i]= Sim.E_Soil[i] * Parameters.λ
     Sim.H_Soil[i]= Sim.Rn_Soil[i] * (1.0 - Parameters.Soil_LE_p)
     Sim.Q_Soil[i]= 0.0
     # RV: Q_Soil is negligible at yearly time-step, and equilibrate between several
@@ -212,7 +212,7 @@ function Soilfun!(Sim,Parameters,Met_c,i)
     # 11/ Soil temperature
 
     Sim.TSoil[i]= Sim.TairCanopy[i] + (Sim.H_Soil[i] * Parameters.MJ_to_W) / 
-                  (air_density(Sim.TairCanopy[i], Met_c.Pressure[i]/10.0) * Parameters.Cp *
+                  (air_density(Sim.TairCanopy[i], Met_c.Pressure[i]/10.0) * Parameters.cp *
                    G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
                              LAI = Sim.LAI_Tree[i]  +  Sim.LAI[i], extwind= Parameters.extwind))
 

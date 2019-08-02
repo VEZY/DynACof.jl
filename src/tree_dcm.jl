@@ -28,7 +28,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     # Computing the air temperature in the shade tree layer:
     Sim.TairCanopy_Tree[i]=
       Met_c.Tair[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
-      (Met_c.Air_Density[i] * Parameters.Cp *
+      (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp *
          G_bulk(Wind= Met_c.WindSpeed[i], ZHT= Parameters.ZHT,
                 LAI= Sim.LAI_Tree[previous_i(i)],
                 extwind= Parameters.extwind,
@@ -37,7 +37,8 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
   
     Sim.Tleaf_Tree[i]=
       Sim.TairCanopy_Tree[i] + (Sim.H_Tree[i]*Parameters.MJ_to_W) /
-      (Met_c.Air_Density[i] * Parameters.Cp *
+      
+      (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp *
          Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf_Tree,
               LAI_lay= Sim.LAI_Tree[previous_i(i)],
               LAI_abv= 0,ZHT = Parameters.ZHT,
@@ -196,7 +197,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
   
     if Sim.TimetoThin_Tree[i]
       # First, reduce stocking by the predefined rate of thining:
-      Sim.Stocking_Tree[i:end]= Sim.Stocking_Tree[i-1] .* (1.0 - Parameters.RateThinning_Tree)
+      Sim.Stocking_Tree[i:end] .= Sim.Stocking_Tree[i-1] * (1.0 - Parameters.RateThinning_Tree)
       # Then add mortality (removing) due to thining :
       Sim.MThinning_Stem_Tree[i]= Sim.CM_Stem_Tree[previous_i(i)] * Parameters.RateThinning_Tree
       Sim.MThinning_CR_Tree[i]= Sim.CM_CR_Tree[previous_i(i) ] * Parameters.RateThinning_Tree

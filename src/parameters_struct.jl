@@ -2,7 +2,7 @@
 Physical constants used in the DynACof package
 
 This function defines the following constants:
-- Cp: specific heat of air for constant pressure (``J\\ K^{-1}\\ kg^{-1}``), Source: Allen 1998 FAO Eq. 8 p. 32
+- cp: specific heat of air for constant pressure (``J\\ K^{-1}\\ kg^{-1}``), Source: Allen 1998 FAO Eq. 8 p. 32
 - epsi: Ratio of the molecular weight of water vapor to dry air (=Mw/Md)
 - pressure0: reference atmospheric pressure at sea level (kPa)
 - FPAR: Fraction of global radiation that is PAR (source: MAESPA model)
@@ -88,8 +88,8 @@ Base.@kwdef struct soil
     Metamodels_soil = Metamodels_soil # Default metamodels from the package. If you want to update them, modify this function:
 end
 
-function Metamodels_soil(sim::DataFrame,met::DataFrame,i::Int64)
-    sim.Rn_Soil[i]= -1.102 + 1.597 * sim.PAR_Trans[i] + 1.391 * sqrt(1.0 - met.FDiff[i])
+function Metamodels_soil(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    Sim.Rn_Soil[i]= -1.102 + 1.597 * Sim.PAR_Trans[i] + 1.391 * sqrt(1.0 - Met_c.FDiff[i])
 end
 
 Base.@kwdef struct coffee
@@ -180,7 +180,7 @@ Base.@kwdef struct coffee
     pa_FRoot::Float64          = 1.0        # Fine root living tissue (fraction)
     DE_opt::Float64            = 0.164      # optimum demand in total carbon for each berry (including growth respiration)
     # = Optimum_Berry_DM*CC_Fruit+Optimum_Berry_DM*CC_Fruit*(1-epsilonFruit)
-    Bud_T_correction           =  CB()      # function to predict the temperature-dependent coefficient giving the mean T in input
+    Bud_T_correction           =  CB      # function to predict the temperature-dependent coefficient giving the mean T in input
     # Parameters for American Leaf Spot
     SlopeAzimut::Float64       = 180.0      # site slope azimuth (deg)
     Slope::Float64             = 5.0        # Percentage slope (%)
@@ -214,13 +214,13 @@ end
 
 # Metamodels (or subroutines):
 # Leaf Water Potential (MPa)
-  function LeafWaterPotential(sim::DataFrame,met::DataFrame,i::Int64)
-    0.040730 - 0.005074 * met.VPD[i] - 0.037518 * sim.PAR_Trans_Tree[i] + 2.676284 * sim.SoilWaterPot[i]
+  function LeafWaterPotential(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    0.040730 - 0.005074 * Met_c.VPD[i] - 0.037518 * Sim.PAR_Trans_Tree[i] + 2.676284 * Sim.SoilWaterPot[i]
 end
 
 # Transpiration:
-function T_Coffee(sim::DataFrame,met::DataFrame,i::Int64)
-    T_Cof= -0.72080 + 0.07319 * met.VPD[i] -0.76984 * (1.0-met.FDiff[i]) + 0.13646*sim.LAI[i] + 0.12910*sim.PAR_Trans_Tree[i]
+function T_Coffee(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    T_Cof= -0.72080 + 0.07319 * Met_c.VPD[i] -0.76984 * (1.0-Met_c.FDiff[i]) + 0.13646*Sim.LAI[i] + 0.12910*Sim.PAR_Trans_Tree[i]
     if T_Cof<0.0
         T_Cof= 0.0
     end
@@ -228,13 +228,13 @@ function T_Coffee(sim::DataFrame,met::DataFrame,i::Int64)
 end
 
 # Sensible heat flux:
-function H_Coffee(sim::DataFrame,met::DataFrame,i::Int64)
-    1.2560 - 0.2886*met.VPD[i] - 3.6280*met.FDiff[i] + 2.6480*sim.T_Coffee[i] + 0.4389*sim.PAR_Trans_Tree[i]
+function H_Coffee(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    1.2560 - 0.2886*Met_c.VPD[i] - 3.6280*Met_c.FDiff[i] + 2.6480*Sim.T_Coffee[i] + 0.4389*Sim.PAR_Trans_Tree[i]
 end
 
 # Light use efficiency:
-function lue(sim::DataFrame,met::DataFrame,i::Int64)::Float64                       
-2.784288 + 0.009667*met.Tair[i] + 0.010561*met.VPD[i] - 0.710361*sqrt(sim.PAR_Trans_Tree[i])
+function lue(Sim::DataFrame,Met_c::DataFrame,i::Int64)::Float64                       
+2.784288 + 0.009667*Met_c.Tair[i] + 0.010561*Met_c.VPD[i] - 0.710361*sqrt(Sim.PAR_Trans_Tree[i])
 end
 
 
@@ -308,64 +308,64 @@ Base.@kwdef struct tree
 end
 
 
-function metamodels_tree(sim::DataFrame,met::DataFrame,i::Int64)
-    sim.lue_Tree[i]= 2.87743 + 0.07595 * met.Tair[i] - 0.03390 * met.VPD[i] - 0.24565*met.PAR[i]
+function metamodels_tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    Sim.lue_Tree[i]= 2.87743 + 0.07595 * Met_c.Tair[i] - 0.03390 * Met_c.VPD[i] - 0.24565*Met_c.PAR[i]
   
-    sim.T_Tree[i]= -0.2366 + 0.6591 * sim.APAR_Tree[i] + 0.1324*sim.LAI_Tree[i]
-    if sim.T_Tree[i] < 0.0
-        sim.T_Tree[i]= 0.0
+    Sim.T_Tree[i]= -0.2366 + 0.6591 * Sim.APAR_Tree[i] + 0.1324*Sim.LAI_Tree[i]
+    if Sim.T_Tree[i] < 0.0
+        Sim.T_Tree[i]= 0.0
     end
 
-    sim.H_Tree[i]=
-      0.34062 + 0.82001 * sim.APAR_Dir_Tree[i] + 0.32883 * sim.APAR_Dif_Tree[i] -
-      0.75801 * sim.LAI_Tree[i] - 0.57135 * sim.T_Tree[i] -
-      0.03033 * met.VPD[i]
+    Sim.H_Tree[i]=
+      0.34062 + 0.82001 * Sim.APAR_Dir_Tree[i] + 0.32883 * Sim.APAR_Dif_Tree[i] -
+      0.75801 * Sim.LAI_Tree[i] - 0.57135 * Sim.T_Tree[i] -
+      0.03033 * Met_c.VPD[i]
 end
 
 
-function light_extinction_K_Tree(sim::DataFrame,met::DataFrame,i::Int64)
+function light_extinction_K_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # See MAESPA_Validation project, script 4-Aquiares_Metamodels.R
     # Source for non-constant k: Sinoquet et al. 2007
     # DOI: 10.1111/j.1469-8137.2007.02088.x
-    sim.K_Dif_Tree[i]= 0.6161 - 0.5354 * sim.LAD_Tree[previous_i(i,1)]
-    sim.K_Dir_Tree[i]= 0.4721 - 0.3973 * sim.LAD_Tree[previous_i(i,1)]
+    Sim.K_Dif_Tree[i]= 0.6161 - 0.5354 * Sim.LAD_Tree[previous_i(i,1)]
+    Sim.K_Dir_Tree[i]= 0.4721 - 0.3973 * Sim.LAD_Tree[previous_i(i,1)]
 end
 
-function tree_allometries(sim::DataFrame,met::DataFrame,Parameters,i::Int64)
-    sim.DBH_Tree[i]= ((sim.DM_Stem_Tree[i] / (parameters.CC_wood_Tree * 1000 * sim.Stocking_Tree[i]) / 0.5)^0.625) / 100.0
+function tree_allometries(Sim::DataFrame,Met_c::DataFrame,Parameters,i::Int64)
+    Sim.DBH_Tree[i]= ((Sim.DM_Stem_Tree[i] / (Parameters.CC_wood_Tree * 1000 * Sim.Stocking_Tree[i]) / 0.5)^0.625) / 100.0
     # Source: Rojas-García et al. (2015) DOI: 10.1007/s13595-015-0456-y
     # /!\ DBH is an average DBH among trees.
     #Tree Height. Source:  CAF2007 used in Van Oijen et al. (2011). With no pruning :
-    sim.Height_Tree[i]= parameters.Kh * (((sim.DM_Stem_Tree[i] / 1000.0) / sim.Stocking_Tree[i])^parameters.KhExp)
+    Sim.Height_Tree[i]= Parameters.Kh * (((Sim.DM_Stem_Tree[i] / 1000.0) / Sim.Stocking_Tree[i])^Parameters.KhExp)
   
     # Crown projected area:
-    sim.CrownProj_Tree[i]= parameters.Kc * (((sim.DM_Branch_Tree[i] / 1000.0) / sim.Stocking_Tree[i])^parameters.KcExp)
+    Sim.CrownProj_Tree[i]= Parameters.Kc * (((Sim.DM_Branch_Tree[i] / 1000.0) / Sim.Stocking_Tree[i])^Parameters.KcExp)
     # Source: Van Oijen et al. (2010, I).
-    sim.CrownRad_Tree[i]= sqrt(sim.CrownProj_Tree[i] / pi )
-    sim.Crown_H_Tree[i]= sim.CrownRad_Tree[i] # See Charbonnier et al. 2013, Table 2.
-    sim.Trunk_H_Tree[i]= sim.Height_Tree[i] - sim.Crown_H_Tree[i]
+    Sim.CrownRad_Tree[i]= sqrt(Sim.CrownProj_Tree[i] / pi )
+    Sim.Crown_H_Tree[i]= Sim.CrownRad_Tree[i] # See Charbonnier et al. 2013, Table 2.
+    Sim.Trunk_H_Tree[i]= Sim.Height_Tree[i] - Sim.Crown_H_Tree[i]
   
     # If there is a pruning management, change the allometries (mostly derived from Vezy et al. 2018) :
-    if any(sim.Plot_Age[i] .== parameters.Pruning_Age_Tree)
+    if any(Sim.Plot_Age[i] .== Parameters.Pruning_Age_Tree)
       # Pruning : trunk height does not depend on trunk dry mass anymore (pruning effect)
-      sim.Trunk_H_Tree[i]= 3.0 * (1. - exp(-0.2 - sim.Plot_Age_num[i]))
-      sim.Height_Tree[i]= sim.Crown_H_Tree[i] + sim.Trunk_H_Tree[i]
+      Sim.Trunk_H_Tree[i]= 3.0 * (1. - exp(-0.2 - Sim.Plot_Age_num[i]))
+      Sim.Height_Tree[i]= Sim.Crown_H_Tree[i] + Sim.Trunk_H_Tree[i]
       # The equation make it grow fast at the early stages and reach a plateau at the
       # maximum height after ca. few months.
-    elseif any(sim.Plot_Age[i] .> parameters.Pruning_Age_Tree)
+    elseif any(Sim.Plot_Age[i] .> Parameters.Pruning_Age_Tree)
       # if there were any pruning before, add the trunk
-      Lastheight_Trunk= 3.0 * (1. - exp(-0.2 - parameters.Pruning_Age_Tree[findlast(sim.Plot_Age[i] .>= parameters.Pruning_Age_Tree)]+1))
-      sim.Height_Tree[i]= parameters.Kh * (((sim.DM_Stem_Tree[i] / 1000.0) / sim.Stocking_Tree[i])^parameters.KhExp) + Lastheight_Trunk
-      sim.Trunk_H_Tree[i]= sim.Height_Tree[i] - sim.Crown_H_Tree[i]
+      Lastheight_Trunk= 3.0 * (1. - exp(-0.2 - Parameters.Pruning_Age_Tree[findlast(Sim.Plot_Age[i] .>= Parameters.Pruning_Age_Tree)]+1))
+      Sim.Height_Tree[i]= Parameters.Kh * (((Sim.DM_Stem_Tree[i] / 1000.0) / Sim.Stocking_Tree[i])^Parameters.KhExp) + Lastheight_Trunk
+      Sim.Trunk_H_Tree[i]= Sim.Height_Tree[i] - Sim.Crown_H_Tree[i]
     end
 
-    sim.LA_Tree[i]= sim.LAI_Tree[i] / sim.Stocking_Tree[i]
-    sim.LAD_Tree[i]= sim.LA_Tree[i] / ((sim.CrownRad_Tree[i]^2.0) * (0.5 * sim.Crown_H_Tree[i]) * pi * (4.0 / 3.0))
+    Sim.LA_Tree[i]= Sim.LAI_Tree[i] / Sim.Stocking_Tree[i]
+    Sim.LAD_Tree[i]= Sim.LA_Tree[i] / ((Sim.CrownRad_Tree[i]^2.0) * (0.5 * Sim.Crown_H_Tree[i]) * pi * (4.0 / 3.0))
 
-    if sim.LAD_Tree[i] == Inf || sim.LAD_Tree[i] < 0.21
-        sim.LAD_Tree[i]= 0.21
-    elseif sim.LAD_Tree[i] > 0.76
-        sim.LAD_Tree[i]= 0.76
+    if Sim.LAD_Tree[i] == Inf || Sim.LAD_Tree[i] < 0.21
+        Sim.LAD_Tree[i]= 0.21
+    elseif Sim.LAD_Tree[i] > 0.76
+        Sim.LAD_Tree[i]= 0.76
     end
 end
 
@@ -374,7 +374,7 @@ Parameter structures
 
 Those structures are used to make the parameter inputs to DynACof. Default values are provided to the user (the struct are Base.@kwdef).
 They are mainly used under the hood from [Import_Parameters()], but can still be called by the user for conveniance (but not needed 
-for a model run). The parameters are divided into five structures: `constants`, `site`, `soil`, `coffee`, and `tree`.
+for a model run). The Parameters are divided into five structures: `constants`, `site`, `soil`, `coffee`, and `tree`.
 
 ## site:
 
@@ -405,7 +405,7 @@ NB: the tree parameter structure is optional, and not needed for monospecific co
 
 # Return 
 
-An instance of a structure with parameters needed for a DynACof simulation.
+An instance of a structure with Parameters needed for a DynACof simulation.
 
 # Details
 The values of the instance can be read from files using [`import_parameters`](@ref). In that case, the user 

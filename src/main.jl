@@ -193,7 +193,7 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
 
 
     Parameters= import_parameters(input_path, file_name)
-    Meteo= meteorology(normpath(string(input_path," / ",file_name.meteo)), Parameters, period)
+    Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
     
@@ -304,14 +304,14 @@ function mainfun(cy,Direction,Meteo,Parameters)
                ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning, 
                df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
 
-  return Sim
   # Main Loop -----------------------------------------------------------------------------------
 
-  # pb= txtProgressBar(max= length(Sim.LAI), style=3)
+  
+  p = Progress(length(Sim.LAI),1)
 
   for i in 1:length(Sim.LAI)
     #   setTxtProgressBar(pb, i)
-    
+    next!(p)
     # Shade Tree computation if any
     Treefun!(Sim,Parameters,Met_c,i)
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
@@ -356,7 +356,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
     # Latent and Sensible heat fluxes
     Sim.LE_Plot[i]= Sim.ETR[i] * Parameters.λ
     Sim.LE_Coffee[i]= (Sim.T_Coffee[i] + Sim.IntercRevapor[i] * (Sim.LAI[i] / Sim.LAIplot[i])) * Parameters.λ
-    Sim.H_Coffee[i]= Parameters.H_Coffee(S,i)
+    Sim.H_Coffee[i]= Parameters.H_Coffee(Sim,Met_c,i)
 
     # Coffea layer net radiation
     Sim.Rn_Coffee[i]= Sim.H_Coffee[i] + Sim.LE_Coffee[i]
@@ -386,7 +386,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
     else
 
       Sim.TairCanopy[i]= Met_c.Tair[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
-        (air_density(Sim.TairCanopy_Tree[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+        (air_density(Met_c.Tair[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
            G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT, Z_top = Parameters.Height_Coffee,
                   LAI = Sim.LAI[i], extwind = Parameters.extwind))
 
@@ -404,8 +404,8 @@ function mainfun(cy,Direction,Meteo,Parameters)
          G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
                    LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
 
-    Sim.DegreeDays_Tcan[i]= GDD(Tmean = Sim.Tleaf_Coffee[i], MinTT = Parameters.MinTT, MaxTT = Parameters.MaxTT)
-
+    Sim.DegreeDays_Tcan[i]= GDD(Sim.Tleaf_Coffee[i], Parameters.MinTT, Parameters.MaxTT)
+    
     # Metamodel LUE coffee:
     Sim.lue[i]= Parameters.lue(Sim,Met_c,i)
 
@@ -439,8 +439,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
          Parameters.Q10_FRoot^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
 
     # Total plant maintenance respiration
-    Sim.Rm[i]= Sim.Rm_Fruit[i]+Sim.Rm_Leaf[i] + Sim.Rm_Shoot[i]+Sim.Rm_SCR[i] + Sim.Rm_FRoot[i]
-
+    Sim.Rm[i]= Sim.Rm_Fruit[i] + Sim.Rm_Leaf[i] + Sim.Rm_Shoot[i] + Sim.Rm_SCR[i] + Sim.Rm_FRoot[i]
 
 
     # Coffee Allocation -------------------------------------------------------
@@ -507,7 +506,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
     # (2) Cumulative degree days experienced by each bud cohort :
     dd_i= cumsum(Sim.DegreeDays_Tcan[i:-1:previous_i(i,1000)])
-
+    
     # (3) Find the window where buds are under dormancy (find the dormant cohorts)
     # Bud develops during F_buds1 (840) degree days after initiation, so they cannot
     # be dormant less than F_buds1 before i. But they can stay under dormancy until
@@ -522,10 +521,10 @@ function mainfun(cy,Direction,Meteo,Parameters)
     CumRain= cumsum(Met_c.Rain[YoungestDormancy:-1:OldestDormancy])
     # (5) Compute the period were all cohorts have encountered all conditions to break
     # dormancy :
-    DormancyBreakPeriod= OldestDormancy:(YoungestDormancy-sum(CumRain<Parameters.F_rain))
+    DormancyBreakPeriod= OldestDormancy:(YoungestDormancy - sum(CumRain .< Parameters.F_rain))
 
     # (6) Temperature effect on bud phenology
-    Sim.Temp_cor_Bud[i]= Parameters.Bud_T_correction(Sim.Tleaf_Coffee[i])
+    Sim.Temp_cor_Bud[i]= Parameters.Bud_T_correction()(Sim.Tleaf_Coffee[i])
     
     # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
     Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.LeafWaterPotential[i]))
@@ -551,8 +550,11 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
     # Demand from each fruits cohort present on the coffee tree (not overriped),
     # same as Demand_Fruit but keeping each value :
-    Demand_Fruit_Cohort_Period = Sim.BudBreak[FruitingPeriod] .* Parameters.DE_opt .*
-                                logistic_deriv.(dd_i[1:length(FruitingPeriod)], Parameters.u_log, Parameters.s_log)
+    demand_distribution= logistic_deriv.(dd_i[1:length(FruitingPeriod)], Parameters.u_log, Parameters.s_log) .*
+                         [0.0 ; Base.diff(dd_i[1:length(FruitingPeriod)])]
+    # NB: we use diff because the values are not evenly distributed (it is not grided, e.g. not 1 by 1 increment)
+    demand_distribution[demand_distribution .== Inf] .= 0.0
+    Demand_Fruit_Cohort_Period = Sim.BudBreak[FruitingPeriod] .* Parameters.DE_opt .* demand_distribution
     # Total C demand of the fruits :
     Sim.Demand_Fruit[i]= sum(Demand_Fruit_Cohort_Period)
     # C supply to Fruits (i.e. what is left from Supply after removing the consumption
@@ -562,15 +564,18 @@ function mainfun(cy,Direction,Meteo,Parameters)
     # Total C allocation to all fruits on day i :
     Sim.Alloc_Fruit[i]= min(Sim.Demand_Fruit[i], Sim.Supply_Fruit[i])
     # Allocation to each cohort, relative to each cohort demand :
-    Rel_DE= Demand_Fruit_Cohort_Period ./ Sim.Demand_Fruit[i]
+    if Sim.Demand_Fruit[i] > 0.0
+      Rel_DE= Demand_Fruit_Cohort_Period ./ Sim.Demand_Fruit[i]
+    else
+      Rel_DE= 0.0
+    end
     Sim.Alloc_Fruit_Cohort[FruitingPeriod] .= Sim.Alloc_Fruit[i] .* Rel_DE
     Sim.NPP_Fruit_Cohort[FruitingPeriod] .= Sim.Alloc_Fruit_Cohort[FruitingPeriod] ./ Parameters.epsilon_Fruit
     Sim.CM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] .+ Sim.NPP_Fruit_Cohort[FruitingPeriod]
     Sim.DM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] ./ Parameters.CC_Fruit
     # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
-    Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(minimum(FruitingPeriod) - 1.0, 1.0)]
+    Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(minimum(FruitingPeriod) - 1, 1)]
     # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[minimum(FruitingPeriod)-1.0] * Parameters.epsilon_Fruit
-
     # Duration of the maturation of each cohort born in the ith day (in days):
     Sim.Maturation_duration[FruitingPeriod] .= 1:length(FruitingPeriod)
     # Sucrose content of each cohort:
@@ -615,7 +620,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
       Sim.CM_Fruit[i-1]= 0.0
       Sim.NPP_Fruit[i]= 0.0
       Sim.Overriped_Fruit[i]= 0.0
-      Sim.CM_Fruit_Cohort= zeros(length(Sim.CM_Fruit_Cohort))
+      Sim.CM_Fruit_Cohort .= zeros(nrow(Sim))
       # RV: could harvest mature fruits only (To do).
     else
       Sim.Harvest_Fruit[i]= 0.0
@@ -623,9 +628,9 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
     # Leaves ------------------------------------------------------------------
 
-    Sim.Supply_Leaf[i]= Parameters.lambda_Leaf_remain * (Sim.Supply[i]-Sim.Alloc_Fruit[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i])
+    Sim.Supply_Leaf[i]= Parameters.lambda_Leaf_remain * (Sim.Supply[i] - Sim.Alloc_Fruit[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i])
 
-    Sim.Alloc_Leaf[i]= min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000.0) * ((Parameters.LAI_max-Sim.LAI[i]) /
+    Sim.Alloc_Leaf[i]= min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000.0) * ((Parameters.LAI_max - Sim.LAI[i]) /
                             (Sim.LAI[i] + Parameters.LAI_max)), 
                            Sim.Supply_Leaf[i])
 

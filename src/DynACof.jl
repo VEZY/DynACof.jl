@@ -2,6 +2,7 @@ module DynACof
 
 using DataFrames
 using CSV
+import ProgressMeter.Progress, ProgressMeter.next!
 import Dates
 import ForwardDiff.derivative # To find Δ (esat slope)
 import Optim.optimize, Optim.minimizer
@@ -11,7 +12,7 @@ import Interpolations.LinearInterpolation
 # Helper functions:
 export is_missing
 export cos°,sin°,tan°,acos°,asin°,atan°
-export logistic,logistic_deriv
+export logistic,logistic_deriv,mean,diff
 # ecophysio helpers:
 export rH_to_VPD,esat,esat_slope,GDD
 export virtual_temp,VPD_to_e,dew_point,paliv_dis,CN,Sucrose_cont_perc
@@ -34,7 +35,7 @@ export GetWind,G_bulk,Gb_h,G_soilcan,G_interlay
 export ALS
 # Main functions:
 export meteorology
-export dynacof, mainfun
+export dynacof, mainfun, Shade_Tree, Soilfun!
 
 include("test.jl")
 include("helpers.jl")
