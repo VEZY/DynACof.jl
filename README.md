@@ -11,11 +11,7 @@
 
 This is a Julia version of the DynACof model. To get to the R version, please follow this [link](https://vezy.github.io/DynACof).
 DynACof is a process-based model that computes plot-scale Net Primary Productivity, carbon allocation, growth,
-yield, energy, and water balance of coffee plantations according to
-management, while accounting for spatial effects using metamodels from
-the 3D process-based [MAESPA](https://maespa.github.io/). The model also
-uses coffee bud and fruit cohorts for reproductive development to better
-represent fruit carbon demand distribution along the year.
+yield, energy, and water balance of coffee plantations according to management, while accounting for spatial effects using metamodels from the 3D process-based [MAESPA](https://maespa.github.io/). The model also uses coffee bud and fruit cohorts for reproductive development to better represent fruit carbon demand distribution along the year.
 
 ## Installation
 
