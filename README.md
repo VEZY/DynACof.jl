@@ -21,11 +21,11 @@ To download DynACof, simply execute these lines of code in the REPL:
 Pkg.add(DynACof)
 ```
 
-The package is tested routinely to pass all tests using Travis-CI (linux) and AppVeyor (Windows).
+The package is tested routinely to pass all tests using Travis-CI (Linux + Mac) and AppVeyor (Windows).
 
 ## Example
 
-This is a basic example using the parameters and meteorology from Vezy et al. (2019). YFirst, you have to dowload the data from this 
+This is a basic example using the parameters and meteorology from Vezy et al. (2019). First, you have to dowload the data from this 
 [Github repository](https://github.com/VEZY/DynACof.jl_inputs).
 
 Then, simply execute this line of code to run a simulation over the whole period: 
