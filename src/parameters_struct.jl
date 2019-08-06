@@ -215,7 +215,7 @@ end
 # Metamodels (or subroutines):
 # Leaf Water Potential (MPa)
   function LeafWaterPotential(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    0.040730 - 0.005074 * Met_c.VPD[i] - 0.037518 * Sim.PAR_Trans_Tree[i] + 2.676284 * Sim.SoilWaterPot[i]
+    0.040730 - 0.005074 * Met_c.VPD[i] - 0.037518 * Sim.PAR_Trans_Tree[i] + 2.676284 * Sim.SoilWaterPot[i-1]
 end
 
 # Transpiration:

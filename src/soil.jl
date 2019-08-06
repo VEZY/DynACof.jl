@@ -21,7 +21,7 @@ This function shouldn't be called by the user. It is made as a sub-module so it 
 
 [`dynacof`](@ref)
 """
-function Soilfun!(Sim,Parameters,Met_c,i)
+function soil_model!(Sim,Parameters,Met_c,i)
 
     # Rn understorey using Shuttleworth & Wallace, 1985, eq. 21 for reference
     Sim.Rn_Soil_SW[i]= Met_c.Rn[i] * exp(-Parameters.k_Rn * Sim.LAIplot[i])

@@ -7,7 +7,7 @@ Initialise model variables.
 - `Met_c::DataFrame`: The meteorology DataFrame
 - `Parameters`: The parameters for the model
 """
-function Init_Sim!(Sim::DataFrame,Met_c::DataFrame,Parameters)
+function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim.LAI= 0.1
     Sim.LAIplot= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,

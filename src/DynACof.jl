@@ -28,14 +28,14 @@ export read_param_file
 export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
 export light_extinction_K_Tree,tree_allometries,metamodels_tree
 # initialization
-export Init_Sim!
+export initialise!
 # Conductances
 export GetWind,G_bulk,Gb_h,G_soilcan,G_interlay
 # Diseases
 export ALS
 # Main functions:
 export meteorology
-export dynacof, mainfun, Shade_Tree, Soilfun!
+export dynacof, mainfun, Shade_Tree, soil_model!
 
 include("test.jl")
 include("helpers.jl")
