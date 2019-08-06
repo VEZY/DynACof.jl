@@ -1,4 +1,8 @@
-# DynACof.jl: The Dynamic Agroforestry Coffee Crop Model <img src="https://raw.githubusercontent.com/VEZY/DynACof/master/man/figures/logo.png" alt="logo" width="300" align="right" />
+# DynACof.jl: The Dynamic Agroforestry Coffee Crop Model
+
+```@raw html
+<img src="https://raw.githubusercontent.com/VEZY/DynACof/master/man/figures/logo.png" alt="logo" width="300" align="right" />
+```
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://VEZY.github.io/DynACof.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://VEZY.github.io/DynACof.jl/dev)
@@ -16,7 +20,7 @@ yield, energy, and water balance of coffee plantations according to management, 
 
 To download DynACof, simply execute these lines of code in the REPL:
 
-``` julia
+```julia
 Pkg.add(DynACof)
 ```
 
@@ -28,7 +32,7 @@ This is a basic example using the parameters and meteorology from Vezy et al. (2
 [Github repository](https://github.com/VEZY/DynACof.jl_inputs).
 
 Then, simply execute this line of code to run a simulation over the whole period: 
-``` julia
+```julia
 using DynACof
 Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_data/DynACof.jl_inputs",
                                 file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",
@@ -40,7 +44,7 @@ argument. A separate [Github repository](https://github.com/VEZY/DynACof.jl_inpu
 
 Example of a simulation without shade trees:
 
-``` julia
+```julia
 Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_data/DynACof.jl_inputs",
                                 file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",
                                             soil="soil.jl",coffee="coffee.jl",tree=""));
