@@ -28,19 +28,20 @@ The package is tested routinely to pass all tests using Travis-CI (linux) and Ap
 
 ## Example
 
-This is a basic example using the parameters and meteorology from Vezy et al. (2019). YFirst, you have to dowload the data from this 
-[Github repository](https://github.com/VEZY/DynACof.jl_inputs).
+This is a basic example using the parameters and meteorology from Vezy et al. (2019). The default values of the parameters in DynACof are already the ones from Vezy et al. (2019). To use those default values, you have to put `"package"` for each parameter in `file_name`. The meteorology data can be downloaded from a [Github repository](https://github.com/VEZY/DynACof.jl_inputs) using the `download` command.
 
-Then, simply execute this line of code to run a simulation over the whole period: 
+Execute this line of code to run a simulation over the whole period using both parameters values and meteorology from Vezy et al. (2019): 
+
 ```julia
 using DynACof
-Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_data/DynACof.jl_inputs",
-                                file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",
-                                            soil="soil.jl",coffee="coffee.jl",tree="tree.jl"));
+file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
+
+Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",coffee="package",tree="package"))
+
+rm(file)
 ```
 
-To use your own data, you have to tell DynACof where to find it using the `input_path` argument, and what are the file names with the `file_name`
-argument. A separate [Github repository](https://github.com/VEZY/DynACof.jl_inputs) is available for input files templates, and some help on how to proceed.
+To use your own data, you have to tell DynACof where to find it using the `input_path` argument, and what are the file names with the `file_name` argument. A separate [Github repository](https://github.com/VEZY/DynACof.jl_inputs) is available for input files templates with values from Vezy et al. (2019), and some help on how to proceed.
 
 Example of a simulation without shade trees:
 

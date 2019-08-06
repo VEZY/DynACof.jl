@@ -172,15 +172,19 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 - Parameters: A list of the input parameters (see [`import_parameters`](@ref), [`constants`](@ref), [`soil`](@ref), [`coffee`](@ref), [`tree`](@ref))
 
 # Details
+
 Almost all variables for coffee exist also for shade trees with the suffix `_Tree` after the name of the variable, 
 **e.g.**: LAI = coffee LAI, LAI_Tree = shade tree LAI. Special shade tree variables (see return section) are only optional, and there may have more
 variables upon parameterization because variables can be added in the parameter file for metamodels_tree or Allometries for example.
 
+# Note
+
+For simulations with custom initialisations (*e.g.* at age > 0), or running a simulation day by day, see [`dynacof_i!`](@ref).
 
 # Examples
 ```julia
 # A simulation with the default parameter files from the package, and an example meteorology file from the `DynACof.jl_inputs` repository:
-file= download("https: /  / raw.githubusercontent.com / VEZY / DynACof.jl_inputs / master / meteorology.txt")
+file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
 Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",
 coffee="package",tree="package"))
 rm(file)
@@ -258,6 +262,66 @@ function mainfun(cy,Direction,Meteo,Parameters)
   p = Progress(length(Sim.LAI),1)
 
   for i in 1:length(Sim.LAI)
+    next!(p)
+    # Shade Tree computation if any
+    tree_model!(Sim,Parameters,Met_c,i)
+    # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
+    coffee_model!(Sim,Parameters,Met_c,i)
+    soil_model!(Sim,Parameters,Met_c,i)
+    balance_model!(Sim,Parameters,Met_c,i) # Energy balance
+  end
+
+  return Sim
+end
+
+"""
+    dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
+
+Using DynACof one iteration after another. Allows to run a DynACof simulation with starting at age > 0 with initializations.
+
+# Arguments
+- `i`: Either an integer, or a range giving the day of simulation needed. Match the row index, so `i=1` make a simulation
+for the first row of Sim and Met.  
+- `Sim::DataFrame`: The simulation DataFrame (see [`dynacof`](@ref))   
+- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref))  
+- `Parameters`: The parameters for the model (see [`import_parameters`](@ref))
+
+# Examples
+```julia
+
+# Making a regular simulation using example data: 
+file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
+Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",coffee="package",tree="package"))
+rm(file)
+
+# Value of the maintenance respiration for coffee:
+Sim.Rm[i]
+
+# Changing the value of Tair in the meteorology for day 100: 
+i= 100
+Meteo.Tair[i] += 10.0
+dynacof_i!(i,Sim,Meteo,Parameters)
+
+# New value of the maintenance respiration for coffee:
+Sim.Rm[i]
+
+# To re-run DynACof for several days, use a range for `i`:
+dynacof_i!(i:(i+10),Sim,Meteo,Parameters)
+
+```
+"""
+function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
+
+  # Search for the species specific tree function:
+  if Parameters.Tree_Species == "No_Shade"
+    tree_model! = No_Shade
+  else
+    tree_model! = Shade_Tree
+  end
+
+  p = Progress(length(i),1)
+
+  for i in collect(i)
     next!(p)
     # Shade Tree computation if any
     tree_model!(Sim,Parameters,Met_c,i)

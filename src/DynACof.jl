@@ -36,6 +36,7 @@ export ALS
 # Main functions:
 export meteorology
 export dynacof, mainfun, Shade_Tree, soil_model!
+export dynacof_i!
 
 include("test.jl")
 include("helpers.jl")
@@ -46,6 +47,9 @@ include("meteorology_helpers.jl")
 include("import_parameters.jl")
 include("initialization.jl")
 include("conductances.jl")
+include("bud_init.jl")
+include("balance.jl")
+include("coffee.jl")
 include("diseases.jl")
 include("tree_dcm.jl")
 include("soil.jl")

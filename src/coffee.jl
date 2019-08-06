@@ -1,4 +1,15 @@
-function coffee_fun!(Sim,Parameters,Met_c,i)
+"""
+Coffee crop model
+
+Computes the coffee crop growth and yield. This function is called from [`dynacof`](@ref) and should not be called
+by the user.
+
+# Return
+
+Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref) for more details.
+
+"""
+function coffee_model!(Sim,Parameters,Met_c,i)
       # CM is in gC m-2soil, so use C content to transform in dry mass
       Sim.LAI[i]= Sim.CM_Leaf[previous_i(i)]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
       Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI[i]
