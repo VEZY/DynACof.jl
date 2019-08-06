@@ -251,14 +251,14 @@ Base.@kwdef struct tree
     LAI_max_Tree         = 1.0                       # Max measured LAI to compute leaf demand. Should be ~1.5*higher than measured.
     Leaf_fall_rate_Tree  = [0.07,0.02,0.015,0.04]    # Mortality during leaf fall (fraction of the leaf mass).
     Fall_Period_Tree     = (1:55,175:240,300:354,355:365) # Time period were leaves fall at high rate (DOY). List of length= Leaf_fall_rate_Tree
-    Thin_Age_Tree        = 22                        # Ages at which thinning is made (age). Set to NULL if no thinning
+    Thin_Age_Tree        = 22                        # Ages at which thinning is made (age). Set to 9999 if no thinning
     ThinThresh           = 0.0                       # (option) Lowest transmittance threshold under wich thinning is triggered (0-1)
     RateThinning_Tree    = 0.97072                   # How many trees are thinned per thinning event in percentage.
     date_Thin_Tree       = 100                       # Date(s) of thinning (DOY)
-    D_pruning_Tree       = 213                       # Date(s) of pruning each year (DOY)
+    D_pruning_Tree       = 213                       # Date(s) of pruning each year (DOY). Set to 9999 if no pruning.
     pruningIntensity_Tree= 0.7                       # Pruning intensity (% dry mass)
     m_FRoot_Tree         = 0.005                     # Fine root percentage that die at pruning
-    Pruning_Age_Tree     = collect(1:21)             # Ages at which pruning is made (age). Set to NULL if no pruning.
+    Pruning_Age_Tree     = collect(1:21)             # Ages at which pruning is made (age). Set to 9999 if no pruning.
     # k_Dif_Tree           = 0.305                   # Light extinction coefficient for diffuse light. Now computed by metamodels
     # k_Dir_Tree           = 0.304                   # Light extinction coefficient for direct light. Now computed by metamodels
     # lue_Tree             = 1.1375                  # Light-use efficiency (gc MJ-1). Now computed by metamodels
@@ -302,6 +302,7 @@ Base.@kwdef struct tree
     pa_CR_Tree           = 0.21                      # Coarse roots living tissue (fraction)
     pa_Leaf_Tree         = 1.0                       # Leaf living tissue (fraction)
     pa_FRoot_Tree        = 1.0                       # Fine root living tissue (fraction)
+    WoodDensity          = 565.0,                    # Potentially used for allometries (ref. value is for Cordia alliodora).
     k                    = light_extinction_K_Tree   # Light extinction coefficient (modify if needed)
     metamodels_tree      = metamodels_tree           # Idem for lue transpiration and sensible heat flux using MAESPA metamodels
     Allometries          = tree_allometries          # Idem for allometric equations (optional any kind of variable can be added here).
