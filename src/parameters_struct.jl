@@ -302,7 +302,7 @@ Base.@kwdef struct tree
     pa_CR_Tree           = 0.21                      # Coarse roots living tissue (fraction)
     pa_Leaf_Tree         = 1.0                       # Leaf living tissue (fraction)
     pa_FRoot_Tree        = 1.0                       # Fine root living tissue (fraction)
-    WoodDensity          = 565.0,                    # Potentially used for allometries (ref. value is for Cordia alliodora).
+    WoodDensity          = 565.0                    # Potentially used for allometries (ref. value is for Cordia alliodora).
     k                    = light_extinction_K_Tree   # Light extinction coefficient (modify if needed)
     metamodels_tree      = metamodels_tree           # Idem for lue transpiration and sensible heat flux using MAESPA metamodels
     Allometries          = tree_allometries          # Idem for allometric equations (optional any kind of variable can be added here).
