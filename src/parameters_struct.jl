@@ -242,7 +242,7 @@ end
 
 
 Base.@kwdef struct tree
-    Tree_Species::String         = "Erythrina poeppigiana"   # Names of the shade Tree species
+    Tree_Species::String = "Erythrina poeppigiana"   # Names of the shade Tree species
     Species_ID           = "Erythrina_Aquiares"      # Optional species ID
     StockingTree_treeha1 = 250.0                     # density at planting (trees ha-1). Source: Taugourdeau et al. (2014)
     SLA_Tree             = 17.4                      # Specific leaf area (m2 kg-1). Source: Van Oijen et al. (2010 I)

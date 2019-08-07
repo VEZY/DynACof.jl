@@ -1,7 +1,7 @@
 """
 Energy balance
 
-Computes the different components of the energy balance considering the shade tree, the coffee and teh soil.
+Computes the different components of the energy balance considering the shade tree, the coffee and the soil.
 
 # Return
 
