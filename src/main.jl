@@ -294,11 +294,11 @@ file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/
 Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",coffee="package",tree="package"))
 rm(file)
 
-# Value of the maintenance respiration for coffee:
+# Value of the maintenance respiration for coffee on day i=100:
+i= 100
 Sim.Rm[i]
 
 # Changing the value of Tair in the meteorology for day 100: 
-i= 100
 Meteo.Tair[i] += 10.0
 dynacof_i!(i,Sim,Meteo,Parameters)
 
@@ -321,14 +321,14 @@ function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
 
   p = Progress(length(i),1)
 
-  for i in collect(i)
+  for j in collect(i)
     next!(p)
     # Shade Tree computation if any
-    tree_model!(Sim,Parameters,Met_c,i)
+    tree_model!(Sim,Parameters,Met_c,j)
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
-    coffee_model!(Sim,Parameters,Met_c,i)
-    soil_model!(Sim,Parameters,Met_c,i)
-    balance_model!(Sim,Parameters,Met_c,i) # Energy balance
+    coffee_model!(Sim,Parameters,Met_c,j)
+    soil_model!(Sim,Parameters,Met_c,j)
+    balance_model!(Sim,Parameters,Met_c,j) # Energy balance
   end
 
   return Sim
