@@ -145,7 +145,7 @@ end
 
 
 """
-    virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64; formula::String="Sonntag_1990",C_to_K::Float64=constants().Kelvin, eps::Float64= constants().epsi)::Float64
+    virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64; formula::String="Sonntag_1990",C_to_K::Float64=constants().Kelvin, epsi::Float64= constants().epsi)::Float64
 Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.
 
 # Arguments  
@@ -155,10 +155,10 @@ Computes the virtual temperature, *i.e.* the temperature at which dry air would 
 - `formula::String`: (optional) Formula to be used for the calculation of esat. One of "Sonntag_1990" (Default),
 "Alduchov_1996", or "Allen_1998".
 - `C_to_K::Float64`: Celsius degree to Kelvin (*e.g.* 273.15)
-- `eps::Float64`: Ratio of the molecular weight of water vapor to dry air 
+- `epsi::Float64`: Ratio of the molecular weight of water vapor to dry air 
 
 # Note
-`C_to_K` and `eps` can be found using `constants()`
+`C_to_K` and `epsi` can be found using `constants()`
 
 # Returns
 T_v, the virtual temperature (°C)
@@ -169,10 +169,10 @@ virtual_temp(25.0, 1010.0, 1.5, "Sonntag_1990")
 ```
 """
 function virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64; formula::String="Sonntag_1990",
-   C_to_K::Float64=constants().Kelvin, eps::Float64= constants().epsi)::Float64
+   C_to_K::Float64=constants().Kelvin, epsi::Float64= constants().epsi)::Float64
   e = VPD_to_e(VPD, Tair, "Sonntag_1990")
   Tair = Tair + C_to_K
-  Tv = Tair/(1 - (1 - eps) * e/pressure)
+  Tv = Tair/(1 - (1 - epsi) * e/pressure)
   Tv - C_to_K
 end
 

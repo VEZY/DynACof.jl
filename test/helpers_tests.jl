@@ -28,7 +28,7 @@ end;
 end;
 
 @testset "helpers" begin
-    @test typeof(struct_to_tuple(constants, constants())) == NamedTuple{(:cp, :epsi, :pressure0, :FPAR, :eps, :g, :Rd, :Rgas, :Kelvin, :vonkarman, :MJ_to_W, :Gsc, :σ, :H2OMW, :W_umol, :λ, :cl, :Dheat),NTuple{18,Float64}}
+    @test typeof(struct_to_tuple(constants, constants())) == NamedTuple{(:cp, :epsi, :pressure0, :FPAR, :g, :Rd, :Rgas, :Kelvin, :vonkarman, :MJ_to_W, :Gsc, :σ, :H2OMW, :W_umol, :λ, :cl, :Dheat),NTuple{17,Float64}}
     @test logistic(1.0,5.0,0.1) ≈ 0.00 atol= 1e-15
     @test logistic(5.0,5.0,0.1) ≈ 0.5
     @test logistic_deriv(1.0,5.0,0.1) ≈ 0.00 atol= 1e-15

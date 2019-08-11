@@ -15,7 +15,7 @@ Computes the virtual temperature, *i.e.* the temperature at which dry air would 
 - `g::Float64`: gravitational acceleration (``m\\ s^{-2}``)
 
 # Note
-`C_to_K` and `eps` can be found using `constants()`
+`C_to_K` and `epsi` can be found using `constants()`
 
 # Returns
 The atmospheric pressure (kPa)
@@ -59,7 +59,7 @@ valid for a wide range of climate conditions
 * Gopinathan and Soler (1995) from 40 widely distributed locations in the latitude range of 36S to 60N.  
 
 # Note
-`C_to_K` and `eps` can be found using `constants()`
+`C_to_K` and `epsi` can be found using `constants()`
 
 # Returns
 ``Hd/H``: the daily diffuse fraction of light (%)

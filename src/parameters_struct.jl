@@ -32,7 +32,6 @@ Base.@kwdef struct constants
     epsi::Float64= 0.622 
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
-    eps::Float64       = 0.622
     g::Float64         = 9.81
     Rd::Float64        = 287.0586
     Rgas::Float64      = 8.314

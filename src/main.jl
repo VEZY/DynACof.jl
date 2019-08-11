@@ -13,7 +13,8 @@ carbon demand distribution along the year.
 - `period::Array{String,1}`: A vector of two character string as POSIX dates that correspond to the min and max dates for the desired time
 period to be returned. The default value ["0000-01-01", "0000-01-02"] makes the function take the min and max values from the meteorology file.
 - `input_path::String`: Path to the input parameter list folder. Default to `"package"`, wich makes DynACof use the package default parameter values.
-- `output_path::String`: Path pointing to the folder were the results will be written. Default to `"output_path = input_path"`.
+- `output_path::String`: Path pointing to the folder were the results will be written. Default to `""`, no writting. If the user need to writte on the 
+same path than in the input_path, output_path can be set to `output_path = input_path`.
 - `simulation_name::String`: Character name of the simulation file name when written (`write == true`). Default: `"DynACof"`.
 - `file_name::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: A list of input file names :
 
@@ -191,7 +192,7 @@ rm(file)
 ```
 """
 function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
-                 output_path= input_path, simulation_name="DynACof",
+                 output_path= "", simulation_name="DynACof",
                  file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",
                              coffee="coffee.jl",tree="tree.jl"))
 
@@ -331,5 +332,4 @@ function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
     balance_model!(Sim,Parameters,Met_c,j) # Energy balance
   end
 
-  return Sim
 end
