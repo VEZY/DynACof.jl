@@ -1,7 +1,7 @@
 name = "DynACof"
 uuid = "d4e20bd3-38f5-51f3-b39d-16897e8b4820"
 authors = ["remi.vezy <VEZY@users.noreply.github.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
