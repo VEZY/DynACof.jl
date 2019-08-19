@@ -219,7 +219,7 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
 
     cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(unique(Meteo.year))]
     cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
-    age_year= collect(Parameters.AgeCoffeeMin:min(Parameters.AgeCoffeeMax,length(years)))
+    age_year= (1:length(ndaysYear)) .% Parameters.AgeCoffeeMax
     age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
     age_day_num= vcat(map((x,y) -> collect(x:(1 / y):(x + 1.0 - 1 / y)),age_year,ndaysYear)...)
 
@@ -312,7 +312,7 @@ dynacof_i!(i:(i+10),Sim,Meteo,Parameters)
 ```
 """
 function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
-
+ 
   # Search for the species specific tree function:
   if Parameters.Tree_Species == "No_Shade"
     tree_model! = No_Shade
