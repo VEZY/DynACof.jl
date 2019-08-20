@@ -27,7 +27,7 @@ function soil_model!(Sim,Parameters,Met_c,i)
     Sim.Rn_Soil_SW[i]= Met_c.Rn[i] * exp(-Parameters.k_Rn * Sim.LAIplot[i])
 
     # Rn understorey using metamodels
-    Parameters.Metamodels_soil(Sim,Met_c,i)
+    Base.invokelatest(Parameters.Metamodels_soil,Sim,Met_c,i)
     # NB: soil heat storage is negligible at daily time-step (or equilibrate rapidly)
 
     # 1/ Rainfall interception, source Gomez-Delgado et al.2011, Box A: IntercMax=AX;

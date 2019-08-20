@@ -10,7 +10,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     # And via allometries: Height_Tree for canopy boundary layer conductance
   
     # Metamodel for kdif and kdir
-    Parameters.k(Sim,Met_c,i)
+    Base.invokelatest(Parameters.k, Sim,Met_c,i)
   
     Sim.APAR_Dif_Tree[i]= (Met_c.PAR[i] * Met_c.FDiff[i]) * (1-exp(- Sim.K_Dif_Tree[i] * Sim.LAI_Tree[previous_i(i)]))
     Sim.APAR_Dir_Tree[i]= (Met_c.PAR[i]*(1-Met_c.FDiff[i]))*(1-exp(-Sim.K_Dir_Tree[i]*Sim.LAI_Tree[previous_i(i)]))
@@ -23,8 +23,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     end
   
     # Calling the metamodels for LUE, Transpiration and sensible heat flux :
-    Parameters.metamodels_tree(Sim,Met_c,i)
-  
+    Base.invokelatest(Parameters.metamodels_tree,Sim,Met_c,i)
     # Computing the air temperature in the shade tree layer:
     Sim.TairCanopy_Tree[i]=
       Met_c.Tair[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
@@ -161,7 +160,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
       # Phenology (leaf mortality increases in this period) if Leaf_Fall_Tree is TRUE
       Sim.Mact_Leaf_Tree[i]=
         Sim.CM_Leaf_Tree[previous_i(i)] *
-        Parameters.Leaf_fall_rate_Tree[Parameters.Leaf_fall_rate_Tree[findall(x -> any(map(y -> y==Met_c.DOY[i],collect(x))), Parameters.Fall_Period_Tree)]]
+        Parameters.Leaf_fall_rate_Tree[findfirst(x -> any(map(y -> y==Met_c.DOY[i],collect(x))), Parameters.Fall_Period_Tree)]
     else
       # Or just natural litterfall assuming no diseases
       Sim.Mact_Leaf_Tree[i]= Sim.CM_Leaf_Tree[previous_i(i)] / Parameters.lifespan_Leaf_Tree
@@ -249,8 +248,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     Sim.LAI_Tree[i]= Sim.DM_Leaf_Tree[i] * (Parameters.SLA_Tree / 1000.0)
   
     # Allometries ------------------------------------------------------------
-    Parameters.Allometries(Sim,Met_c,Parameters,i)
-  
+    Base.invokelatest(Parameters.Allometries,Sim,Met_c,Parameters,i)
     Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI_Tree[i]
 end  
 

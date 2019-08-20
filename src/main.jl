@@ -219,7 +219,7 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
 
     cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(unique(Meteo.year))]
     cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
-    age_year= (1:length(ndaysYear)) .% Parameters.AgeCoffeeMax
+    age_year= (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
     age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
     age_day_num= vcat(map((x,y) -> collect(x:(1 / y):(x + 1.0 - 1 / y)),age_year,ndaysYear)...)
 
@@ -264,6 +264,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   for i in 1:length(Sim.LAI)
     next!(p)
+    # println(i)
     # Shade Tree computation if any
     tree_model!(Sim,Parameters,Met_c,i)
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)

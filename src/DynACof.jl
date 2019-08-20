@@ -10,7 +10,7 @@ import Interpolations.LinearInterpolation
 
 
 # Helper functions:
-export is_missing, warn_var
+export is_missing, warn_var, previous_i
 export cos°,sin°,tan°,acos°,asin°,atan°
 export logistic,logistic_deriv,mean,diff
 # ecophysio helpers:
@@ -35,7 +35,7 @@ export GetWind,G_bulk,Gb_h,G_soilcan,G_interlay
 export ALS
 # Main functions:
 export meteorology
-export dynacof, mainfun, Shade_Tree, soil_model!
+export dynacof, mainfun, Shade_Tree, soil_model!, coffee_model!,balance_model!
 export dynacof_i!
 
 include("test.jl")

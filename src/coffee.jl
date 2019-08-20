@@ -30,11 +30,10 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # soil (+canopy evap) water balance ---------------------------------------
   
         # Metamodel Coffee leaf water potential
-      Sim.LeafWaterPotential[i]= Parameters.LeafWaterPotential(Sim,Met_c,i)
-      
+      Sim.LeafWaterPotential[i]= Base.invokelatest(Parameters.LeafWaterPotential,Sim,Met_c,i)
       # Transpiration Coffee
-      Sim.T_Coffee[i]= Parameters.T_Coffee(Sim,Met_c,i)
-      Sim.H_Coffee[i]= Parameters.H_Coffee(Sim,Met_c,i)
+      Sim.T_Coffee[i]= Base.invokelatest(Parameters.T_Coffee,Sim,Met_c,i)
+      Sim.H_Coffee[i]= Base.invokelatest(Parameters.H_Coffee,Sim,Met_c,i)
   
       # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
       # Source: Van de Griend and Van Boxel 1989.
@@ -73,7 +72,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       Sim.DegreeDays_Tcan[i]= GDD(Sim.Tleaf_Coffee[i], Parameters.MinTT, Parameters.MaxTT)
       
       # Metamodel LUE coffee:
-      Sim.lue[i]= Parameters.lue(Sim,Met_c,i)
+      Sim.lue[i]= Base.invokelatest(Parameters.lue,Sim,Met_c,i)
   
       #GPP Coffee
       Sim.GPP[i]= Sim.lue[i] * Sim.APAR[i]
@@ -190,7 +189,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       DormancyBreakPeriod= OldestDormancy:(YoungestDormancy - sum(CumRain .< Parameters.F_rain))
   
       # (6) Temperature effect on bud phenology
-      Sim.Temp_cor_Bud[i]= Parameters.Bud_T_correction()(Sim.Tleaf_Coffee[i])
+      Sim.Temp_cor_Bud[i]= Base.invokelatest(Parameters.Bud_T_correction)(Sim.Tleaf_Coffee[i])
       
       # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
       Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.LeafWaterPotential[i]))
