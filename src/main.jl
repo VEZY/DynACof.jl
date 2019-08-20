@@ -264,7 +264,6 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   for i in 1:length(Sim.LAI)
     next!(p)
-    # println(i)
     # Shade Tree computation if any
     tree_model!(Sim,Parameters,Met_c,i)
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)

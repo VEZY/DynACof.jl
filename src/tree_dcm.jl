@@ -196,7 +196,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
   
     if Sim.TimetoThin_Tree[i]
       # First, reduce stocking by the predefined rate of thining:
-      Sim.Stocking_Tree[i:end] .= Sim.Stocking_Tree[i-1] * (1.0 - Parameters.RateThinning_Tree)
+      Sim.Stocking_Tree[i:end] .= Sim.Stocking_Tree[previous_i(i)] * (1.0 - Parameters.RateThinning_Tree)
       # Then add mortality (removing) due to thining :
       Sim.MThinning_Stem_Tree[i]= Sim.CM_Stem_Tree[previous_i(i)] * Parameters.RateThinning_Tree
       Sim.MThinning_CR_Tree[i]= Sim.CM_CR_Tree[previous_i(i) ] * Parameters.RateThinning_Tree
