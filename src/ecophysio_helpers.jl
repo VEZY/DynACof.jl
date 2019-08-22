@@ -142,8 +142,6 @@ function dew_point(Tair::Float64, VPD::Float64, formula::String="Sonntag_1990"):
   # optimize(f, lower, upper, method; kwargs...)
 end
 
-
-
 """
     virtual_temp(Tair::Float64, pressure::Float64, VPD::Float64; formula::String="Sonntag_1990",C_to_K::Float64=constants().Kelvin, epsi::Float64= constants().epsi)::Float64
 Computes the virtual temperature, *i.e.* the temperature at which dry air would have the same density as moist air at its actual temperature.

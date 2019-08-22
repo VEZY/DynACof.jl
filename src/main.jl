@@ -1,5 +1,5 @@
 """
-    dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",output_path= input_path, simulation_name="DynACof",
+    dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
              file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl")
 
 # Dynamic Agroforestry Coffee Crop Model
@@ -13,9 +13,6 @@ carbon demand distribution along the year.
 - `period::Array{String,1}`: A vector of two character string as POSIX dates that correspond to the min and max dates for the desired time
 period to be returned. The default value ["0000-01-01", "0000-01-02"] makes the function take the min and max values from the meteorology file.
 - `input_path::String`: Path to the input parameter list folder. Default to `"package"`, wich makes DynACof use the package default parameter values.
-- `output_path::String`: Path pointing to the folder were the results will be written. Default to `""`, no writting. If the user need to writte on the 
-same path than in the input_path, output_path can be set to `output_path = input_path`.
-- `simulation_name::String`: Character name of the simulation file name when written (`write == true`). Default: `"DynACof"`.
 - `file_name::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: A list of input file names :
 
     + **constants**: Physical constants file. Default: "constants.jl". More info in the corresponding structure: [`constants`](@ref).
@@ -192,7 +189,6 @@ rm(file)
 ```
 """
 function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
-                 output_path= "", simulation_name="DynACof",
                  file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",
                              coffee="coffee.jl",tree="tree.jl"))
 
@@ -201,15 +197,15 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
     Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
-    
-    NCycles= ceil(Int64,(maximum(Meteo.year) - minimum(Meteo.year)) / Parameters.AgeCoffeeMax)
+    years= unique(Meteo.year)
 
+    NCycles= ceil(Int64,length(years) ./ Parameters.AgeCoffeeMax)
+    
     if NCycles==0
       error("Carefull, minimum allowed simulation length is one year")
     end
 
     # Setting up the simulation with each plantation rotation (cycle) and plantation age (Plot_Age) 
-    years= unique(Meteo.year)
     ndaysYear= zeros(Int64, length(years))
     for i in 1:length(years)
         ndaysYear[i]= nrow(Meteo[Meteo.year .== years[i],:])
@@ -217,7 +213,7 @@ function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_p
     # Variables are re-initialized from one to another cycle so each cycle is independant from the others -> mandatory for
     # parallel processing afterwards
 
-    cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(unique(Meteo.year))]
+    cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(years)]
     cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
     age_year= (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
     age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
