@@ -1,9 +1,25 @@
-function No_Shade(Sim,Parameters,Met_c,i)
+"""
 
-end
+# Shade Tree subroutine
+Make all computations for shade trees (similar to coffee, but no fruits) for the ith day by modifying the `S` list in place.
 
+# Arguments 
 
-function Shade_Tree(Sim,Parameters,Met_c,i)
+- `Sim::DataFrame`: The main simulation DataFrame to make the computation. Is modified in place.
+- `Parameters`: A named tuple with parameter values (see [`import_parameters`](@ref)).
+- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref)).
+- `i::Int64`: The index of the day since the first day of the simulation.
+
+# Return
+Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref) for more details.
+
+# Note
+This function shouldn't be called by the user. It is made as a "sub-module" so it is easier for advanced users to modify the code.
+`No_Shade()` is used as an empty function that is called when there are no shade trees.
+
+See also [`dynacof`](@ref)
+"""
+function tree_model!(Sim,Parameters,Met_c,i)
     # Shade tree layer computations (common for all species)
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree,
     # LE_Tree (sum of transpiration + leaf evap)
@@ -250,27 +266,3 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     Base.invokelatest(Parameters.Allometries,Sim,Met_c,Parameters,i)
     Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI_Tree[i]
 end  
-
-
-"""
-
-# Shade Tree subroutine
-Make all computations for shade trees (similar to coffee, but no fruits) for the ith day by modifying the `S` list in place.
-
-# Arguments 
-
-- `Sim::DataFrame`: The main simulation DataFrame to make the computation. Is modified in place.
-- `Parameters`: A named tuple with parameter values (see [`import_parameters`](@ref)).
-- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref)).
-- `i::Int64`: The index of the day since the first day of the simulation.
-
-# Return
-Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref) for more details.
-
-# Note
-This function shouldn't be called by the user. It is made as a "sub-module" so it is easier for advanced users to modify the code.
-`No_Shade()` is used as an empty function that is called when there are no shade trees.
-
-See also [`dynacof`](@ref)
-"""
-Shade_Tree, No_Shade

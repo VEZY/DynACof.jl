@@ -8,7 +8,7 @@ Initialise model variables.
 - `Parameters`: The parameters for the model
 """
 function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
-    Sim[!,:LAI] .= 0.1
+    Sim[!,:LAI] .= 0.0
     Sim[!,:LAIplot] .= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,
     # otherwise, GPP does not start and nothing grows
@@ -188,6 +188,7 @@ function Tree_init_no_shade!(Sim)
     Sim[!,:Height_Tree] .= 0.0
     Sim[!,:TairCanopy_Tree] .= 0.0
     Sim[!,:PAR_Trans_Tree] .= 0.0
+    Sim[!,:Stocking_Tree] .= 0.0
 end
 
 
@@ -200,16 +201,14 @@ function Tree_init!(Sim,Met_c,Parameters)
     Sim[!,:CM_FRoot_Tree] .= 0.01
     Sim[!,:CM_CR_Tree] .= 0.01
     Sim[!,:CM_RE_Tree] .= 0.15
-  
-    Sim[!,:LAI_Tree] .= Sim.CM_Leaf_Tree .* (Parameters.SLA_Tree ./ 1000.0) ./ Parameters.CC_Leaf_Tree
-  
     Sim[!,:Trunk_H_Tree] .= 0.0
     Sim[!,:Crown_H_Tree] .= 0.0
     Sim[!,:Height_Tree] .= 0.0
     Sim.Height_Tree[1]= 0.001 # because G_bulk doesn't allow heights of 0
-
+    Sim[!,:LAI_Tree] .= 0.0
     Sim[!,:LA_Tree] .= 0.0
     Sim[!,:DM_Leaf_Tree] .= 0.0
+    Sim.DM_Leaf_Tree[1]= Sim.CM_Leaf_Tree[1] / Parameters.CC_Leaf_Tree
     Sim[!,:DM_Branch_Tree] .= 0.0
     Sim[!,:DM_Stem_Tree] .= 0.0
     Sim[!,:DM_CR_Tree] .= 0.0

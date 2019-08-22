@@ -243,13 +243,6 @@ function mainfun(cy,Direction,Meteo,Parameters)
   initialise!(Sim,Met_c,Parameters)
   bud_init_period!(Sim,Met_c,Parameters)
   
-  # Search for the species specific tree function:
-  if Parameters.Tree_Species == "No_Shade"
-    tree_model! = No_Shade
-  else
-    tree_model! = Shade_Tree
-  end
-
   Sim.ALS= ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
                Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
                ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning, 
@@ -311,19 +304,14 @@ dynacof_i!(i:(i+10),Sim,Meteo,Parameters)
 """
 function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
  
-  # Search for the species specific tree function:
-  if Parameters.Tree_Species == "No_Shade"
-    tree_model! = No_Shade
-  else
-    tree_model! = Shade_Tree
-  end
-
   p = Progress(length(i),1)
 
   for j in collect(i)
     next!(p)
     # Shade Tree computation if any
-    tree_model!(Sim,Parameters,Met_c,j)
+    if Sim.Stocking_Tree[i] > 0.0
+      tree_model!(Sim,Parameters,Met_c,i)
+    end
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
     coffee_model!(Sim,Parameters,Met_c,j)
     soil_model!(Sim,Parameters,Met_c,j)
