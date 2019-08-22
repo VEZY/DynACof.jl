@@ -362,7 +362,7 @@ function tree_allometries(Sim::DataFrame,Met_c::DataFrame,Parameters,i::Int64)
     Sim.LA_Tree[i]= Sim.LAI_Tree[i] / Sim.Stocking_Tree[i]
     Sim.LAD_Tree[i]= Sim.LA_Tree[i] / ((Sim.CrownRad_Tree[i]^2.0) * (0.5 * Sim.Crown_H_Tree[i]) * pi * (4.0 / 3.0))
 
-    if Sim.LAD_Tree[i] == Inf || Sim.LAD_Tree[i] < 0.21
+    if Sim.LAD_Tree[i] == Inf || isnan(Sim.LAD_Tree[i]) || Sim.LAD_Tree[i] < 0.21
         Sim.LAD_Tree[i]= 0.21
     elseif Sim.LAD_Tree[i] > 0.76
         Sim.LAD_Tree[i]= 0.76

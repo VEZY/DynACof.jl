@@ -9,11 +9,13 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     # LE_Tree (sum of transpiration + leaf evap)
     # And via allometries: Height_Tree for canopy boundary layer conductance
   
+    Sim.LAI_Tree[i]= Sim.DM_Leaf_Tree[previous_i(i)] * (Parameters.SLA_Tree / 1000.0)
+
     # Metamodel for kdif and kdir
     Base.invokelatest(Parameters.k, Sim,Met_c,i)
   
-    Sim.APAR_Dif_Tree[i]= (Met_c.PAR[i] * Met_c.FDiff[i]) * (1-exp(- Sim.K_Dif_Tree[i] * Sim.LAI_Tree[previous_i(i)]))
-    Sim.APAR_Dir_Tree[i]= (Met_c.PAR[i]*(1-Met_c.FDiff[i]))*(1-exp(-Sim.K_Dir_Tree[i]*Sim.LAI_Tree[previous_i(i)]))
+    Sim.APAR_Dif_Tree[i]= (Met_c.PAR[i] * Met_c.FDiff[i]) * (1.0-exp(-Sim.K_Dif_Tree[i] * Sim.LAI_Tree[i]))
+    Sim.APAR_Dir_Tree[i]= (Met_c.PAR[i]*(1-Met_c.FDiff[i])) * (1.0-exp(-Sim.K_Dir_Tree[i]*Sim.LAI_Tree[i]))
   
     Sim.APAR_Tree[i]= max(0.0,Sim.APAR_Dir_Tree[i]+Sim.APAR_Dif_Tree[i])
   
@@ -29,17 +31,16 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
       Met_c.Tair[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
       (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp *
          G_bulk(Wind= Met_c.WindSpeed[i], ZHT= Parameters.ZHT,
-                LAI= Sim.LAI_Tree[previous_i(i)],
+                LAI= Sim.LAI_Tree[i],
                 extwind= Parameters.extwind,
                 Z_top= Sim.Height_Tree[previous_i(i)]))
     # NB : using WindSpeed because wind extinction is already computed in G_bulk (until top of canopy).
   
     Sim.Tleaf_Tree[i]=
       Sim.TairCanopy_Tree[i] + (Sim.H_Tree[i]*Parameters.MJ_to_W) /
-      
       (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp *
          Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf_Tree,
-              LAI_lay= Sim.LAI_Tree[previous_i(i)],
+              LAI_lay= Sim.LAI_Tree[i],
               LAI_abv= 0,ZHT = Parameters.ZHT,
               Z_top = Sim.Height_Tree[previous_i(i)],
               extwind= Parameters.extwind))
@@ -101,8 +102,8 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
       Sim.M_Rm_CR_Tree[i]= Parameters.lambda_CR_Tree * Sim.Supply_Total_Tree[i]
       Sim.M_Rm_Branch_Tree[i]= Parameters.lambda_Branch_Tree * Sim.Supply_Total_Tree[i]
       Sim.M_Rm_Leaf_Tree[i]= 
-            min(Parameters.DELM_Tree * Sim.Stocking_Tree[i] * ((Parameters.LAI_max_Tree - Sim.LAI_Tree[previous_i(i)]) /
-                  (Sim.LAI_Tree[previous_i(i)] + Parameters.LAI_max_Tree)),
+            min(Parameters.DELM_Tree * Sim.Stocking_Tree[i] * ((Parameters.LAI_max_Tree - Sim.LAI_Tree[i]) /
+                  (Sim.LAI_Tree[i] + Parameters.LAI_max_Tree)),
                 Parameters.lambda_Leaf_Tree * Sim.Supply_Total_Tree[i])
 
       Sim.M_Rm_FRoot_Tree[i]= Parameters.lambda_FRoot_Tree * Sim.Supply_Total_Tree[i]
@@ -126,8 +127,8 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
     Sim.Alloc_CR_Tree[i]= Parameters.lambda_CR_Tree * Sim.Supply_Total_Tree[i]
     Sim.Alloc_Branch_Tree[i]= Parameters.lambda_Branch_Tree * Sim.Supply_Total_Tree[i]
     Sim.Alloc_Leaf_Tree[i]= 
-        min(Parameters.DELM_Tree * Sim.Stocking_Tree[i] * ((Parameters.LAI_max_Tree - Sim.LAI_Tree[previous_i(i)]) /
-               (Sim.LAI_Tree[previous_i(i)] + Parameters.LAI_max_Tree)),
+        min(Parameters.DELM_Tree * Sim.Stocking_Tree[i] * ((Parameters.LAI_max_Tree - Sim.LAI_Tree[i]) /
+               (Sim.LAI_Tree[i] + Parameters.LAI_max_Tree)),
           Parameters.lambda_Leaf_Tree * Sim.Supply_Total_Tree[i])
     Sim.Alloc_FRoot_Tree[i]= Parameters.lambda_FRoot_Tree * Sim.Supply_Total_Tree[i]
     # Allocation to reserves (Supply - all other allocations):
@@ -244,9 +245,7 @@ function Shade_Tree(Sim,Parameters,Met_c,i)
   
     # Daily C balance that should be nil every day:
     Sim.Cbalance_Tree[i]= Sim.Supply_Total_Tree[i] - (Sim.NPP_Tree[i] + Sim.Rg_Tree[i])
-  
-    Sim.LAI_Tree[i]= Sim.DM_Leaf_Tree[i] * (Parameters.SLA_Tree / 1000.0)
-  
+    
     # Allometries ------------------------------------------------------------
     Base.invokelatest(Parameters.Allometries,Sim,Met_c,Parameters,i)
     Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI_Tree[i]
