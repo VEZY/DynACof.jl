@@ -10,6 +10,7 @@ Initialise model variables.
 function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:LAI] .= 0.0
     Sim[!,:LAIplot] .= 0.0
+    Sim[!,:Height_Canopy] .= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,
     # otherwise, GPP does not start and nothing grows
     Sim[!,:PAR_Trans] .= 0.0
@@ -167,14 +168,14 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:WSurfaceRes] .= 0.0
   
     if Parameters.Tree_Species == "No_Shade"
-        Tree_init_no_shade!(Sim)
+        Tree_init_no_shade!(Sim,Met_c)
     else
         Tree_init!(Sim,Met_c,Parameters)
     end
 end
 
 
-function Tree_init_no_shade!(Sim,Met_c)
+function Tree_init_no_shade!(Sim::DataFrame,Met_c::DataFrame)
     # NB: if Tree_Species is NULL (i.e. no shade trees), then do not add
     # any trees related variables to the main table, except for the few ones
     # needed in-code (e.g. Tree Height for GBCANMS):
@@ -197,7 +198,7 @@ end
 
 
 
-function Tree_init!(Sim,Met_c,Parameters)
+function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     # Initialisation of Shade tree variables:
     Sim[!,:CM_Leaf_Tree] .= 0.01
     Sim[!,:CM_Stem_Tree] .= 0.01
