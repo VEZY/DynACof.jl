@@ -46,7 +46,7 @@ Part of the code is taken from the [MAESPA model](https://maespa.github.io).
 GetWind(Wind=3.0,LAI_lay=4.0,LAI_abv=0.3,extwind= 0.58,Z_top = 24.0,ZHT = 25.0)
 ```
 """
-function GetWind(;Wind,LAI_lay,LAI_abv,Z_top,ZHT,extwind=0,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),vonkarman=constants().vonkarman, verbose=false)
+function GetWind(;Wind,LAI_lay,LAI_abv,Z_top,ZHT,extwind,Z0=Z_top*0.1,ZPD=Z_top*0.75,α=1.5,ZW=ZPD+α*(Z_top-ZPD),vonkarman=constants().vonkarman, verbose=false)
     ZHT= test_ZHT(ZHT, Z_top, verbose= false)
     Ustar = Wind * vonkarman / log((ZHT - ZPD) / Z0) # by inverting eq.41 from Van de Griend
     # Wind at the top of the canopy:

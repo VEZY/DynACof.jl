@@ -138,7 +138,6 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:Gb_h] .= 0.0
     Sim[!,:Gb_air_canopy] .= 0.0
     Sim[!,:air_density] .= 0.0
-    Sim[!,:WindSpeed_Coffee] .= 0.0
     Sim[!,:TairCanopy] .= 0.0
     Sim[!,:APAR_Dif] .= 0.0
     Sim[!,:APAR] .= 0.0

@@ -28,7 +28,7 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 - Khorasanizadeh, H. and K. Mohammadi (2016). "Diffuse solar radiation on a horizontal surface: Reviewing and categorizing the empirical models." Renewable and Sustainable Energy Reviews 53: 338-362.
 """
 Base.@kwdef struct constants
-    cp::Float64= 1013*10^-6
+    cp::Float64= 1013.0 * 10.0^-6
     epsi::Float64= 0.622 
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
@@ -37,7 +37,7 @@ Base.@kwdef struct constants
     Rgas::Float64      = 8.314
     Kelvin::Float64    = 273.15
     vonkarman::Float64 = 0.41
-    MJ_to_W::Float64   = 10^-6
+    MJ_to_W::Float64   = 10.0^-6
     Gsc::Float64       = 1367.0            # also found 1366 in Kalogirou (2013)
     σ::Float64         = 5.670367e-08
     H2OMW::Float64     = 18.e-3
