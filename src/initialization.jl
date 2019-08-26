@@ -134,6 +134,9 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:LE_tot] .= 0.0
     Sim[!,:Diff_T] .= 0.0
     Sim[!,:Tleaf_Coffee] .= 0.0
+    Sim[!,:Gb_h] .= 0.0
+    Sim[!,:Gb_air_canopy] .= 0.0
+    Sim[!,:air_density] .= 0.0
     Sim[!,:WindSpeed_Coffee] .= 0.0
     Sim[!,:TairCanopy] .= 0.0
     Sim[!,:APAR_Dif] .= 0.0
@@ -171,7 +174,7 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
 end
 
 
-function Tree_init_no_shade!(Sim)
+function Tree_init_no_shade!(Sim,Met_c)
     # NB: if Tree_Species is NULL (i.e. no shade trees), then do not add
     # any trees related variables to the main table, except for the few ones
     # needed in-code (e.g. Tree Height for GBCANMS):
@@ -186,7 +189,8 @@ function Tree_init_no_shade!(Sim)
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:LE_Tree] .= 0.0
     Sim[!,:Height_Tree] .= 0.0
-    Sim[!,:TairCanopy_Tree] .= 0.0
+    Sim[!,:TairCanopy_Tree] .= Met_c.Tair
+    Sim[!,:air_density_Tree] .= 0.0
     Sim[!,:PAR_Trans_Tree] .= 0.0
     Sim[!,:Stocking_Tree] .= 0.0
 end
@@ -236,6 +240,7 @@ function Tree_init!(Sim,Met_c,Parameters)
     Sim[!,:T_Tree] .= 0.0
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:Tleaf_Tree] .= 0.0
+    Sim[!,:air_density_Tree] .= 0.0
     Sim[!,:GPP_Tree] .= 0.0
     Sim[!,:Rm_Leaf_Tree] .= 0.0
     Sim[!,:Rm_CR_Tree] .= 0.0

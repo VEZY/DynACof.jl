@@ -13,7 +13,8 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # CM is in gC m-2soil, so use C content to transform in dry mass
       Sim.LAI[i]= Sim.CM_Leaf[previous_i(i)]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
       Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI[i]
-  
+      Sim.Height_Canopy[i]= max(Sim.Height_Tree[i], Parameters.Height_Coffee)
+
       # Light interception ------------------------------------------------------
   
       Sim.K_Dif[i]= Parameters.k_Dif
@@ -37,35 +38,31 @@ function coffee_model!(Sim,Parameters,Met_c,i)
   
       # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
       # Source: Van de Griend and Van Boxel 1989.
+
+                           
       if Sim.Height_Tree[i] > Parameters.Height_Coffee
-  
-        Sim.TairCanopy[i]= Sim.TairCanopy_Tree[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
-          (air_density(Sim.TairCanopy_Tree[i],Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
-             G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT, LAI_top= Sim.LAI_Tree[i], LAI_bot= Sim.LAI[i],
-                        Z_top= Sim.Height_Tree[i], extwind = Parameters.extwind))
-        Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i] + (Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
-          (air_density(Sim.TairCanopy[i],Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
-             Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay=Sim.LAI[i], LAI_abv=Sim.LAI_Tree[i],
-                  ZHT = Parameters.ZHT, Z_top = Sim.Height_Tree[i], extwind= Parameters.extwind))
-  
+        Sim.Gb_air_canopy[i]= G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT, LAI_top= Sim.LAI_Tree[i], LAI_bot= Sim.LAI[i],
+                                         Z_top= Sim.Height_Canopy[i], extwind = Parameters.extwind)  
       else
-  
-        Sim.TairCanopy[i]= Met_c.Tair[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
-          (air_density(Met_c.Tair[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
-             G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT, Z_top = Parameters.Height_Coffee,
-                    LAI = Sim.LAI[i], extwind = Parameters.extwind))
-  
-        Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i]+(Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
-          (air_density(Sim.TairCanopy[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp  * 
-             Gb_h(Wind= Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay= Sim.LAI[i], LAI_abv= Sim.LAI_Tree[i],
-                  ZHT= Parameters.ZHT, Z_top= Parameters.Height_Coffee, extwind= Parameters.extwind))
+        Sim.Gb_air_canopy[i]= G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT, Z_top = Sim.Height_Canopy[i],
+                                     LAI = Sim.LAI[i], extwind = Parameters.extwind)
       end
-      # NB: if no trees, TairCanopy_Tree= Tair
-  
+      
+      Sim.air_density_Tree[i]= air_density(Sim.TairCanopy_Tree[i],Met_c.Pressure[i] / 10.0)
+      Sim.TairCanopy[i]= Sim.TairCanopy_Tree[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
+                        (Sim.air_density_Tree[i] *  Parameters.cp * Sim.Gb_air_canopy[i])
+      # NB: if no trees, TairCanopy_Tree= Tair (see initialization.jl)
+      Sim.air_density[i]= air_density(Sim.TairCanopy[i],Met_c.Pressure[i] / 10.0)
+
+      Sim.Gb_h[i]= Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay=Sim.LAI[i], LAI_abv=Sim.LAI_Tree[i],
+                        ZHT = Parameters.ZHT, Z_top = Sim.Height_Canopy[i], extwind= Parameters.extwind)
+
+      Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i]+(Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
+                           (Sim.air_density[i] *  Parameters.cp  * Sim.Gb_h[i])
       # Recomputing soil temperature knowing TairCanopy
   
       Sim.TSoil[i]= Sim.TairCanopy[i]+(Sim.H_Soil[i] * Parameters.MJ_to_W) / 
-        (air_density(Sim.TairCanopy[i], Met_c.Pressure[i] / 10.0) *  Parameters.cp * 
+        (Sim.air_density[i] *  Parameters.cp * 
            G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
                      LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
   

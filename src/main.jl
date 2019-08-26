@@ -36,6 +36,8 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 | Type                         | Var                    | unit                | Definition                                                                          |
 |------------------------------|------------------------|---------------------|-------------------------------------------------------------------------------------|
 | General                      | Cycle                  | -                   | Plantation cycle ID                                                                 |
+|                              | date                   | Posix date (Y-m-d)  | Simulation date                                                                     |
+|                              | year                   | Year                | Simulation year                                                                     |
 |                              | Plot_Age               | year                | Plantation age (starting at 1)                                                      |
 |                              | Plot_Age_num           | year (numeric)      | Numeric age of plantation                                                           |
 |                              | LAIplot                | m2 leaves m-2 soil  | Plot (Coffee + Shade Tree if any) Leaf Area Index                                   |
@@ -56,8 +58,8 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | Rn_Coffee              | MJ m-2 d-1          | Coffee net radiation                                                                |
 |                              | Rn_Soil                | MJ m-2 d-1          | Soil net radiation                                                                  |
 |                              | Rn_Soil_SW             | MJ m-2 d-1          | Soil net radiation computed using Shuttleworth & Wallace (1985) for reference       |
-|                              | LE_x                   | MJ m-2 d-1          | System / Coffee / Tree / Soil latent heat                                                 |
-|                              | H_x                    | MJ m-2 d-1          | System / Coffee / Tree / Soil sensible heat                                               |
+|                              | LE_x                   | MJ m-2 d-1          | System / Coffee / Tree / Soil latent heat                                           |
+|                              | H_x                    | MJ m-2 d-1          | System / Coffee / Tree / Soil sensible heat                                         |
 |                              | Q_Soil                 | MJ m-2 d-1          | Soil heat transport                                                                 |
 |                              | Transmittance_Tree     | fraction            | Fraction of light transmitted by the shade trees                                    |
 |                              | PAR_Trans_Tree         | MJ m-2 d-1          | Light transmitted by the shade trees canopy                                         |
@@ -68,8 +70,11 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | APAR_Dif               | MJ m-2 d-1          | Absorbed diffuse PAR (Direct is APAR-APAR_Dif)                                      |
 |                              | lue                    | gC MJ               | Light use efficiency                                                                |
 |                              | Tleaf_Coffee           | deg C               | Coffee canopy temperature computed by DynACof                                       |
-|                              | WindSpeed_x            | m s-1               | Wind speed at the center of the layer                                               |
 |                              | TairCanopy_x           | deg C               | Air tempetature at the center of the layer                                          |
+|                              | Gb_h_x                 | m s-1               | Coffee / Tree conductance to heat                                                   |
+|                              | Gb_air_canopy          | m s-1               | Bulk (no tree) or canopy layer to canopy layer aerodynamic conductance              |
+|                              | air_density_x          | kg m-3              | Air density inside the canopy of the tree or the coffee (see [`air_density`](@ref)) |
+|                              | WindSpeed_x            | m s-1               | Wind speed at the center of the layer                                               |
 |                              | DegreeDays_Tcan        | deg C               | Growing degree days computed using Coffee Canopy Temperature                        |
 | Carbon                       | GPP                    | gC m-2 d-1          | Gross primary productivity                                                          |
 |                              | Consumption_RE         | gC m-2 d-1          | Daily reserve consumption                                                           |
@@ -104,6 +109,7 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | Harvest_Maturity_Pot   | Fraction            | Daily average fruit maturity (0-1)                                                  |
 |                              | Date_harvest           | day of year         | date of harvest                                                                     |
 |                              | Harvest_Fruit          | gC m-2              | Total fruit carbon mass at harvest                                                  |
+|                              | Yield_green            | kg ha-1             | Yield of green coffee bean                                                          |
 |                              | Harvest_Maturity       | Fraction            | Average fruit maturity at harvest (0-1)                                             |
 |                              | Overriped_Fruit        | gC m-2 d-1          | Overriped fruits that fall onto the ground                                          |
 | Water                        | IntercMax              | mm                  | Maximum potential rainfall interception by canopy                                   |
@@ -262,6 +268,10 @@ function mainfun(cy,Direction,Meteo,Parameters)
     soil_model!(Sim,Parameters,Met_c,i)
     balance_model!(Sim,Parameters,Met_c,i) # Energy balance
   end
+
+  Sim[!,:date] .= Met_c.Date
+  Sim[!,:year] .= Met_c.year
+  Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
 
   return Sim
 end
