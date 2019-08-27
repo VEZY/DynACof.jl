@@ -319,8 +319,8 @@ function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
   for j in collect(i)
     next!(p)
     # Shade Tree computation if any
-    if Sim.Stocking_Tree[i] > 0.0
-      tree_model!(Sim,Parameters,Met_c,i)
+    if Sim.Stocking_Tree[j] > 0.0
+      tree_model!(Sim,Parameters,Met_c,j)
     end
     # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
     coffee_model!(Sim,Parameters,Met_c,j)
