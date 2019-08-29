@@ -66,7 +66,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
            G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
                      LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
   
-      Sim.DegreeDays_Tcan[i]= GDD(Sim.Tleaf_Coffee[i], Parameters.MinTT, Parameters.MaxTT)
+      Sim.DegreeDays_Tcan[i]= GDD(Sim.TairCanopy[i], Parameters.MinTT, Parameters.MaxTT)
       
       # Metamodel LUE coffee:
       Sim.lue[i]= Base.invokelatest(Parameters.lue,Sim,Met_c,i)
@@ -147,7 +147,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # so number of nodes) are related to leaf area (new leaves appear on nodes) :
       # GUTIERREZ et al. (1998)
       if Met_c.DOY[i] == Parameters.DVG2
-        T_VG= Sim.Tleaf_Coffee[(Met_c.year .== Met_c.year[i]) .& (Met_c.DOY .>= Parameters.DVG1) .& (Met_c.DOY .<= Parameters.DVG2)]
+        T_VG= Sim.TairCanopy[(Met_c.year .== Met_c.year[i]) .& (Met_c.DOY .>= Parameters.DVG1) .& (Met_c.DOY .<= Parameters.DVG2)]
         T_VG= sum(T_VG)/length(T_VG)
         Sim.ratioNodestoLAI[Met_c.year .>= Met_c.year[i]] .= Parameters.RNL_base * CN(T_VG)
       end
@@ -158,7 +158,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # Buds start appearing for the very first time from 5500 dd. After that,
       # they appear every "Parameters.F_Tffb" degree days until flowering starts
       if Sim.BudInitPeriod[i]
-        Sim.Budinit[i]= (Parameters.a_bud+Parameters.b_bud * (Sim.PAR_Trans_Tree[i] / Parameters.FPAR)) *
+        Sim.Budinit[i]= (Parameters.a_bud + Parameters.b_bud * (Sim.PAR_Trans_Tree[i] / Parameters.FPAR)) *
                          Sim.LAI[i-1] * Sim.ratioNodestoLAI[i-1] * Sim.DegreeDays_Tcan[i]
         # NB: Number of nodes= Sim.LAI[i-1] * Sim.ratioNodestoLAI[i-1]
         Sim.Bud_available[i]= Sim.Budinit[i]
