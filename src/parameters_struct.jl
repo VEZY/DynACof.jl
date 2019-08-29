@@ -19,6 +19,7 @@ This function defines the following constants:
 - λ (lambda): Latent heat of vaporization (``MJ\\ kg_{H2O}^{-1}``)
 - cl: Drag coefficient per unit leaf area (``m\\ s^{-1}``)
 - Dheat: Molecular diffusivity for heat (``m\\ s^{-1}``)
+- GBVGBH: Conversion factor from conductance to water to conductance to heat.
 
 Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocumentation.org/packages/bigleaf/versions/0.7.0/topics/bigleaf.constants)
 
@@ -45,6 +46,7 @@ Base.@kwdef struct constants
     λ::Float64         = 2.45
     cl::Float64        = 0.4
     Dheat::Float64     = 21.5e-6
+    GBVGBH::Float64    = 1.075
 end
 
 

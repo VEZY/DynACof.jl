@@ -330,6 +330,7 @@ Compute the daily evaporation or transpiration of the surface using the Penman-M
     + Rgas: universal gas constant (J mol-1 K-1)
     + Kelvin: conversion degree Celsius to Kelvin
     + H2OMW: conversion from kg to mol for H2O (kg mol-1)
+    + GBVGBH: conversion from water conductance to heat conductance
 
 All arguments are named. 
 
@@ -370,13 +371,15 @@ function PENMON(;Rn,Wind,Tair,ZHT,Z_top,Pressure,Gs,VPD,LAI,extwind=0,wleaf=0.06
 
   GH = GB
 
-  GV = 1.0 / (1.0 / Gs + 1.0 / GB)
+  GV = 1.0 / (1.0 / Gs + 1.0 / (GB / Parameters.GBVGBH))
 
   gamma  = psychrometric_constant(Tair,Pressure/10.0)
   Delta  = esat_slope(Tair,"Allen_1998")
   rho    = air_density(Tair,Pressure / 10.0)
 
-  LE_ref = (Delta * Rn * 10^6 + rho * Parameters.cp * (VPD / 10.0) * GH) / (Delta + gamma * (1.0 + GH / GV))
+  gamma_star= 2.0 * gamma * GH / GV
+
+  LE_ref = (Delta * Rn * 10^6 + rho * Parameters.cp * (VPD / 10.0) * GH) / (Delta + gamma_star)
   ET_ref = LE_to_ET(LE_ref,Tair)
   
   return ET_ref
