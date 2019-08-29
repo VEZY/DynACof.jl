@@ -152,9 +152,9 @@ function soil_model!(Sim,Parameters,Met_c,i)
     end
 
     # 6/ Root Water Extraction by soil layer, source Granier et al., 1999
-    Sim.RootWaterExtract_1[i]= Sim.T_tot[i] * Parameters.RootFraction1
-    Sim.RootWaterExtract_2[i]= Sim.T_tot[i] * Parameters.RootFraction2
-    Sim.RootWaterExtract_3[i]= Sim.T_tot[i] * Parameters.RootFraction3
+    Sim.RootWaterExtract_1[i]= Sim.T_tot[previous_i(i)] * Parameters.RootFraction1
+    Sim.RootWaterExtract_2[i]= Sim.T_tot[previous_i(i)] * Parameters.RootFraction2
+    Sim.RootWaterExtract_3[i]= Sim.T_tot[previous_i(i)] * Parameters.RootFraction3
     # Avoiding depleting Wx below Wmx, and udating Wx after retrieving actual RootWaterExtract
     if (Sim.W_1[i] - Sim.RootWaterExtract_1[i]) >= Parameters.Wm1
         Sim.W_1[i]= Sim.W_1[i] - Sim.RootWaterExtract_1[i]

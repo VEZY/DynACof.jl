@@ -30,16 +30,15 @@ function coffee_model!(Sim,Parameters,Met_c,i)
   
       # soil (+canopy evap) water balance ---------------------------------------
   
-        # Metamodel Coffee leaf water potential
-      Sim.LeafWaterPotential[i]= Base.invokelatest(Parameters.LeafWaterPotential,Sim,Met_c,i)
       # Transpiration Coffee
       Sim.T_Coffee[i]= Base.invokelatest(Parameters.T_Coffee,Sim,Met_c,i)
+      # Sensible heat Coffee
       Sim.H_Coffee[i]= Base.invokelatest(Parameters.H_Coffee,Sim,Met_c,i)
-  
+
+      Sim.LeafWaterPotential[i]= Sim.SoilWaterPot[previous_i(i)] - (Sim.T_Coffee[i] / Parameters.M_H20) / Parameters.KTOT
+      
       # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
       # Source: Van de Griend and Van Boxel 1989.
-
-                           
       if Sim.Height_Tree[i] > Parameters.Height_Coffee
         Sim.Gb_air_canopy[i]= G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT, LAI_top= Sim.LAI_Tree[i], LAI_bot= Sim.LAI[i],
                                          Z_top= Sim.Height_Canopy[i], extwind = Parameters.extwind)  

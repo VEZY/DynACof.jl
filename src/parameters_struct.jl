@@ -20,6 +20,7 @@ This function defines the following constants:
 - cl: Drag coefficient per unit leaf area (``m\\ s^{-1}``)
 - Dheat: Molecular diffusivity for heat (``m\\ s^{-1}``)
 - GBVGBH: Conversion factor from conductance to water to conductance to heat.
+- M_H20: H2O molar mass (``kg\\ mol^{-1}``)
 
 Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocumentation.org/packages/bigleaf/versions/0.7.0/topics/bigleaf.constants)
 
@@ -29,8 +30,8 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 - Khorasanizadeh, H. and K. Mohammadi (2016). "Diffuse solar radiation on a horizontal surface: Reviewing and categorizing the empirical models." Renewable and Sustainable Energy Reviews 53: 338-362.
 """
 Base.@kwdef struct constants
-    cp::Float64= 1013.0 * 10.0^-6
-    epsi::Float64= 0.622 
+    cp::Float64        = 1013.0 * 10.0^-6
+    epsi::Float64      = 0.622 
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
     g::Float64         = 9.81
@@ -47,6 +48,7 @@ Base.@kwdef struct constants
     cl::Float64        = 0.4
     Dheat::Float64     = 21.5e-6
     GBVGBH::Float64    = 1.075
+    M_H20::Float64     = 0.01801528
 end
 
 
@@ -191,9 +193,8 @@ Base.@kwdef struct coffee
     ShadeType::Int64           = 1          # Shade type:
     # 1 Legume only; 2	bananas and legume only;3	bananas and other plants;
     # 4	fruit and forest tree only; 5	no shade
-    CoffeePruning::String      = "tree"           # Coffee pruning management type:
-    # tree ; row ; 3 by block ; 4 NULL (no pruning)
-    LeafWaterPotential= LeafWaterPotential
+    CoffeePruning::String      = "tree"     # Coffee pruning management type: tree ; row ; 3 by block ; 4 NULL (no pruning)
+    KTOT::Float64              = 800.0      # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
     T_Coffee= T_Coffee
     H_Coffee= H_Coffee
     lue= lue
