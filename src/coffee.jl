@@ -244,10 +244,11 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       Sim.DM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] ./ Parameters.CC_Fruit
       # Using CM_Fruit_Cohort_remain to keep track of the fruit mass that is created, but it is updated by removing the overriped 
       # fruits then, so the overriped fruits can only be removed once.   
-      Sim.CM_Fruit_Cohort_remain[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod]
+      Sim.CM_Fruit_Cohort_remain[FruitingPeriod] .= Sim.CM_Fruit_Cohort_remain[FruitingPeriod]  .+ Sim.NPP_Fruit_Cohort[FruitingPeriod]
       # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
-      Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort_remain[max(minimum(FruitingPeriod) - 1, 1)]
-      Sim.CM_Fruit_Cohort_remain[max(minimum(FruitingPeriod) - 1, 1)]= 0.0
+      overriped_day= max(minimum(FruitingPeriod) - 1, 1)
+      Sim.Overriped_Fruit[i]= sum(Sim.CM_Fruit_Cohort_remain[previous_i.(overriped_day,0:10)])
+      Sim.CM_Fruit_Cohort_remain[previous_i.(overriped_day,0:10)] .= 0.0
       # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[minimum(FruitingPeriod)-1.0] * Parameters.epsilon_Fruit
       # Duration of the maturation of each cohort born in the ith day (in days):
       Sim.Maturation_duration[FruitingPeriod] .= 1:length(FruitingPeriod)
