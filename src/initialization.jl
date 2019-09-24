@@ -44,10 +44,10 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:Alloc_Fruit_Cohort] .= 0.0
     Sim[!,:NPP_Fruit_Cohort] .= 0.0
     Sim[!,:CM_Fruit_Cohort] .= 0.0
+    Sim[!,:CM_Fruit_Cohort_remain] .= 0.0
     Sim[!,:Maturation_duration] .= 0.0
     Sim[!,:SC] .= 0.0
     Sim[!,:Temp_cor_Bud] .= 1.0
-  
   
     Sim[!,:Tcan_Diurnal_Cof_deg] .= 0.0
     Sim[!,:NPP_RE] .= 0.0

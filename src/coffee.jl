@@ -242,8 +242,12 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       Sim.NPP_Fruit_Cohort[FruitingPeriod] .= Sim.Alloc_Fruit_Cohort[FruitingPeriod] ./ Parameters.epsilon_Fruit
       Sim.CM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] .+ Sim.NPP_Fruit_Cohort[FruitingPeriod]
       Sim.DM_Fruit_Cohort[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod] ./ Parameters.CC_Fruit
+      # Using CM_Fruit_Cohort_remain to keep track of the fruit mass that is created, but it is updated by removing the overriped 
+      # fruits then, so the overriped fruits can only be removed once.   
+      Sim.CM_Fruit_Cohort_remain[FruitingPeriod] .= Sim.CM_Fruit_Cohort[FruitingPeriod]
       # Overriped fruits that fall onto the ground (= to mass of the cohort that overripe) :
-      Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[max(minimum(FruitingPeriod) - 1, 1)]
+      Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort_remain[max(minimum(FruitingPeriod) - 1, 1)]
+      Sim.CM_Fruit_Cohort_remain[max(minimum(FruitingPeriod) - 1, 1)]= 0.0
       # Sim.Overriped_Fruit[i]= Sim.CM_Fruit_Cohort[minimum(FruitingPeriod)-1.0] * Parameters.epsilon_Fruit
       # Duration of the maturation of each cohort born in the ith day (in days):
       Sim.Maturation_duration[FruitingPeriod] .= 1:length(FruitingPeriod)
@@ -275,10 +279,12 @@ function coffee_model!(Sim,Parameters,Met_c,i)
         # This option is the best one when fruit maturation is not well known or when the
         # harvest is made throughout several days or weeks with the assumption that fruits
         # are harvested when mature.
-      else
+      elseif Parameters.harvest == "quality"
         is_harvest= (Sim.Plot_Age[i]>=Parameters.ageMaturity) &
                     (mean(Sim.Harvest_Maturity_Pot[previous_i.(i,0:9)]) < mean(Sim.Harvest_Maturity_Pot[previous_i.(i,10:19)]))
         # Made as soon as the overall fruit maturation is optimal (all fruits are mature)
+      else
+        is_harvest= false
       end
   
       if is_harvest
@@ -337,7 +343,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
                       Sim.Carbon_Lack_Mortality[i] * Sim.CM_Leaf[previous_i(i)] / CM_tot
       Sim.CM_Shoot[i]= Sim.CM_Shoot[previous_i(i)] + Sim.NPP_Shoot[i]-Sim.Mortality_Shoot[i] -
                        Sim.Carbon_Lack_Mortality[i] * Sim.CM_Shoot[previous_i(i)] / CM_tot
-      Sim.CM_Fruit[i]= Sim.CM_Fruit[previous_i(i)]+ Sim.NPP_Fruit[i] - Sim.Overriped_Fruit[i]
+      Sim.CM_Fruit[i]= Sim.CM_Fruit[previous_i(i)] + Sim.NPP_Fruit[i] - Sim.Overriped_Fruit[i]
       Sim.CM_SCR[i]= Sim.CM_SCR[previous_i(i)] + Sim.NPP_SCR[i] - Sim.Mortality_SCR[i] -
                      Sim.Carbon_Lack_Mortality[i] * Sim.CM_SCR[previous_i(i)] / CM_tot
       Sim.CM_FRoot[i]= Sim.CM_FRoot[previous_i(i)] + Sim.NPP_FRoot[i] - Sim.Mortality_FRoot[i] -
