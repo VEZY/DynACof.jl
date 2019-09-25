@@ -207,7 +207,7 @@ function soil_model!(Sim,Parameters,Met_c,i)
     Sim.Q_Soil[i]= 0.0
     # RV: Q_Soil is negligible at yearly time-step, and equilibrate between several
     # days anyway.
-    Sim.Rn_Soil[i]= Sim.H_Soil[i]  +  Sim.LE_Soil[i]  +  Sim.Q_Soil[i]
+    # Sim.Rn_Soil[i]= Sim.H_Soil[i]  +  Sim.LE_Soil[i]  +  Sim.Q_Soil[i]
 
     # 11/ Soil temperature
 

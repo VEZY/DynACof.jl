@@ -241,6 +241,7 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:T_Tree] .= 0.0
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:TairCanopy_Tree] .= 0.0
+    Sim[!,:air_density_Tree] .= 0.0
     Sim[!,:Tleaf_Tree] .= 0.0
     Sim[!,:Gb_h_Tree] .= 0.0
     Sim[!,:GPP_Tree] .= 0.0
@@ -303,14 +304,14 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:Stocking_Tree] .= Parameters.StockingTree_treeha1 / 10000.0
      
     Sim[!,:TimetoFall_Tree] .= false
-    Sim.TimetoFall_Tree[findall(x -> x in Parameters.Fall_Period_Tree, Met_c.DOY)] .= true
-    Sim.TimetoFall_Tree[Sim.Plot_Age .< 1] .= false
+    Sim.TimetoFall_Tree[findall(x -> x in vcat(Parameters.Fall_Period_Tree...), Met_c.DOY)] .= true
+    Sim.TimetoFall_Tree[Sim.Plot_Age .<= 1] .= false
       
     Sim[!,:TimetoThin_Tree] .= false
-    Sim.TimetoThin_Tree[intersect(findall(x -> x in Parameters.Thin_Age_Tree, Sim.Plot_Age),
-                                  findall(x -> x in Parameters.date_Thin_Tree, Met_c.DOY))] .= true  
+    Sim.TimetoThin_Tree[intersect(findall(x -> x in vcat(Parameters.Thin_Age_Tree), Sim.Plot_Age),
+                                  findall(x -> x in vcat(Parameters.date_Thin_Tree), Met_c.DOY))] .= true  
     Sim[!,:TimetoPrun_Tree] .= false
-    Sim.TimetoPrun_Tree[intersect(findall(x -> x in Parameters.Pruning_Age_Tree, Sim.Plot_Age),
-                                  findall(x -> x in Parameters.D_pruning_Tree, Met_c.DOY))] .= true    
+    Sim.TimetoPrun_Tree[intersect(findall(x -> x in vcat(Parameters.Pruning_Age_Tree), Sim.Plot_Age),
+                                  findall(x -> x in vcat(Parameters.D_pruning_Tree), Met_c.DOY))] .= true    
 end
   
