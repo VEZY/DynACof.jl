@@ -252,7 +252,6 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:Tleaf_min_Tree] .= 0.0
     Sim[!,:Tleaf_max_Tree] .= 0.0
     Sim[!,:Gb_h_Tree] .= 0.0
-    Sim[!,:Tleaf_min_Tree] .= 0.0
     Sim[!,:GPP_Tree] .= 0.0
     Sim[!,:Rm_Leaf_Tree] .= 0.0
     Sim[!,:Rm_CR_Tree] .= 0.0
