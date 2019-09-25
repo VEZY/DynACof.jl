@@ -143,11 +143,18 @@ function soil_model!(Sim,Parameters,Met_c,i)
 
     # 5/ Evaporation of the Understorey, E_Soil (from W_1 only)
     Sim.E_Soil[i]= Sim.Rn_Soil[i] * Parameters.Soil_LE_p / Parameters.λ
-    # Evaporation is from the surface layer only, but it cannot be bigger than the available water:
-    if (Sim.WSurfaceRes[i] - Sim.E_Soil[i]) >= 0.0
+    # Evaporation is from the surface layer first:
+    if Sim.E_Soil[i] <= Sim.WSurfaceRes[i]
+        # E_Soil <= WSurfaceRes, we take it on the surface layer
         Sim.WSurfaceRes[i]= Sim.WSurfaceRes[i] - Sim.E_Soil[i]
+    elseif (Sim.E_Soil[i] - Sim.WSurfaceRes[i]) <= Sim.W_1[i]
+        # E_Soil >= WSurfaceRes, we take all the water in WSurfaceRes, and either take the remainder in W_1.
+        Sim.W_1[i]= Sim.E_Soil[i] - Sim.WSurfaceRes[i]
+        Sim.WSurfaceRes[i]= 0.0
     else
-        Sim.E_Soil[i]= Sim.WSurfaceRes[i]
+        # Or if the remaining water <= W_1 we take it in W_1, else we reduce E_Soil.
+        Sim.E_Soil[i]= Sim.W_1[i] + Sim.WSurfaceRes[i]
+        Sim.W_1[i]= 0.0
         Sim.WSurfaceRes[i]= 0.0
     end
 
