@@ -297,6 +297,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
         Sim.NPP_Fruit[i]= 0.0
         Sim.Overriped_Fruit[i]= 0.0
         Sim.CM_Fruit_Cohort .= zeros(nrow(Sim))
+        Sim.CM_Fruit_Cohort_remain .= zeros(nrow(Sim))
         # RV: could harvest mature fruits only (To do).
       else
         Sim.Harvest_Fruit[i]= 0.0
