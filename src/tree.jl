@@ -47,31 +47,21 @@ function tree_model!(Sim,Parameters,Met_c,i)
                           LAI= Sim.LAI_Tree[i], extwind= Parameters.extwind,
                           Z_top= Sim.Height_Tree[previous_i(i)])
 
-    Sim.TairCanopy_max_Tree[i]= 
-      Met_c.Tmax[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
-      (air_density(Met_c.Tmax[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.G_bulk[i])
-
-    Sim.TairCanopy_min_Tree[i]= 
-      Met_c.Tmin[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
-      (air_density(Met_c.Tmin[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.G_bulk[i])
-
     # Computing the air temperature in the shade tree layer:
-    Sim.TairCanopy_Tree[i]= (Sim.TairCanopy_min_Tree[i] + Sim.TairCanopy_max_Tree[i]) / 2.0
+    Sim.TairCanopy_Tree[i]= 
+      Met_c.Tair[i] + (Sim.H_Tree[i] * Parameters.MJ_to_W) /
+      (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.G_bulk[i])
     # NB : using WindSpeed because wind extinction is already computed in G_bulk (until top of canopy).
   
     Sim.Gb_h_Tree[i]= Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf_Tree, LAI_lay= Sim.LAI_Tree[i],
                         LAI_abv= 0,ZHT = Parameters.ZHT, Z_top = Sim.Height_Tree[previous_i(i)],
                         extwind= Parameters.extwind)
 
-    Sim.Tleaf_min_Tree[i]=
-      Sim.TairCanopy_min_Tree[i] + (Sim.H_Tree[i]*Parameters.MJ_to_W) /
-      (air_density(Met_c.Tmin[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.Gb_h_Tree[i])
-                                      
-    Sim.Tleaf_max_Tree[i]=
-      Sim.TairCanopy_max_Tree[i] + (Sim.H_Tree[i]*Parameters.MJ_to_W) /
-      (air_density(Met_c.Tmax[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.Gb_h_Tree[i])        
-    
-    Sim.Tleaf_Tree[i]= (Sim.Tleaf_min_Tree[i] + Sim.Tleaf_max_Tree[i]) / 2.0
+    Sim.Tleaf_Tree[i]=
+      Sim.TairCanopy_Tree[i] + (Sim.H_Tree[i]*Parameters.MJ_to_W) /
+      (air_density(Met_c.Tair[i],Met_c.Pressure[i] / 10.0) * Parameters.cp * Sim.Gb_h_Tree[i])        
+
+    Sim.air_density_Tree[i]= air_density(Sim.TairCanopy_Tree[i], Met_c.Pressure[i] / 10.0)
 
     Sim.GPP_Tree[i]= Sim.lue_Tree[i] * Sim.APAR_Tree[i]
   

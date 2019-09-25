@@ -135,11 +135,7 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:LE_tot] .= 0.0
     Sim[!,:Diff_T] .= 0.0
     Sim[!,:TairCanopy] .= 0.0
-    Sim[!,:TairCanopy_min] .= 0.0
-    Sim[!,:TairCanopy_max] .= 0.0
     Sim[!,:Tleaf_Coffee] .= 0.0
-    Sim[!,:Tleaf_min_Coffee] .= 0.0
-    Sim[!,:Tleaf_max_Coffee] .= 0.0
     Sim[!,:Gb_h] .= 0.0
     Sim[!,:G_bulk] .= 0.0
     Sim[!,:Gb_air_canopy] .= 0.0
@@ -194,8 +190,7 @@ function Tree_init_no_shade!(Sim::DataFrame,Met_c::DataFrame)
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:LE_Tree] .= 0.0
     Sim[!,:Height_Tree] .= 0.0
-    Sim[!,:TairCanopy_min_Tree] .= Met_c.Tmin
-    Sim[!,:TairCanopy_max_Tree] .= Met_c.Tmax
+    Sim[!,:TairCanopy_Tree] .= Met_c.Tair
     Sim[!,:air_density_Tree] .= 0.0
     Sim[!,:PAR_Trans_Tree] .= 0.0
     Sim[!,:Stocking_Tree] .= 0.0
@@ -246,13 +241,8 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:T_Tree] .= 0.0
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:TairCanopy_Tree] .= 0.0
-    Sim[!,:TairCanopy_min_Tree] .= 0.0
-    Sim[!,:TairCanopy_max_Tree] .= 0.0
     Sim[!,:Tleaf_Tree] .= 0.0
-    Sim[!,:Tleaf_min_Tree] .= 0.0
-    Sim[!,:Tleaf_max_Tree] .= 0.0
     Sim[!,:Gb_h_Tree] .= 0.0
-    Sim[!,:Tleaf_min_Tree] .= 0.0
     Sim[!,:GPP_Tree] .= 0.0
     Sim[!,:Rm_Leaf_Tree] .= 0.0
     Sim[!,:Rm_CR_Tree] .= 0.0
