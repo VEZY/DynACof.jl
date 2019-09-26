@@ -259,6 +259,7 @@ function mainfun(cy,Direction,Meteo,Parameters)
 
   for i in 1:length(Sim.LAI)
     next!(p)
+
     # Shade Tree computation if any
     if Sim.Stocking_Tree[i] > 0.0
       tree_model!(Sim,Parameters,Met_c,i)

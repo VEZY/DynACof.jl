@@ -194,7 +194,7 @@ Base.@kwdef struct coffee
     # 1 Legume only; 2	bananas and legume only;3	bananas and other plants;
     # 4	fruit and forest tree only; 5	no shade
     CoffeePruning::String      = "tree"     # Coffee pruning management type: tree ; row ; 3 by block ; 4 NULL (no pruning)
-    KTOT::Float64              = 800.0      # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
+    KTOT::Float64              = 80.0       # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
     T_Coffee= T_Coffee
     H_Coffee= H_Coffee
     lue= lue
