@@ -260,12 +260,12 @@ function mainfun(cy,Direction,Meteo,Parameters)
   for i in 1:length(Sim.LAI)
     next!(p)
 
-    energy_water_models!(Sim,Parameters,Met_c,i)
+    energy_water_models!(Sim,Parameters,Met_c,i) # the soil is in here also
+
     # Shade Tree computation if any
     if Sim.Stocking_Tree[i] > 0.0
       tree_model!(Sim,Parameters,Met_c,i)
     end
-    # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
     coffee_model!(Sim,Parameters,Met_c,i)
   end
 

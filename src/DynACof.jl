@@ -35,7 +35,8 @@ export GetWind,G_bulk,Gb_h,G_soilcan,G_interlay
 export ALS
 # Main functions:
 export meteorology
-export dynacof, mainfun, tree_model!, soil_model!, coffee_model!,balance_model!
+export dynacof, mainfun, tree_model!, soil_model!, coffee_model!,balance_model!, energy_water_models!
+export light_model_coffee!, energy_model_tree!, energy_model_coffee!
 export dynacof_i!
 
 include("main.jl")

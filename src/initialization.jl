@@ -172,6 +172,10 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     else
         Tree_init!(Sim,Met_c,Parameters)
     end
+
+    Sim.LAI[1]= Sim.CM_Leaf[1]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
+    Sim.LAIplot[1]= Sim.LAI_Tree[1] + Sim.LAI[1]
+    Sim.Height_Canopy[1]= Parameters.Height_Coffee
 end
 
 
@@ -211,6 +215,7 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:Height_Tree] .= 0.0
     Sim.Height_Tree[1]= 0.001 # because G_bulk doesn't allow heights of 0
     Sim[!,:LAI_Tree] .= 0.0
+    Sim.LAI_Tree[1]= Sim.CM_Leaf_Tree[1]  *  Parameters.SLA_Tree  /  1000.0  /  Parameters.CC_Leaf_Tree
     Sim[!,:LA_Tree] .= 0.0
     Sim[!,:DM_Leaf_Tree] .= 0.0
     Sim.DM_Leaf_Tree[1]= Sim.CM_Leaf_Tree[1] / Parameters.CC_Leaf_Tree
