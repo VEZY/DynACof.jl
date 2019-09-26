@@ -261,7 +261,6 @@ function mainfun(cy,Direction,Meteo,Parameters)
     next!(p)
 
     energy_water_models!(Sim,Parameters,Met_c,i) # the soil is in here also
-
     # Shade Tree computation if any
     if Sim.Stocking_Tree[i] > 0.0
       tree_model!(Sim,Parameters,Met_c,i)

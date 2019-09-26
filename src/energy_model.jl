@@ -103,9 +103,9 @@ end
 
 function energy_model_tree!(Sim,Parameters,Met_c,i)
    
-    # Transpiration Coffee
+    # Transpiration Tree
     Sim.T_Tree[i]= Base.invokelatest(Parameters.T_Tree,Sim,Met_c,i)
-    # Sensible heat Coffee
+    # Sensible heat Tree
     Sim.H_Tree[i]= Base.invokelatest(Parameters.H_Tree,Sim,Met_c,i)
 
     Sim.G_bulk[i]= G_bulk(Wind= Met_c.WindSpeed[i], ZHT= Parameters.ZHT,

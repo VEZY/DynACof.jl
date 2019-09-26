@@ -312,24 +312,23 @@ Base.@kwdef struct tree
     Allometries          = tree_allometries          # Idem for allometric equations (optional any kind of variable can be added here).
 end
 
-function lue_Tree()
-    Sim.lue_Tree[i]= 2.87743 + 0.07595 * Met_c.Tair[i] - 0.03390 * Met_c.VPD[i] - 0.24565*Met_c.PAR[i]
+function lue_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    2.87743 + 0.07595 * Met_c.Tair[i] - 0.03390 * Met_c.VPD[i] - 0.24565*Met_c.PAR[i]
 end
 
-function T_Tree()
-    Sim.T_Tree[i]= -0.2366 + 0.6591 * Sim.APAR_Tree[i] + 0.1324*Sim.LAI_Tree[i]
-    if Sim.T_Tree[i] < 0.0
-        Sim.T_Tree[i]= 0.0
+function T_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    T= -0.2366 + 0.6591 * Sim.APAR_Tree[i] + 0.1324*Sim.LAI_Tree[i]
+    if T < 0.0
+        T= 0.0
     end
+    T
 end
 
-function H_Tree()
-    Sim.H_Tree[i]=
-      0.34062 + 0.82001 * Sim.APAR_Dir_Tree[i] + 0.32883 * Sim.APAR_Dif_Tree[i] -
+function H_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+    0.34062 + 0.82001 * Sim.APAR_Dir_Tree[i] + 0.32883 * Sim.APAR_Dif_Tree[i] -
       0.75801 * Sim.LAI_Tree[i] - 0.57135 * Sim.T_Tree[i] -
       0.03033 * Met_c.VPD[i]
 end
-
 
 function light_extinction_K_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # See MAESPA_Validation project, script 4-Aquiares_Metamodels.R

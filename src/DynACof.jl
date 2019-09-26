@@ -26,7 +26,7 @@ export constants,site,coffee,soil,tree
 export struct_to_tuple
 export read_param_file
 export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
-export light_extinction_K_Tree,tree_allometries,metamodels_tree
+export light_extinction_K_Tree,tree_allometries,lue_Tree,H_Tree,T_Tree
 # initialization
 export initialise!
 # Conductances
@@ -36,7 +36,7 @@ export ALS
 # Main functions:
 export meteorology
 export dynacof, mainfun, tree_model!, soil_model!, coffee_model!,balance_model!, energy_water_models!
-export light_model_coffee!, energy_model_tree!, energy_model_coffee!
+export light_model_coffee!, energy_model_tree!, energy_model_coffee!, bud_init_period!,light_model_tree!
 export dynacof_i!
 
 include("main.jl")
