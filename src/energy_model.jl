@@ -62,8 +62,6 @@ function light_model_coffee!(Sim,Parameters,Met_c,i)
 end
 
 function energy_model_coffee!(Sim,Parameters,Met_c,i)
- 
-    # soil (+canopy evap) water balance ---------------------------------------
 
     # Transpiration Coffee
     Sim.T_Coffee[i]= Base.invokelatest(Parameters.T_Coffee,Sim,Met_c,i)
@@ -105,8 +103,10 @@ end
 
 function energy_model_tree!(Sim,Parameters,Met_c,i)
    
-    # Calling the metamodels for LUE, Transpiration and sensible heat flux :
-    Base.invokelatest(Parameters.metamodels_tree,Sim,Met_c,i)
+    # Transpiration Coffee
+    Sim.T_Tree[i]= Base.invokelatest(Parameters.T_Tree,Sim,Met_c,i)
+    # Sensible heat Coffee
+    Sim.H_Tree[i]= Base.invokelatest(Parameters.H_Tree,Sim,Met_c,i)
 
     Sim.G_bulk[i]= G_bulk(Wind= Met_c.WindSpeed[i], ZHT= Parameters.ZHT,
                           LAI= Sim.LAI_Tree[i], extwind= Parameters.extwind,

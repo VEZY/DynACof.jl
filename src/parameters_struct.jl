@@ -195,9 +195,9 @@ Base.@kwdef struct coffee
     # 4	fruit and forest tree only; 5	no shade
     CoffeePruning::String      = "tree"     # Coffee pruning management type: tree ; row ; 3 by block ; 4 NULL (no pruning)
     KTOT::Float64              = 80.0       # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
-    T_Coffee= T_Coffee
-    H_Coffee= H_Coffee
-    lue= lue
+    T_Coffee= T_Coffee                      # Metamodel for coffee transpiration
+    H_Coffee= H_Coffee                      # Metamodel for coffee sensible heat
+    lue= lue                                # Metamodel for coffee lue
 end
 
 function CB()
@@ -304,21 +304,26 @@ Base.@kwdef struct tree
     pa_CR_Tree           = 0.21                      # Coarse roots living tissue (fraction)
     pa_Leaf_Tree         = 1.0                       # Leaf living tissue (fraction)
     pa_FRoot_Tree        = 1.0                       # Fine root living tissue (fraction)
-    WoodDensity          = 565.0                    # Potentially used for allometries (ref. value is for Cordia alliodora).
+    WoodDensity          = 565.0                     # Potentially used for allometries (ref. value is for Cordia alliodora).
     k                    = light_extinction_K_Tree   # Light extinction coefficient (modify if needed)
-    metamodels_tree      = metamodels_tree           # Idem for lue transpiration and sensible heat flux using MAESPA metamodels
+    T_Tree               = T_Tree                    # Metamodel for tree transpiration
+    H_Tree               = H_Tree                    # Metamodel for tree sensible heat
+    lue_Tree             = lue_Tree                  # Metamodel for tree lue
     Allometries          = tree_allometries          # Idem for allometric equations (optional any kind of variable can be added here).
 end
 
-
-function metamodels_tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
+function lue_Tree()
     Sim.lue_Tree[i]= 2.87743 + 0.07595 * Met_c.Tair[i] - 0.03390 * Met_c.VPD[i] - 0.24565*Met_c.PAR[i]
-  
+end
+
+function T_Tree()
     Sim.T_Tree[i]= -0.2366 + 0.6591 * Sim.APAR_Tree[i] + 0.1324*Sim.LAI_Tree[i]
     if Sim.T_Tree[i] < 0.0
         Sim.T_Tree[i]= 0.0
     end
+end
 
+function H_Tree()
     Sim.H_Tree[i]=
       0.34062 + 0.82001 * Sim.APAR_Dir_Tree[i] + 0.32883 * Sim.APAR_Dif_Tree[i] -
       0.75801 * Sim.LAI_Tree[i] - 0.57135 * Sim.T_Tree[i] -

@@ -25,6 +25,7 @@ function tree_model!(Sim,Parameters,Met_c,i)
     # LE_Tree (sum of transpiration + leaf evap)
     # And via allometries: Height_Tree for canopy boundary layer conductance
     # Metamodel for kdif and kdir
+    Sim.lue_Tree[i]= Base.invokelatest(Parameters.lue_Tree,Sim,Met_c,i)
 
     Sim.GPP_Tree[i]= Sim.lue_Tree[i] * Sim.APAR_Tree[i]
   
