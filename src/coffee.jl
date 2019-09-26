@@ -10,66 +10,12 @@ Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref
 
 """
 function coffee_model!(Sim,Parameters,Met_c,i)
-      # CM is in gC m-2soil, so use C content to transform in dry mass
-      Sim.LAI[i]= Sim.CM_Leaf[previous_i(i)]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
-      Sim.LAIplot[i]= Sim.LAIplot[i] + Sim.LAI[i]
-      Sim.Height_Canopy[i]= max(Sim.Height_Tree[i], Parameters.Height_Coffee)
 
       # Light interception ------------------------------------------------------
-  
-      Sim.K_Dif[i]= Parameters.k_Dif
-      Sim.K_Dir[i]= Parameters.k_Dir
-  
-      #APAR coffee
-      Sim.PAR_Trans_Tree[i]= Met_c.PAR[i] - Sim.APAR_Tree[i] # PAR above coffee layer
-      Sim.APAR_Dif[i]= max(0.0, (Sim.PAR_Trans_Tree[i] * Met_c.FDiff[i]) * (1.0 - exp(-Sim.K_Dif[i] * Sim.LAI[i])))
-      APAR_Dir= max(0.0,(Sim.PAR_Trans_Tree[i] * (1.0 - Met_c.FDiff[i])) * (1.0 - exp(-Sim.K_Dir[i] * Sim.LAI[i])))
-      # APAR_Dir is not part of Sim because it can be easily computed by Met_c.PARm2d1-Sim.APAR_Dif
-      Sim.APAR[i]= APAR_Dir + Sim.APAR_Dif[i]
-      Sim.PAR_Trans[i]= Sim.PAR_Trans_Tree[i] - Sim.APAR[i] # PAR above soil layer
-  
-      # soil (+canopy evap) water balance ---------------------------------------
-  
-      # Transpiration Coffee
-      Sim.T_Coffee[i]= Base.invokelatest(Parameters.T_Coffee,Sim,Met_c,i)
-      # Sensible heat Coffee
-      Sim.H_Coffee[i]= Base.invokelatest(Parameters.H_Coffee,Sim,Met_c,i)
+      n_i= nrow(Sim)
 
       Sim.LeafWaterPotential[i]= Sim.SoilWaterPot[previous_i(i)] - (Sim.T_Coffee[i] / Parameters.M_H20) / Parameters.KTOT
-      
-      # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
-      # Source: Van de Griend and Van Boxel 1989.
-      if Sim.Height_Tree[i] > Parameters.Height_Coffee
-        Sim.Gb_air_canopy[i]= G_interlay(Wind= Met_c.WindSpeed[i], ZHT = Parameters.ZHT, LAI_top= Sim.LAI_Tree[i], LAI_bot= Sim.LAI[i],
-                                         Z_top= Sim.Height_Canopy[i], extwind = Parameters.extwind)  
-      else
-        Sim.G_bulk[i]= G_bulk(Wind = Met_c.WindSpeed[i], ZHT = Parameters.ZHT, Z_top = Sim.Height_Canopy[i],
-                              LAI = Sim.LAI[i], extwind = Parameters.extwind)
-        Sim.Gb_air_canopy[i]= Sim.G_bulk[i]
-      end
-      
-      
 
-      Sim.Gb_h[i]= Gb_h(Wind = Met_c.WindSpeed[i], wleaf= Parameters.wleaf, LAI_lay=Sim.LAI[i], LAI_abv=Sim.LAI_Tree[i],
-                        ZHT = Parameters.ZHT, Z_top = Sim.Height_Canopy[i], extwind= Parameters.extwind)
-      
-      Sim.TairCanopy[i]= Sim.TairCanopy_Tree[i] + ((Sim.H_Coffee[i] + Sim.H_Soil[i]) * Parameters.MJ_to_W) / 
-                         (Sim.air_density_Tree[i] *  Parameters.cp * Sim.Gb_air_canopy[i])
-      # NB: if no trees, TairCanopy= Tair (see initialization.jl)
-
-      Sim.air_density[i]= air_density(Sim.TairCanopy[i],Met_c.Pressure[i] / 10.0)
-
-      Sim.Tleaf_Coffee[i]= Sim.TairCanopy[i] + (Sim.H_Coffee[i] * Parameters.MJ_to_W) / 
-                            (air_density(Sim.TairCanopy[i],Met_c.Pressure[i] / 10.0) *  Parameters.cp  * Sim.Gb_h[i])
-
-      # Recomputing soil temperature knowing TairCanopy
-      Sim.TSoil[i]= Sim.TairCanopy[i]+(Sim.H_Soil[i] * Parameters.MJ_to_W) / 
-        (Sim.air_density[i] *  Parameters.cp * 
-           G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
-                     LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
-  
-      Sim.DegreeDays_Tcan[i]= GDD(Sim.TairCanopy[i], Parameters.MinTT, Parameters.MaxTT)
-      
       # Metamodel LUE coffee:
       Sim.lue[i]= Base.invokelatest(Parameters.lue,Sim,Met_c,i)
   
@@ -291,8 +237,8 @@ function coffee_model!(Sim,Parameters,Met_c,i)
         Sim.CM_Fruit[i-1]= 0.0
         Sim.NPP_Fruit[i]= 0.0
         Sim.Overriped_Fruit[i]= 0.0
-        Sim.CM_Fruit_Cohort .= zeros(nrow(Sim))
-        Sim.CM_Fruit_Cohort_remain .= zeros(nrow(Sim))
+        Sim.CM_Fruit_Cohort .= zeros(n_i)
+        Sim.CM_Fruit_Cohort_remain .= zeros(n_i)
         # RV: could harvest mature fruits only (To do).
       else
         Sim.Harvest_Fruit[i]= 0.0
@@ -359,4 +305,11 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       Sim.Rg[i]= Sim.Rg_Fruit[i] + Sim.Rg_Leaf[i] + Sim.Rg_Shoot[i]+Sim.Rg_SCR[i] + Sim.Rg_FRoot[i]
       Sim.Ra[i]=Sim.Rm[i] + Sim.Rg[i]
       Sim.NPP[i]= Sim.NPP_Shoot[i] + Sim.NPP_SCR[i] + Sim.NPP_Fruit[i] + Sim.NPP_Leaf[i] + Sim.NPP_FRoot[i]  
+
+      # Compute LAI for the day after based on the CM of this day ---------------
+      # CM is in gC m-2soil, so use C content to transform in dry mass
+      Sim.LAI[min(i+1,n_i)]= Sim.CM_Leaf[i]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
+      Sim.LAIplot[min(i+1,n_i)]= Sim.LAIplot[i] + Sim.LAI[i]
+      Sim.Height_Canopy[min(i+1,n_i)]= max(Sim.Height_Tree[i], Parameters.Height_Coffee)
+      
 end

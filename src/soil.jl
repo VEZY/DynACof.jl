@@ -215,12 +215,6 @@ function soil_model!(Sim,Parameters,Met_c,i)
     # RV: Q_Soil is negligible at yearly time-step, and equilibrate between several
     # days anyway.
     # Sim.Rn_Soil[i]= Sim.H_Soil[i]  +  Sim.LE_Soil[i]  +  Sim.Q_Soil[i]
-
-    # 11/ Soil temperature
-
-    Sim.TSoil[i]= Sim.TairCanopy[i] + (Sim.H_Soil[i] * Parameters.MJ_to_W) / 
-                  (air_density(Sim.TairCanopy[i], Met_c.Pressure[i]/10.0) * Parameters.cp *
-                   G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
-                             LAI = Sim.LAI_Tree[i]  +  Sim.LAI[i], extwind= Parameters.extwind))
-
+    
+    # TSoil is compute outside because we need Taircanopy (coffee is computed after the soil).
 end  
