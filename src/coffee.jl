@@ -309,6 +309,5 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # Compute LAI for the day after based on the CM of this day ---------------
       # CM is in gC m-2soil, so use C content to transform in dry mass
       Sim.LAI[min(i+1,n_i)]= Sim.CM_Leaf[i]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
-      Sim.LAIplot[min(i+1,n_i)]= Sim.LAIplot[min(i+1,n_i)] + Sim.LAI[i]
-      Sim.Height_Canopy[min(i+1,n_i)]= max(Sim.Height_Tree[i], Parameters.Height_Coffee)  
+      Sim.LAIplot[min(i+1,n_i)]= Sim.LAIplot[min(i+1,n_i)] + Sim.LAI[min(i+1,n_i)]
 end

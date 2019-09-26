@@ -10,7 +10,6 @@ Initialise model variables.
 function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:LAI] .= 0.0
     Sim[!,:LAIplot] .= 0.0
-    Sim[!,:Height_Canopy] .= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,
     # otherwise, GPP does not start and nothing grows
     Sim[!,:PAR_Trans] .= 0.0
@@ -24,7 +23,7 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:CM_FRoot] .= 0.0
     Sim[!,:CM_Shoot] .= 0.0
     Sim[!,:CM_Leaf] .= 1.0
-  
+    Sim[!,:Height_Canopy] .= 1.0
     Sim[!,:DM_Leaf] .= 0.0
     Sim[!,:DM_FRoot] .= 0.0
     Sim[!,:DM_Shoot] .= 0.0
@@ -175,7 +174,7 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
 
     Sim.LAI[1]= Sim.CM_Leaf[1]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
     Sim.LAIplot[1]= Sim.LAI_Tree[1] + Sim.LAI[1]
-    Sim.Height_Canopy[1]= Parameters.Height_Coffee
+    Sim.Height_Canopy .= Parameters.Height_Coffee
 end
 
 

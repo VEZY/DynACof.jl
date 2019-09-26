@@ -234,5 +234,6 @@ function tree_model!(Sim,Parameters,Met_c,i)
 
     # Computing LAI for next day based on the DM ------------------------------
     Sim.LAI_Tree[min(i+1,n_i)]= Sim.DM_Leaf_Tree[i] * (Parameters.SLA_Tree / 1000.0)
-    Sim.LAIplot[min(i+1,n_i)]= Sim.LAIplot[min(i+1,n_i)] + Sim.LAI_Tree[i]
+    Sim.LAIplot[min(i+1,n_i)]= Sim.LAIplot[min(i+1,n_i)] + Sim.LAI_Tree[min(i+1,n_i)]
+    Sim.Height_Canopy[min(i+1,n_i)]= max(Sim.Height_Tree[i], Parameters.Height_Coffee)  
 end  

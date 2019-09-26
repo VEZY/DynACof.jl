@@ -1,8 +1,15 @@
 """
-Coffee crop model
+Energy and water models
 
-Computes the coffee crop growth and yield. This function is called from [`dynacof`](@ref) and should not be called
-by the user.
+Computes the energy and water related variables for the shade tree (if any), the coffee and the soil. Call 
+different sub-models:
+
+* [`light_model_tree!`](@ref) for the light interception of the shade tree  
+* [`light_model_coffee!`](@ref) for the light interception of the coffee  
+* [`energy_model_tree!`](@ref) for the energy fluxes of the tree (H, LE, Tleaf...)  
+* [`energy_model_coffee!`](@ref) for the energy fluxes of the coffee (H, LE, Tleaf...)  
+* [`soil_model!`](@ref) the full soil model (water transport, H, T Soil...)  
+* [`balance_model!`](@ref) the energy balance at plot scale model (H, LE, Rn...)  
 
 # Return
 
@@ -27,12 +34,23 @@ function energy_water_models!(Sim,Parameters,Met_c,i)
     # so we have to compute the soil before the coffee. 
     Sim.TSoil[i]= Sim.TairCanopy[i] + (Sim.H_Soil[i] * Parameters.MJ_to_W) / 
                   (air_density(Sim.TairCanopy[i], Met_c.Pressure[i]/10.0) * Parameters.cp *
-                   G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
+                   G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= Sim.Height_Canopy[i],
                              LAI = Sim.LAI_Tree[i]  +  Sim.LAI[i], extwind= Parameters.extwind))
 
     balance_model!(Sim,Parameters,Met_c,i) # Energy balance
 end
 
+"""
+Light interception models
+
+Computes the light interception (and transmission) for the shade tree or the coffee.
+
+# Return
+
+Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref) for more details.
+
+"""
+light_model_tree!,light_model_coffee!
 
 function light_model_tree!(Sim,Parameters,Met_c,i)
     Base.invokelatest(Parameters.k, Sim,Met_c,i)
@@ -60,6 +78,18 @@ function light_model_coffee!(Sim,Parameters,Met_c,i)
     Sim.APAR[i]= APAR_Dir + Sim.APAR_Dif[i]
     Sim.PAR_Trans[i]= Sim.PAR_Trans_Tree[i] - Sim.APAR[i] # PAR above soil layer
 end
+
+"""
+Energy fluxes models
+
+Computes the energy-related variables such as H, LE, Tleaf for the shade tree or the coffee.
+
+# Return
+
+Nothing, modify the DataFrame of simulation `Sim` in place. See [`dynacof`](@ref) for more details.
+
+"""
+energy_model_coffee!,energy_model_tree!
 
 function energy_model_coffee!(Sim,Parameters,Met_c,i)
 
@@ -94,7 +124,7 @@ function energy_model_coffee!(Sim,Parameters,Met_c,i)
       # Recomputing soil temperature knowing TairCanopy
       Sim.TSoil[i]= Sim.TairCanopy[i]+(Sim.H_Soil[i] * Parameters.MJ_to_W) / 
         (Sim.air_density[i] *  Parameters.cp * 
-           G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= max(Sim.Height_Tree[i], Parameters.Height_Coffee),
+           G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= Sim.Height_Canopy[i],
                      LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
   
       Sim.DegreeDays_Tcan[i]= GDD(Sim.TairCanopy[i], Parameters.MinTT, Parameters.MaxTT)

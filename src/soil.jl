@@ -216,5 +216,5 @@ function soil_model!(Sim,Parameters,Met_c,i)
     # days anyway.
     # Sim.Rn_Soil[i]= Sim.H_Soil[i]  +  Sim.LE_Soil[i]  +  Sim.Q_Soil[i]
     
-    # TSoil is compute outside because we need Taircanopy (coffee is computed after the soil).
+    # TSoil is computed outside because we need Taircanopy (coffee is computed after the soil).
 end  
