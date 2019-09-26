@@ -191,7 +191,7 @@ function Tree_init_no_shade!(Sim::DataFrame,Met_c::DataFrame)
     Sim[!,:LE_Tree] .= 0.0
     Sim[!,:Height_Tree] .= 0.0
     Sim[!,:TairCanopy_Tree] .= Met_c.Tair
-    Sim[!,:air_density_Tree] .= 0.0
+    Sim[!,:air_density_Tree] .= air_density.(Met_c.Tair, Met_c.Pressure / 10.0)
     Sim[!,:PAR_Trans_Tree] .= 0.0
     Sim[!,:Stocking_Tree] .= 0.0
 end
