@@ -143,7 +143,7 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:APAR] .= 0.0
     Sim[!,:PAR_Soil] .= 0.0
     Sim[!,:SoilWaterPot] .= 0.0
-    Sim[!,:LeafWaterPotential] .= 0.0
+    Sim[!,:PSIL] .= 0.0
     Sim[!,:AEu] .= 0.0
     Sim[!,:IntercMax] .= 0.0
     Sim[!,:T_Coffee] .= 0.0
@@ -243,6 +243,7 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:PAR_Trans_Tree] .= 0.0
     Sim[!,:lue_Tree] .= 0.0
     Sim[!,:T_Tree] .= 0.0
+    Sim[!,:PSIL_Tree] .= 0.0
     Sim[!,:H_Tree] .= 0.0
     Sim[!,:TairCanopy_Tree] .= 0.0
     Sim[!,:air_density_Tree] .= 0.0

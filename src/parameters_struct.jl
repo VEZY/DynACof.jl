@@ -213,13 +213,6 @@ function CB()
     return CB_fun
 end
 
-
-# Metamodels (or subroutines):
-# Leaf Water Potential (MPa)
-  function LeafWaterPotential(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    0.040730 - 0.005074 * Met_c.VPD[i] - 0.037518 * Sim.PAR_Trans_Tree[i] + 2.676284 * Sim.SoilWaterPot[previous_i(i)]
-end
-
 # Transpiration:
 function T_Coffee(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     T_Cof= -0.72080 + 0.07319 * Met_c.VPD[i] -0.76984 * (1.0-Met_c.FDiff[i]) + 0.13646*Sim.LAI[i] + 0.12910*Sim.PAR_Trans_Tree[i]
@@ -305,6 +298,7 @@ Base.@kwdef struct tree
     pa_Leaf_Tree         = 1.0                       # Leaf living tissue (fraction)
     pa_FRoot_Tree        = 1.0                       # Fine root living tissue (fraction)
     WoodDensity          = 565.0                     # Potentially used for allometries (ref. value is for Cordia alliodora).
+    KTOT_Tree            = 80.0                      # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
     k                    = light_extinction_K_Tree   # Light extinction coefficient (modify if needed)
     T_Tree               = T_Tree                    # Metamodel for tree transpiration
     H_Tree               = H_Tree                    # Metamodel for tree sensible heat

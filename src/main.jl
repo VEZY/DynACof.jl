@@ -135,7 +135,7 @@ Return a three objects Sim, Meteo and Parameters. To get the objects from a dyna
 |                              | E_Soil                 | mm                  | Soil evaporation                                                                    |
 |                              | ETR                    | mm                  | System evapotranspiration                                                           |
 |                              | SoilWaterPot           | MPa                 | Soil water potential                                                                |
-|                              | LeafWaterPotential     | Mpa                 | Coffee leaf water potential                                                         |
+|                              | PSIL_*                 | Mpa                 | Coffee leaf water potential                                                         |
 | Special shade tree variables | LA_Tree                | m2 leaves tree-1    | shade tree leaf area                                                                |
 |                              | Crown_H_Tree           | m                   | Crown height                                                                        |
 |                              | Trunk_H_Tree           | m                   | Trunk height                                                                        |

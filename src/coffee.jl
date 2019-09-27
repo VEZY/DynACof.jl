@@ -14,8 +14,6 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       # Light interception ------------------------------------------------------
       n_i= nrow(Sim)
 
-      Sim.LeafWaterPotential[i]= Sim.SoilWaterPot[previous_i(i)] - (Sim.T_Coffee[i] / Parameters.M_H20) / Parameters.KTOT
-
       # Metamodel LUE coffee:
       Sim.lue[i]= Base.invokelatest(Parameters.lue,Sim,Met_c,i)
   
@@ -137,7 +135,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
       Sim.Temp_cor_Bud[i]= Base.invokelatest(Parameters.Bud_T_correction)(Sim.Tleaf_Coffee[i])
       
       # (7) Bud dormancy break, Source, Drinnan 1992 and Rodriguez et al., 2011 eq. 13
-      Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.LeafWaterPotential[i]))
+      Sim.pbreak[i]= 1.0 / (1.0 + exp(Parameters.a_p + Parameters.b_p * Sim.PSIL[i]))
       # (8) Compute the number of buds that effectively break dormancy in each cohort:
       Sim.BudBreak_cohort[DormancyBreakPeriod] .=
           map(min, Sim.Bud_available[DormancyBreakPeriod], 

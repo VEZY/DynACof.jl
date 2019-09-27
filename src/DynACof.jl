@@ -25,7 +25,7 @@ export import_parameters
 export constants,site,coffee,soil,tree
 export struct_to_tuple
 export read_param_file
-export CB,LeafWaterPotential,T_Coffee,H_Coffee,lue,Metamodels_soil
+export CB,T_Coffee,H_Coffee,lue,Metamodels_soil
 export light_extinction_K_Tree,tree_allometries,lue_Tree,H_Tree,T_Tree
 # initialization
 export initialise!

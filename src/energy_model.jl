@@ -55,8 +55,8 @@ light_model_tree!,light_model_coffee!
 function light_model_tree!(Sim,Parameters,Met_c,i)
     Base.invokelatest(Parameters.k, Sim,Met_c,i)
   
-    Sim.APAR_Dif_Tree[i]= (Met_c.PAR[i] * Met_c.FDiff[i]) * (1.0-exp(-Sim.K_Dif_Tree[i] * Sim.LAI_Tree[i]))
-    Sim.APAR_Dir_Tree[i]= (Met_c.PAR[i]*(1-Met_c.FDiff[i])) * (1.0-exp(-Sim.K_Dir_Tree[i]*Sim.LAI_Tree[i]))
+    Sim.APAR_Dif_Tree[i]= (Met_c.PAR[i] * Met_c.FDiff[i]) * (1.0 - exp(-Sim.K_Dif_Tree[i] * Sim.LAI_Tree[i]))
+    Sim.APAR_Dir_Tree[i]= (Met_c.PAR[i] * (1-Met_c.FDiff[i])) * (1.0 - exp(-Sim.K_Dir_Tree[i] * Sim.LAI_Tree[i]))
   
     Sim.APAR_Tree[i]= max(0.0,Sim.APAR_Dir_Tree[i]+Sim.APAR_Dif_Tree[i])
   
@@ -97,6 +97,7 @@ function energy_model_coffee!(Sim,Parameters,Met_c,i)
     Sim.T_Coffee[i]= Base.invokelatest(Parameters.T_Coffee,Sim,Met_c,i)
     # Sensible heat Coffee
     Sim.H_Coffee[i]= Base.invokelatest(Parameters.H_Coffee,Sim,Met_c,i)
+    Sim.PSIL[i]= Sim.SoilWaterPot[previous_i(i)] - (Sim.T_Coffee[i] / Parameters.M_H20) / Parameters.KTOT
 
     # Tcanopy Coffee : using bulk conductance if no trees, interlayer conductance if trees
       # Source: Van de Griend and Van Boxel 1989.
@@ -137,6 +138,7 @@ function energy_model_tree!(Sim,Parameters,Met_c,i)
     Sim.T_Tree[i]= Base.invokelatest(Parameters.T_Tree,Sim,Met_c,i)
     # Sensible heat Tree
     Sim.H_Tree[i]= Base.invokelatest(Parameters.H_Tree,Sim,Met_c,i)
+    Sim.PSIL_Tree[i]= Sim.SoilWaterPot[previous_i(i)] - (Sim.T_Tree[i] / Parameters.M_H20) / Parameters.KTOT_Tree
 
     Sim.G_bulk[i]= G_bulk(Wind= Met_c.WindSpeed[i], ZHT= Parameters.ZHT,
                           LAI= Sim.LAI_Tree[i], extwind= Parameters.extwind,
