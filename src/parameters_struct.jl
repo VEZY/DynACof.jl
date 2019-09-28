@@ -102,7 +102,6 @@ Base.@kwdef struct coffee
     SLA::Float64               = 10.97      # Specific Leaf Area (m-2 kg-1 dry mass)
     wleaf::Float64             = 0.068      # Leaf width (m)
     DELM::Float64              = 7.0        # Max leaf carbon demand (gC plant-1 d-1)
-    LAI_max::Float64           = 6.0        # Max measured LAI to compute leaf demand. (measured= 5.56)
     Height_Coffee::Float64     = 2.0        # Average coffee canopy height (m) used for aerodynamic conductance.
     D_pruning::Int64           = 74         # day of year of pruning
     MeanAgePruning::Int64      = 5          # Age of first pruning (year)

@@ -246,8 +246,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
   
       Sim.Supply_Leaf[i]= Parameters.lambda_Leaf_remain * (Sim.Supply[i] - Sim.Alloc_Fruit[i] - Sim.Alloc_Shoot[i] - Sim.Alloc_SCR[i])
   
-      Sim.Alloc_Leaf[i]= min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000.0) * ((Parameters.LAI_max - Sim.LAI[i]) /
-                              (Sim.LAI[i] + Parameters.LAI_max)), 
+      Sim.Alloc_Leaf[i]= min(Parameters.DELM * (Parameters.Stocking_Coffee / 10000.0), 
                              Sim.Supply_Leaf[i])
   
       Sim.NPP_Leaf[i]= Sim.Alloc_Leaf[i] / Parameters.epsilon_Leaf
