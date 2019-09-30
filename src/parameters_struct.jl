@@ -113,7 +113,6 @@ Base.@kwdef struct coffee
     DVG1::Int64                = 105        # Day of year for the beginning of the Vegetative Growing Season
     DVG2::Int64                = 244        # Day of year for the end of the Vegetative Growing Season
     MinTT::Float64             = 10.0       # Minimum temperature threshold (deg C) for degree days computation
-    MaxTT::Float64             = 40.0       # Maximum temperature threshold (deg C) for degree days computation (if any)
     RNL_base::Float64          = 91.2       # Nodes per LAI unit at the reference 20 Celsius degrees following Drinnan & Menzel (1995)
     VF_Flowering::Float64      = 5500.0     # Very first flowering (dd) source: Rodriguez et al. (2001)
     F_buds1::Float64           = 840.0      # Bud development stage 1 (2) source: PhD Louise Meylan p.58.
@@ -193,7 +192,7 @@ Base.@kwdef struct coffee
     # 1 Legume only; 2	bananas and legume only;3	bananas and other plants;
     # 4	fruit and forest tree only; 5	no shade
     CoffeePruning::String      = "tree"     # Coffee pruning management type: tree ; row ; 3 by block ; 4 NULL (no pruning)
-    KTOT::Float64              = 80.0       # soil to leaf hydrolic conducance (mol m-2 s-1 MPa-1)
+    KTOT::Float64              = 80.0       # soil to leaf hydraulic conductance (mol m-2 s-1 MPa-1)
     T_Coffee= T_Coffee                      # Metamodel for coffee transpiration
     H_Coffee= H_Coffee                      # Metamodel for coffee sensible heat
     lue= lue                                # Metamodel for coffee lue

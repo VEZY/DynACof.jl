@@ -128,7 +128,7 @@ function energy_model_coffee!(Sim,Parameters,Met_c,i)
            G_soilcan(Wind= Met_c.WindSpeed[i], ZHT=Parameters.ZHT, Z_top= Sim.Height_Canopy[i],
                      LAI = Sim.LAI_Tree[i] + Sim.LAI[i], extwind= Parameters.extwind))
   
-      Sim.DegreeDays_Tcan[i]= GDD(Sim.TairCanopy[i], Parameters.MinTT, Parameters.MaxTT)
+      Sim.DegreeDays_Tcan[i]= GDD(Sim.TairCanopy[i], Parameters.MinTT)
 end
 
 

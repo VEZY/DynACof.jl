@@ -14,7 +14,6 @@ The default value ["0000-01-01", "0000-01-02"] makes the function take the min a
     + WindSpeed : constant wind speed (m s-1), only needed if windspeed is missing
     + CO2       : constant atmospheric ``CO_2`` concentration (ppm), only needed if ``CO_2`` is missing
     + MinTT     : minimum temperature threshold for degree days computing (Celsius), see [GDD()]
-    + MaxTT     : maximum temperature threshold for degree days computing (Celsius), see [GDD()]
     + albedo    : site shortwave surface albedo, only needed if net radiation is missing, see [Rad_net()]
 
 # Details
@@ -170,7 +169,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
 
     # Missing DegreeDays:
     if is_missing(MetData,"DegreeDays")
-        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT, Parameters.MaxTT)
+        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT)
         warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
     end
 
