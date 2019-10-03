@@ -93,7 +93,7 @@ end
 
 function Metamodels_soil(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # -1.07535639  +  1.70234797 * Sim.PAR_Trans[i] +  0.05094017 * Met_c.VPD[i]
-    -1.051471  +  1.70234797 * Sim.PAR_Trans[i] 
+    -1.064715  +  1.777666 * Sim.PAR_Trans[i] 
 end
 
 Base.@kwdef struct coffee
@@ -102,7 +102,7 @@ Base.@kwdef struct coffee
     AgeCoffeeMax::Int64        = 40         # maximum coffee stand age (start a new rotation after)
     SLA::Float64               = 10.97      # Specific Leaf Area (m-2 kg-1 dry mass)
     wleaf::Float64             = 0.068      # Leaf width (m)
-    DELM::Float64              = 7.0        # Max leaf carbon demand (gC plant-1 d-1)
+    DELM::Float64              = 2.0        # Max leaf carbon demand (gC plant-1 d-1)
     Height_Coffee::Float64     = 2.0        # Average coffee canopy height (m) used for aerodynamic conductance.
     D_pruning::Int64           = 74         # day of year of pruning
     MeanAgePruning::Int64      = 5          # Age of first pruning (year)
