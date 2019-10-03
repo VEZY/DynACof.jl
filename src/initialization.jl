@@ -141,7 +141,6 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:air_density] .= 0.0
     Sim[!,:APAR_Dif] .= 0.0
     Sim[!,:APAR] .= 0.0
-    Sim[!,:PAR_Soil] .= 0.0
     Sim[!,:SoilWaterPot] .= 0.0
     Sim[!,:PSIL] .= 0.0
     Sim[!,:AEu] .= 0.0
