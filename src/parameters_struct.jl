@@ -257,7 +257,7 @@ Base.@kwdef struct tree
     # k_Dif_Tree           = 0.305                   # Light extinction coefficient for diffuse light. Now computed by metamodels
     # k_Dir_Tree           = 0.304                   # Light extinction coefficient for direct light. Now computed by metamodels
     # lue_Tree             = 1.1375                  # Light-use efficiency (gc MJ-1). Now computed by metamodels
-    lambda_Stem_Tree     = 0.20                      # Allocation coefficient to the stem. Source: Litton (2007)
+    lambda_Stem_Tree     = 0.21                      # Allocation coefficient to the stem. Source: Litton (2007)
     lambda_Branch_Tree   = 0.25                      # Allocation coefficient to the branches wood. Source: Litton (2007)
     lambda_CR_Tree       = 0.10                      # Allocation coefficient to the coarse roots. Source: Litton (2007)
     lambda_Leaf_Tree     = 0.26                      # Allocation coefficient to the Leaves. Source: Litton (2007)
