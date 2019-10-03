@@ -229,11 +229,8 @@ end
 
 # Light use efficiency:
 function lue(Sim::DataFrame,Met_c::DataFrame,i::Int64)::Float64
-    2.82749155 + 0.01237971 * Met_c.Tair[i] - 0.78618262 * sqrt(Sim.PAR_Trans_Tree[i]) - 0.56248263 * Sim.PSIL[i]
+    2.738690562  +  0.011330972 * Met_c.Tair[i] -  0.705428477 * sqrt(Sim.PAR_Trans_Tree[i]) +  0.009245904 * Met_c.VPD[i]
 end
-
-
-
 
 
 Base.@kwdef struct tree
