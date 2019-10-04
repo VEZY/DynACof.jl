@@ -93,7 +93,7 @@ end
 
 function Metamodels_soil(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # -1.07535639  +  1.70234797 * Sim.PAR_Trans[i] +  0.05094017 * Met_c.VPD[i]
-    -1.064715  +  1.777666 * Sim.PAR_Trans[i] 
+    -1.050189  +  1.766872 * Sim.PAR_Trans[i] 
 end
 
 Base.@kwdef struct coffee
@@ -214,7 +214,7 @@ end
 
 # Transpiration:
 function T_Coffee(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    T_Cof = -0.86408239  +  0.03342774 * Met_c.Tair[i] +  0.16334697 * Sim.APAR[i] +  0.06270258 * Met_c.VPD[i]
+    T_Cof = -0.82327839 + 0.03089959 * Met_c.Tair[i] + 0.15777166 * Sim.APAR[i] + 0.07297392 * Met_c.VPD[i]
     if T_Cof<0.0
         T_Cof= 0.0
     end
@@ -224,12 +224,12 @@ end
 # Sensible heat flux:
 function H_Coffee(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # 1.3377959 - 0.1197404 * Met_c.Tair[i] + 0.5623476 * Sim.PAR_Trans_Tree[i] - 0.3077488 * Met_c.VPD[i] + 2.9021295 * Sim.T_Coffee[i]
-    -0.8770245  +  0.5671539 * Sim.PAR_Trans_Tree[i] -  0.3032931 * Met_c.VPD[i] +  2.5925547 * Sim.T_Coffee[i]
+    -0.7678758  +  0.5461716 * Sim.PAR_Trans_Tree[i] -  0.3207445 * Met_c.VPD[i] +  2.6837429 * Sim.T_Coffee[i]
 end
 
 # Light use efficiency:
 function lue(Sim::DataFrame,Met_c::DataFrame,i::Int64)::Float64
-    2.738690562  +  0.011330972 * Met_c.Tair[i] -  0.705428477 * sqrt(Sim.PAR_Trans_Tree[i]) +  0.009245904 * Met_c.VPD[i]
+    2.77258689  +  0.01034341 * Met_c.Tair[i] -  0.71823829 * sqrt(Sim.PAR_Trans_Tree[i]) +  0.01537693 * Met_c.VPD[i]
 end
 
 
@@ -304,11 +304,11 @@ Base.@kwdef struct tree
 end
 
 function lue_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    2.83661957 + 0.07542358 * Met_c.Tair[i] - 0.03009240 * Met_c.VPD[i] - 0.24074124 * Met_c.PAR[i]
+    2.91332985 + 0.07195458 * Met_c.Tair[i] - 0.03124228 * Met_c.VPD[i] - 0.24092238 * Met_c.PAR[i]
 end
 
 function T_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    Transp= -0.54141773 + 0.01775386 * Met_c.Tair[i] + 0.01619095 * Met_c.VPD[i] + 0.16202098 * Sim.LAI_Tree[i] + 0.50673098 * Sim.APAR_Tree[i]
+    Transp= -0.55231394 + 0.01798136 * Met_c.Tair[i] + 0.02229318 * Met_c.VPD[i] + 0.16053935 * Sim.LAI_Tree[i] + 0.48838455 * Sim.APAR_Tree[i]
     if Transp < 0.0
         Transp= 0.0
     end
@@ -316,16 +316,16 @@ function T_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
 end
 
 function H_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
-    0.15311742  +  0.74344303 * Sim.APAR_Tree[i] -  0.73439407 * Sim.LAI_Tree[i] -  0.71071620 * Sim.T_Tree[i] -  0.03509675 * Met_c.VPD[i] +
-      0.09494137 * Met_c.WindSpeed[i]
+    0.19869391  +  0.70967904 * Sim.APAR_Tree[i] -  0.78428282 * Sim.LAI_Tree[i] -  0.68444250 * Sim.T_Tree[i] -  0.03157318 * Met_c.VPD[i] +
+      0.06780685 * Met_c.WindSpeed[i]
 end
 
 function light_extinction_K_Tree(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # See MAESPA_Validation project, script 4-Aquiares_Metamodels.R
     # Source for non-constant k: Sinoquet et al. 2007
     # DOI: 10.1111/j.1469-8137.2007.02088.x
-    Sim.K_Dif_Tree[i]= 0.6181120 - 0.5389547 * Sim.LAD_Tree[previous_i(i,1)]
-    Sim.K_Dir_Tree[i]= 0.4805782 - 0.4129781 * Sim.LAD_Tree[previous_i(i,1)]
+    Sim.K_Dif_Tree[i]= 0.6146417 - 0.5321444 * Sim.LAD_Tree[previous_i(i,1)]
+    Sim.K_Dir_Tree[i]= 0.4754740 - 0.4015379 * Sim.LAD_Tree[previous_i(i,1)]
 end
 
 function tree_allometries(Sim::DataFrame,Met_c::DataFrame,Parameters,i::Int64)

@@ -44,7 +44,7 @@ function coffee_model!(Sim,Parameters,Met_c,i)
   
       # Fine roots:
       Sim.Rm_FRoot[i]= after_2 * (Parameters.pa_FRoot * Sim.DM_FRoot[previous_i(i)] * Parameters.NC_FRoot * Parameters.MRN * 
-           Parameters.Q10_FRoot^((Sim.TairCanopy[i] - Parameters.TMR) / 10.0))
+           Parameters.Q10_FRoot^((Sim.TSoil[i] - Parameters.TMR) / 10.0))
   
       # Total plant maintenance respiration
       Sim.Rm[i]= Sim.Rm_Fruit[i] + Sim.Rm_Leaf[i] + Sim.Rm_Shoot[i] + Sim.Rm_SCR[i] + Sim.Rm_FRoot[i]

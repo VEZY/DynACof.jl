@@ -56,7 +56,7 @@ function tree_model!(Sim,Parameters,Met_c,i)
   
     Sim.Rm_FRoot_Tree[i]=
       Parameters.pa_FRoot_Tree * Sim.DM_FRoot_Tree[previous_i(i)] * Parameters.MRN * Parameters.NC_FRoot_Tree *
-      Parameters.Q10FRoot_Tree^((Sim.TairCanopy_Tree[i] - Parameters.TMR) / 10.0)
+      Parameters.Q10FRoot_Tree^((Sim.TSoil[i] - Parameters.TMR) / 10.0)
   
     Sim.Rm_Tree[i]= Sim.Rm_Leaf_Tree[i] + Sim.Rm_CR_Tree[i] + Sim.Rm_Branch_Tree[i] + Sim.Rm_Stem_Tree[i] + Sim.Rm_FRoot_Tree[i]
   
