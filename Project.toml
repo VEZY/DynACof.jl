@@ -15,6 +15,13 @@ ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [compat]
 julia = "1.1"
+CSV= "0.5.22"
+DataFrames= "0.20.0"
+Documenter= "0.24.5"
+ForwardDiff= "0.10.9"
+Interpolations= "0.12.8"
+Optim= "0.20.1"
+ProgressMeter= "1.2.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
