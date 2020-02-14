@@ -28,7 +28,7 @@ end;
 end;
 
 @testset "helpers" begin
-    @test typeof(struct_to_tuple(constants, constants())) == NamedTuple{(:cp, :epsi, :pressure0, :FPAR, :g, :Rd, :Rgas, :Kelvin, :vonkarman, :MJ_to_W, :Gsc, :σ, :H2OMW, :W_umol, :λ, :cl, :Dheat),NTuple{17,Float64}}
+    @test typeof(struct_to_tuple(constants, constants())) == NamedTuple{(:cp, :epsi, :pressure0, :FPAR, :g, :Rd, :Rgas, :Kelvin, :vonkarman, :MJ_to_W, :Gsc, :σ, :H2OMW, :W_umol, :λ, :cl, :Dheat, :GBVGBH, :M_H20),NTuple{19,Float64}}
     @test logistic(1.0,5.0,0.1) ≈ 0.00 atol= 1e-15
     @test logistic(5.0,5.0,0.1) ≈ 0.5
     @test logistic_deriv(1.0,5.0,0.1) ≈ 0.00 atol= 1e-15
@@ -49,7 +49,7 @@ end;
     @test air_density(25.0,101.325) ≈ 1.1838896840018194
     @test latent_heat_vaporization(20.0) ≈ 2.4536e6
     @test psychrometric_constant(20.0, 100.0) ≈ 6.63766450661906e-8
-    @test PENMON(Rn=12.0,Wind=0.5,Tair=16.0,ZHT=26.0,Z_top=25.0,Pressure=900.0,Gs=1E09,VPD=2.41,LAI=3.0,extwind=0.58,wleaf=0.068) ≈ 4.8719439498348045
+    @test PENMON(Rn=12.0,Wind=0.5,Tair=16.0,ZHT=26.0,Z_top=25.0,Pressure=900.0,Gs=1E09,VPD=2.41,LAI=3.0,extwind=0.58,wleaf=0.068) ≈ 4.8719 atol= 1e-04
     @test Sucrose_cont_perc(1000.0,5.3207,-28.5561,191,3.5) ≈ 0.08820700000000001
     @test Sucrose_cont_perc(1.0,5.3207,-28.5561,191,3.5) == 0.035
 end;

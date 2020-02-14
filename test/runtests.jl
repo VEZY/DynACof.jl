@@ -15,8 +15,5 @@ end
 
 
 @testset "parameters" begin
- @test read_param_file(:constants,"package") == constants()
- a= import_parameters("package")
- @test length(a) == 204
- @test a.cp == constants().cp
+    include("parameters.jl")
 end
