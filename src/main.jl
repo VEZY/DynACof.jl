@@ -6,7 +6,7 @@
 
 The DynACof process-based model computes plot-scale Net Primary Productivity, carbon allocation, growth, yield, energy, and water balance 
 of coffee plantations according to management, while accounting for spatial effects using metamodels from the 3D process-based model
-[MAESPA](https: /  / maespa.github.io / ). The model also uses cohorts for the development of the coffee buds and fruits to better represent fruit
+[MAESPA](https://maespa.github.io/). The model also uses cohorts for the development of the coffee buds and fruits to better represent fruit
 carbon demand distribution along the year.
 
 # Arguments
