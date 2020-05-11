@@ -14,7 +14,7 @@ Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [compat]
-CSV = "0.5.22"
+CSV = "0.5.22, 0.6"
 DataFrames = "0.20.0"
 Documenter = "0.24.5"
 ForwardDiff = "0.10.9"
