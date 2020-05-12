@@ -21,7 +21,7 @@ true
 function is_missing(data::DataFrame,key::String)::Bool
   columns= names(data)
   for i in 1:length(columns)
-    is_in_col= columns[i] == Symbol(key)
+    is_in_col= columns[i] == key
     if is_in_col
       return false
     end
