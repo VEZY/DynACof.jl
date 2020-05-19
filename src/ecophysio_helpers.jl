@@ -30,7 +30,7 @@ end
 
 
 """
-    esat(20,"Allen_1998")
+    esat(20.0,"Sonntag_1990")
 
 Computes the saturation vapor pressure (Esat)
 
