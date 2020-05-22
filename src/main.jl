@@ -281,34 +281,39 @@ end
 Using DynACof one iteration after another. Allows to run a DynACof simulation with starting at age > 0 with initializations.
 
 # Arguments
-- `i`: Either an integer, or a range giving the day of simulation needed. Match the row index, so `i=1` make a simulation
-for the first row of Sim and Met.
-- `Sim::DataFrame`: The simulation DataFrame (see [`dynacof`](@ref))
-- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref))
-- `Parameters`: The parameters for the model (see [`import_parameters`](@ref))
+- `i`: Either an integer, or a range giving the day of simulation needed. Match the row index, so `i=366` make a simulation
+for the 366th row of Sim and Met.
+- `Sim::DataFrame`: The simulation DataFrame (see [`dynacof`](@ref)), initialized using [`dynacof_i_init`](@ref);
+- `Met_c::DataFrame`: The meteorology DataFrame (see [`meteorology`](@ref)), initialized using [`dynacof_i_init`](@ref)
+- `Parameters`: The parameters for the model (see [`import_parameters`](@ref)), initialized using [`dynacof_i_init`](@ref)
 
 # Examples
 ```julia
 
 # Making a regular simulation using example data:
 file= download("https://raw.githubusercontent.com/VEZY/DynACof.jl_inputs/master/meteorology.txt")
-Sim, Meteo, Parameters= dynacof(input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",coffee="package",tree="package"))
+
+# Initialize the simulation:
+Sim, Meteo, Parameters= dynacof_i_init(1:365,input_path= dirname(file), file_name= (constants= "package",site="package",meteo=basename(file),soil="package",coffee="package",tree="package"))
 rm(file)
 
-# Value of the maintenance respiration for coffee on day i=100:
-i= 100
-Sim.Rm[i]
+Sim2= copy(Sim)
+Meteo2= copy(Meteo)
+# Changing the value of Tair in the meteorology for day 366 for S2:
+Meteo2.Tair[366]= Meteo2.Tair[366]+10.0
 
-# Changing the value of Tair in the meteorology for day 100:
-Meteo.Tair[i] += 10.0
-dynacof_i!(i,Sim,Meteo,Parameters)
+# Make a computation for each:
+dynacof_i!(366,Sim,Meteo,Parameters)
+dynacof_i!(366,Sim2,Meteo2,Parameters)
 
-# New value of the maintenance respiration for coffee:
-Sim.Rm[i]
+# Compare the values of e.g. the maitenance respiration:
+Sim.Rm[366]
+Sim2.Rm[366]
 
-# To re-run DynACof for several days, use a range for `i`:
-dynacof_i!(i:(i+10),Sim,Meteo,Parameters)
-
+# To run DynACof for several days, use a range for i:
+S= dynacof_i(367:nrow(Meteo),Sim,Meteo,Parameters)
+# NB: nrow(Meteo) or nrow(Sim) is the maximum length we can simulate. To increase a simulation,
+# initialize it with a wider range for the "Period" argument (see [`dynacof_i_init`](@ref)).
 ```
 """
 function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
@@ -366,7 +371,7 @@ using all defaults, or set the desired default file to "package" in `file_name`,
 
 # Return
 
-Return three objects: Sim, Meteo and Parameters. To get the objects from the call: `Sim, Meteo, Parameters= dynacof_i_init(...)`. See [`DynACof`](@ref) for more details.
+Return three objects: Sim, Meteo and Parameters. To get the objects from the call: `Sim, Meteo, Parameters= dynacof_i_init(...)`. See [`dynacof`](@ref) for more details.
 
 # Examples
 ```julia
