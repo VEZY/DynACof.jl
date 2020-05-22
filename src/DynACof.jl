@@ -37,7 +37,7 @@ export ALS
 export meteorology
 export dynacof, mainfun, tree_model!, soil_model!, coffee_model!,balance_model!, energy_water_models!
 export light_model_coffee!, energy_model_tree!, energy_model_coffee!, bud_init_period!,light_model_tree!
-export dynacof_i!
+export dynacof_i!, dynacof_i_init
 
 include("main.jl")
 include("energy_model.jl")
