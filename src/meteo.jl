@@ -66,10 +66,10 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
 
     if is_missing(MetData,"Date")
         if !is_missing(Parameters,"Start_Date")
-            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date):Dates.Day(1):(Dates.Date(Parameters.Start_Date) + Dates.Day(nrow(MetData)-1)))
+            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date, "Y/m/d"):Dates.Day(1):(Dates.Date(Parameters.Start_Date, "Y/m/d") + Dates.Day(nrow(MetData)-1)))
             warn_var("Date","Start_Date from Parameters","warn")
         else
-            MetData[:Date] = collect(Dates.Date("2000-01-01"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01")) + Dates.Day(nrow(MetData)-1)))
+            MetData[:Date] = collect(Dates.Date("2000-01-01", "Y/m/d"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01", "Y/m/d")) + Dates.Day(nrow(MetData)-1)))
             warn_var("Date","dummy 2000-01-01", "warn")
         end
     end
