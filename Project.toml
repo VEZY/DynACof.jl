@@ -14,12 +14,12 @@ Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 
 [compat]
-CSV = "0.5.22, 0.6, 0.7"
+CSV = "0.5.22, 0.6, 0.7, 0.8"
 DataFrames = "0.20.0, 0.21"
 Documenter = "0.24.5, 0.25"
 ForwardDiff = "0.10.9"
-Optim = "0.20.1, 0.21, 0.22, 1.2"
 Interpolations = "0.12.8, 0.13"
+Optim = "0.20.1, 0.21, 0.22, 1.2"
 ProgressMeter = "1.2.0"
 julia = "1.4"
 
