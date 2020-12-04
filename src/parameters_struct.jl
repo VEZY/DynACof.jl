@@ -31,7 +31,7 @@ Values are partly burrowed from [bigleaf::bigleaf.constants()](https://www.rdocu
 """
 Base.@kwdef struct constants
     cp::Float64        = 1013.0 * 10.0^-6
-    epsi::Float64      = 0.622 
+    epsi::Float64      = 0.622
     pressure0::Float64 = 101.325
     FPAR::Float64      = 0.5
     g::Float64         = 9.81
@@ -43,7 +43,7 @@ Base.@kwdef struct constants
     Gsc::Float64       = 1367.0            # also found 1366 in Kalogirou (2013)
     σ::Float64         = 5.670367e-08
     H2OMW::Float64     = 18.e-3
-    W_umol::Float64    = 4.57 
+    W_umol::Float64    = 4.57
     λ::Float64         = 2.45
     cl::Float64        = 0.4
     Dheat::Float64     = 21.5e-6
@@ -93,7 +93,7 @@ end
 
 function Metamodels_soil(Sim::DataFrame,Met_c::DataFrame,i::Int64)
     # -1.07535639  +  1.70234797 * Sim.PAR_Trans[i] +  0.05094017 * Met_c.VPD[i]
-    -1.050189  +  1.766872 * Sim.PAR_Trans[i] 
+    -1.050189  +  1.766872 * Sim.PAR_Trans[i]
 end
 
 Base.@kwdef struct coffee
@@ -207,7 +207,7 @@ function CB()
     Data_Buds_day.Inflo_per_Node_standard= Data_Buds_day.Inflo_per_Node ./ maximum(Data_Buds_day.Inflo_per_Node)
     Data_Buds_day.Buds_per_Inflo_standard= Data_Buds_day.Buds_per_Inflo ./ maximum(Data_Buds_day.Buds_per_Inflo)
     Data_Buds_day.T_cor_Flower= Data_Buds_day.Inflo_per_Node_standard .* Data_Buds_day.Buds_per_Inflo_standard
-  
+
     CB_fun= LinearInterpolation(Data_Buds_day.Air_T, Data_Buds_day.T_cor_Flower);
     return CB_fun
 end
@@ -279,6 +279,7 @@ Base.@kwdef struct tree
     Kc                   = 8.0                       # Allometries source: CAF2007 Van Oijen et al. (2010). Adjusted to fit our observations.
     KcExp                = 0.45                      # Allometries source: CAF2007 Van Oijen et al. (2010). Adjusted to fit our observations.
     MRN_Tree             = 0.20                      # Base maintenance respiration (gC.gN.day-1)
+    TMR_Tree::Float64    = 15.0                      # Base temperature for maintenance respiration (deg C)
     NC_Branch_Tree       = 0.005                     # Branch nitrogen content (gN.gDM-1).
     NC_Stem_Tree         = 0.005                     # Stem nitrogen content (gN.gDM-1).
     NC_CR_Tree           = 0.0084                    # Coarse roots nitrogen content (gN.gDM-1). Source: Van Oijen et al. (2010I)
@@ -334,14 +335,14 @@ function tree_allometries(Sim::DataFrame,Met_c::DataFrame,Parameters,i::Int64)
     # /!\ DBH is an average DBH among trees.
     #Tree Height. Source:  CAF2007 used in Van Oijen et al. (2011). With no pruning :
     Sim.Height_Tree[i]= Parameters.Kh * (((Sim.DM_Stem_Tree[i] / 1000.0) / Sim.Stocking_Tree[i])^Parameters.KhExp)
-  
+
     # Crown projected area:
     Sim.CrownProj_Tree[i]= Parameters.Kc * (((Sim.DM_Branch_Tree[i] / 1000.0) / Sim.Stocking_Tree[i])^Parameters.KcExp)
     # Source: Van Oijen et al. (2010, I).
     Sim.CrownRad_Tree[i]= sqrt(Sim.CrownProj_Tree[i] / pi )
     Sim.Crown_H_Tree[i]= Sim.CrownRad_Tree[i] # See Charbonnier et al. 2013, Table 2.
     Sim.Trunk_H_Tree[i]= Sim.Height_Tree[i] - Sim.Crown_H_Tree[i]
-  
+
     # If there is a pruning management, change the allometries (mostly derived from Vezy et al. 2018) :
     if any(Sim.Plot_Age[i] .== Parameters.Pruning_Age_Tree)
       # Pruning : trunk height does not depend on trunk dry mass anymore (pruning effect)
@@ -370,7 +371,7 @@ end
 Parameter structures
 
 Those structures are used to make the parameter inputs to DynACof. Default values are provided to the user (the struct are Base.@kwdef).
-They are mainly used under the hood from [Import_Parameters()], but can still be called by the user for conveniance (but not needed 
+They are mainly used under the hood from [Import_Parameters()], but can still be called by the user for conveniance (but not needed
 for a model run). The Parameters are divided into five structures: `constants`, `site`, `soil`, `coffee`, and `tree`.
 
 ## site:
@@ -395,17 +396,17 @@ every year to sustain the production on three resprouts per stump in average (se
 
 # tree
 
-The shade tree structure. The default values come from *Erythrina poeppigiana* shade trees from Aquiares. They were planted at high density 
+The shade tree structure. The default values come from *Erythrina poeppigiana* shade trees from Aquiares. They were planted at high density
 (250 trees ha-1) pruned to optimize light transmitted to the *Coffea*, and were thinned in 2000 to a low density of ~7.4 trees ha-1.
-Starting from 2000, these trees made a relatively large crown with an average height of 26 m in 2018 on this site. 
+Starting from 2000, these trees made a relatively large crown with an average height of 26 m in 2018 on this site.
 NB: the tree parameter structure is optional, and not needed for monospecific coffee plantations.
 
-# Return 
+# Return
 
 An instance of a structure with Parameters needed for a DynACof simulation.
 
 # Details
-The values of the instance can be read from files using [`import_parameters`](@ref). In that case, the user 
+The values of the instance can be read from files using [`import_parameters`](@ref). In that case, the user
 can provide only the parameter values that need to be changed, and all others will be taken as the default values. Example files are provided in
 a specific Github repository [here](https://github.com/VEZY/DynACof.jl_inputs).
 """

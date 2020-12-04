@@ -4,7 +4,7 @@
 
 Make all computations for soil water balance for the ith day by modifying the `Sim` DataFrame in place.
 
-# Arguments  
+# Arguments
 
 - `Sim::DataFrame`: The main simulation DataFrame to make the computation. Is modified in place.
 - `Parameters`: A named tuple with parameter values (see [`import_parameters`](@ref)).
@@ -39,7 +39,7 @@ function soil_model!(Sim,Parameters,Met_c,i)
         PENMON(Rn= Met_c.Rn[i], Wind= Met_c.WindSpeed[i], Tair = Met_c.Tair[i],
                ZHT = Parameters.ZHT, Z_top = max(Sim.Height_Tree[i], Parameters.Height_Coffee),
                Pressure = Met_c.Pressure[i], Gs = 1E09, VPD = Met_c.VPD[i], LAI= Sim.LAIplot[i],
-               extwind = Parameters.extwind, wleaf= Parameters.wleaf)
+               extwind = Parameters.extwind, wleaf= mean((Parameters.wleaf,Parameters.wleaf_Tree)))
 
     if Sim.CanopyHumect[i] <= Sim.IntercMax[i]
         Sim.Throughfall[i]= 0.0
@@ -197,7 +197,7 @@ function soil_model!(Sim,Parameters,Met_c,i)
     Sim.EW_3[i]= Sim.W_3[i] - Parameters.Wm3
     Sim.REW_3[i]= Sim.EW_3[i] / (Parameters.Wf3 - Parameters.Wm3)
     Sim.EW_tot[i]= Sim.EW_1[i] + Sim.EW_2[i] + Sim.EW_3[i]
-    Sim.REW_tot[i]= Sim.EW_tot[i] / ((Parameters.Wf1 - Parameters.Wm1) + (Parameters.Wf2 - Parameters.Wm2) + 
+    Sim.REW_tot[i]= Sim.EW_tot[i] / ((Parameters.Wf1 - Parameters.Wm1) + (Parameters.Wf2 - Parameters.Wm2) +
                     (Parameters.Wf3 - Parameters.Wm3))
 
     # 8/ Soil water deficit
@@ -218,6 +218,6 @@ function soil_model!(Sim,Parameters,Met_c,i)
     # RV: Q_Soil is negligible at yearly time-step, and equilibrate between several
     # days anyway.
     # Sim.Rn_Soil[i]= Sim.H_Soil[i]  +  Sim.LE_Soil[i]  +  Sim.Q_Soil[i]
-    
+
     # TSoil is computed outside because we need Taircanopy (coffee is computed after the soil).
-end  
+end
