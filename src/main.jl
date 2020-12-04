@@ -247,12 +247,14 @@ function mainfun(cy,Direction,Meteo,Parameters)
   Met_c= Meteo[Direction.Cycle .== cy,:]
 
   initialise!(Sim,Met_c,Parameters)
-  bud_init_period!(Sim,Met_c,Parameters)
-
-  Sim.ALS= ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
-               Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
-               ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning,
-               df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
+  if Parameters.Stocking_Coffee > 0.0
+    bud_init_period!(Sim,Met_c,Parameters)
+    Sim.ALS= ALS(
+        Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
+        Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
+        ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning,
+        df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
+  end
 
   # Main Loop -----------------------------------------------------------------------------------
   p = Progress(length(Sim.LAI),1)
@@ -265,12 +267,18 @@ function mainfun(cy,Direction,Meteo,Parameters)
     if Sim.Stocking_Tree[i] > 0.0
       tree_model!(Sim,Parameters,Met_c,i)
     end
-    coffee_model!(Sim,Parameters,Met_c,i)
+
+    if Parameters.Stocking_Coffee > 0.0
+        coffee_model!(Sim,Parameters,Met_c,i)
+    end
   end
 
   Sim[!,:date] .= Met_c.Date
   Sim[!,:year] .= Met_c.year
-  Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
+
+  if Parameters.Stocking_Coffee > 0.0
+    Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
+  end
 
   return Sim
 end
@@ -447,9 +455,9 @@ function dynacof_i_init(i;period::Array{String,1}= ["0000-01-01", "0000-01-02"],
     Sim[!,:date] .= Met_c.Date
     Sim[!,:year] .= Met_c.year
     Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
-             
+
     Sim[1:nrow(Sim_df),:]= Sim_df[:,:]
-    
+
     n_i= min(maximum(i)+1,length(Sim.LAI))
     Sim.LAI[n_i]= Sim.CM_Leaf[maximum(i)]*Parameters.SLA/1000.0/Parameters.CC_Leaf
 

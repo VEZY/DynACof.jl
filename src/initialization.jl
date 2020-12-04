@@ -8,103 +8,110 @@ Initialise model variables.
 - `Parameters`: The parameters for the model
 """
 function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
+    
     Sim[!,:LAI] .= 0.0
+    
+    if Parameters.Stocking_Coffee != 0.0
+        Sim[!,:CM_RE] .= 0.0
+        Sim[!,:Rm] .= 0.0
+        Sim[!,:CM_SCR] .= 0.0
+        Sim[!,:Demand_Fruit] .= 0.0
+        Sim[!,:CM_Fruit] .= 0.0
+        Sim[!,:SM] .= 0.0
+        Sim[!,:Harvest_Maturity] .= 0.0
+        Sim[!,:CM_FRoot] .= 0.0
+        Sim[!,:CM_Shoot] .= 0.0
+        Sim[!,:CM_Leaf] .= 1.0
+        Sim[!,:DM_Leaf] .= 0.0
+        Sim[!,:DM_FRoot] .= 0.0
+        Sim[!,:DM_Shoot] .= 0.0
+        Sim[!,:DM_Fruit] .= 0.0
+        Sim[!,:DM_SCR] .= 0.0
+        Sim[!,:DM_Fruit_Cohort] .= 0.0
+        Sim[!,:DM_RE] .= 0.0
+        Sim[!,:Mact_SCR] .= 0.0
+        Sim[!,:Mnat_SCR] .= 0.0
+        Sim[!,:Mprun_Shoot] .= 0.0
+        Sim[!,:DegreeDays_Tcan] .= 0.0
+        Sim[!,:pbreak] .= 0.0
+        Sim[!,:Budinit] .= 0.0
+        Sim[!,:BudBreak] .= 0.0
+        Sim[!,:Bud_available] .= 0.0
+        Sim[!,:BudBreak_cohort] .= 0.0
+        Sim[!,:Alloc_Fruit_Cohort] .= 0.0
+        Sim[!,:NPP_Fruit_Cohort] .= 0.0
+        Sim[!,:CM_Fruit_Cohort] .= 0.0
+        Sim[!,:CM_Fruit_Cohort_remain] .= 0.0
+        Sim[!,:Maturation_duration] .= 0.0
+        Sim[!,:SC] .= 0.0
+        Sim[!,:Temp_cor_Bud] .= 1.0
+        
+        Sim[!,:Tcan_Diurnal_Cof_deg] .= 0.0
+        Sim[!,:NPP_RE] .= 0.0
+        Sim[!,:lue] .= 0.0
+        Sim[!,:GPP] .= 0.0
+        Sim[!,:K_Dif] .= 0.0
+        Sim[!,:K_Dir] .= 0.0
+        Sim[!,:Consumption_RE] .= 0.0
+        Sim[!,:Supply] .= 0.0
+        Sim[!,:Carbon_Lack_Mortality] .= 0.0
+        Sim[!,:Alloc_Shoot] .= 0.0
+        Sim[!,:NPP_Shoot] .= 0.0
+        Sim[!,:Rg_Shoot] .= 0.0
+        Sim[!,:Mnat_Shoot] .= 0.0
+        Sim[!,:Mortality_Shoot] .= 0.0
+        Sim[!,:Rm_Shoot] .= 0.0
+        Sim[!,:lambdaSCRage] .= 0.0
+        Sim[!,:Alloc_SCR] .= 0.0
+        Sim[!,:NPP_SCR] .= 0.0
+        Sim[!,:Rg_SCR] .= 0.0
+        Sim[!,:Rm_SCR] .= 0.0
+        Sim[!,:Mortality_SCR] .= 0.0
+        Sim[!,:Harvest_Maturity_Pot] .= 0.0
+        Sim[!,:ratioNodestoLAI] .= 0.0
+        Sim[!,:Supply_Fruit] .= 0.0
+        Sim[!,:Alloc_Fruit] .= 0.0
+        Sim[!,:Overriped_Fruit] .= 0.0
+        Sim[!,:NPP_Fruit] .= 0.0
+        Sim[!,:Rg_Fruit] .= 0.0
+        Sim[!,:Harvest_Fruit] .= 0.0
+        Sim[!,:Rm_Fruit] .= 0.0
+        Sim[!,:Supply_Leaf] .= 0.0
+        Sim[!,:Alloc_Leaf] .= 0.0
+        Sim[!,:NPP_Leaf] .= 0.0
+        Sim[!,:Rg_Leaf] .= 0.0
+        Sim[!,:Mnat_Leaf] .= 0.0
+        Sim[!,:M_ALS] .= 0.0
+        Sim[!,:MnatALS_Leaf] .= 0.0
+        Sim[!,:Mprun_Leaf] .= 0.0
+        Sim[!,:Mortality_Leaf] .= 0.0
+        Sim[!,:Rm_Leaf] .= 0.0
+        Sim[!,:Demand_FRoot] .= 0.0
+        Sim[!,:Supply_FRoot] .= 0.0
+        Sim[!,:Alloc_FRoot] .= 0.0
+        Sim[!,:NPP_FRoot] .= 0.0
+        Sim[!,:Rg_FRoot] .= 0.0
+        Sim[!,:Mnat_FRoot] .= 0.0
+        Sim[!,:Mprun_FRoot] .= 0.0
+        Sim[!,:Mortality_FRoot] .= 0.0
+        Sim[!,:Rm_FRoot] .= 0.0
+        Sim[!,:Rg] .= 0.0
+        Sim[!,:Ra] .= 0.0
+        Sim[!,:BudInitPeriod] .= false
+        Sim[!,:Tleaf_Coffee] .= 0.0
+        Sim.LAI[1]= Sim.CM_Leaf[1]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
+    end
+    
     Sim[!,:LAIplot] .= 0.0
     #Leaf Area per Plant location, to convert per ha using density,cannot be zero at beginning,
     # otherwise, GPP does not start and nothing grows
-    Sim[!,:PAR_Trans] .= 0.0
-    Sim[!,:CM_RE] .= 0.0
-    Sim[!,:Rm] .= 0.0
-    Sim[!,:CM_SCR] .= 0.0
-    Sim[!,:Demand_Fruit] .= 0.0
-    Sim[!,:CM_Fruit] .= 0.0
-    Sim[!,:SM] .= 0.0
-    Sim[!,:Harvest_Maturity] .= 0.0
-    Sim[!,:CM_FRoot] .= 0.0
-    Sim[!,:CM_Shoot] .= 0.0
-    Sim[!,:CM_Leaf] .= 1.0
+    Sim[!,:PAR_Trans] .= 0.0  
     Sim[!,:Height_Canopy] .= 1.0
-    Sim[!,:DM_Leaf] .= 0.0
-    Sim[!,:DM_FRoot] .= 0.0
-    Sim[!,:DM_Shoot] .= 0.0
-    Sim[!,:DM_Fruit] .= 0.0
-    Sim[!,:DM_SCR] .= 0.0
-    Sim[!,:DM_Fruit_Cohort] .= 0.0
-    Sim[!,:DM_RE] .= 0.0
-    Sim[!,:Mact_SCR] .= 0.0
-    Sim[!,:Mnat_SCR] .= 0.0
-    Sim[!,:Mprun_Shoot] .= 0.0
-    Sim[!,:DegreeDays_Tcan] .= 0.0
-    Sim[!,:pbreak] .= 0.0
-    Sim[!,:Budinit] .= 0.0
-    Sim[!,:BudBreak] .= 0.0
-    Sim[!,:Bud_available] .= 0.0
-    Sim[!,:BudBreak_cohort] .= 0.0
-    Sim[!,:Alloc_Fruit_Cohort] .= 0.0
-    Sim[!,:NPP_Fruit_Cohort] .= 0.0
-    Sim[!,:CM_Fruit_Cohort] .= 0.0
-    Sim[!,:CM_Fruit_Cohort_remain] .= 0.0
-    Sim[!,:Maturation_duration] .= 0.0
-    Sim[!,:SC] .= 0.0
-    Sim[!,:Temp_cor_Bud] .= 1.0
-  
-    Sim[!,:Tcan_Diurnal_Cof_deg] .= 0.0
-    Sim[!,:NPP_RE] .= 0.0
-    Sim[!,:lue] .= 0.0
-    Sim[!,:GPP] .= 0.0
-    Sim[!,:K_Dif] .= 0.0
-    Sim[!,:K_Dir] .= 0.0
-    Sim[!,:Consumption_RE] .= 0.0
-    Sim[!,:Supply] .= 0.0
-    Sim[!,:Carbon_Lack_Mortality] .= 0.0
-    Sim[!,:Alloc_Shoot] .= 0.0
-    Sim[!,:NPP_Shoot] .= 0.0
-    Sim[!,:Rg_Shoot] .= 0.0
-    Sim[!,:Mnat_Shoot] .= 0.0
-    Sim[!,:Mortality_Shoot] .= 0.0
-    Sim[!,:Rm_Shoot] .= 0.0
-    Sim[!,:lambdaSCRage] .= 0.0
-    Sim[!,:Alloc_SCR] .= 0.0
-    Sim[!,:NPP_SCR] .= 0.0
-    Sim[!,:Rg_SCR] .= 0.0
-    Sim[!,:Rm_SCR] .= 0.0
-    Sim[!,:Mortality_SCR] .= 0.0
-    Sim[!,:Harvest_Maturity_Pot] .= 0.0
-    Sim[!,:ratioNodestoLAI] .= 0.0
-    Sim[!,:Supply_Fruit] .= 0.0
-    Sim[!,:Alloc_Fruit] .= 0.0
-    Sim[!,:Overriped_Fruit] .= 0.0
-    Sim[!,:NPP_Fruit] .= 0.0
-    Sim[!,:Rg_Fruit] .= 0.0
-    Sim[!,:Harvest_Fruit] .= 0.0
-    Sim[!,:Rm_Fruit] .= 0.0
-    Sim[!,:Supply_Leaf] .= 0.0
-    Sim[!,:Alloc_Leaf] .= 0.0
-    Sim[!,:NPP_Leaf] .= 0.0
-    Sim[!,:Rg_Leaf] .= 0.0
-    Sim[!,:Mnat_Leaf] .= 0.0
-    Sim[!,:M_ALS] .= 0.0
-    Sim[!,:MnatALS_Leaf] .= 0.0
-    Sim[!,:Mprun_Leaf] .= 0.0
-    Sim[!,:Mortality_Leaf] .= 0.0
-    Sim[!,:Rm_Leaf] .= 0.0
-    Sim[!,:Demand_FRoot] .= 0.0
-    Sim[!,:Supply_FRoot] .= 0.0
-    Sim[!,:Alloc_FRoot] .= 0.0
-    Sim[!,:NPP_FRoot] .= 0.0
-    Sim[!,:Rg_FRoot] .= 0.0
-    Sim[!,:Mnat_FRoot] .= 0.0
-    Sim[!,:Mprun_FRoot] .= 0.0
-    Sim[!,:Mortality_FRoot] .= 0.0
-    Sim[!,:Rm_FRoot] .= 0.0
-    Sim[!,:Rg] .= 0.0
-    Sim[!,:Ra] .= 0.0
     Sim[!,:NPP] .= 0.0
     Sim[!,:Cbalance] .= 0.0
-    Sim[!,:BudInitPeriod] .= false
     Sim[!,:Rn_tot] .= 0.0
     Sim[!,:Date_harvest] .= 0
-
+    
     Sim[!,:Throughfall] .= 0.0
     Sim[!,:IntercRevapor] .= 0.0
     Sim[!,:ExcessRunoff] .= 0.0
@@ -134,7 +141,6 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:LE_tot] .= 0.0
     Sim[!,:Diff_T] .= 0.0
     Sim[!,:TairCanopy] .= 0.0
-    Sim[!,:Tleaf_Coffee] .= 0.0
     Sim[!,:Gb_h] .= 0.0
     Sim[!,:G_bulk] .= 0.0
     Sim[!,:Gb_air_canopy] .= 0.0
@@ -161,17 +167,16 @@ function initialise!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     Sim[!,:W_2] .= 66.0
     Sim[!,:W_3] .= 69.0
     Sim[!,:W_tot] .= Sim.W_1+Sim.W_2+Sim.W_3
-  
+    
     Sim[!,:CanopyHumect] .= 0.0
     Sim[!,:WSurfaceRes] .= 0.0
-  
+    
     if Parameters.Tree_Species == "No_Shade"
         Tree_init_no_shade!(Sim,Met_c)
     else
         Tree_init!(Sim,Met_c,Parameters)
     end
-
-    Sim.LAI[1]= Sim.CM_Leaf[1]  *  Parameters.SLA  /  1000.0  /  Parameters.CC_Leaf
+    
     Sim.LAIplot[1]= Sim.LAI_Tree[1] + Sim.LAI[1]
     Sim.Height_Canopy .= Parameters.Height_Coffee
 end
@@ -306,16 +311,15 @@ function Tree_init!(Sim::DataFrame,Met_c::DataFrame,Parameters)
     
     # Pre-computation of some variables / parameters:
     Sim[!,:Stocking_Tree] .= Parameters.StockingTree_treeha1 / 10000.0
-     
+    
     Sim[!,:TimetoFall_Tree] .= false
     Sim.TimetoFall_Tree[findall(x -> x in vcat(Parameters.Fall_Period_Tree...), Met_c.DOY)] .= true
     Sim.TimetoFall_Tree[Sim.Plot_Age .<= 1] .= false
-      
+    
     Sim[!,:TimetoThin_Tree] .= false
     Sim.TimetoThin_Tree[intersect(findall(x -> x in vcat(Parameters.Thin_Age_Tree), Sim.Plot_Age),
-                                  findall(x -> x in vcat(Parameters.date_Thin_Tree), Met_c.DOY))] .= true  
+    findall(x -> x in vcat(Parameters.date_Thin_Tree), Met_c.DOY))] .= true  
     Sim[!,:TimetoPrun_Tree] .= false
     Sim.TimetoPrun_Tree[intersect(findall(x -> x in vcat(Parameters.Pruning_Age_Tree), Sim.Plot_Age),
-                                  findall(x -> x in vcat(Parameters.D_pruning_Tree), Met_c.DOY))] .= true    
+    findall(x -> x in vcat(Parameters.D_pruning_Tree), Met_c.DOY))] .= true    
 end
-  

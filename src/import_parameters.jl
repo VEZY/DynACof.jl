@@ -1,16 +1,16 @@
 """
-    import_parameters(path::String,Names)
+import_parameters(path::String,Names)
 
-Import the model parameters from local files, or from default values in the parameter structures: 
+Import the model parameters from local files, or from default values in the parameter structures:
 - constants
 - site
 - soil
 - coffee
 - tree (for a simulation of a monocrop coffee plantation, use an empty string for the tree, see example)
 
-# Arguments 
+# Arguments
 - `path::String`: The path to the parameter files folder. If `path= "package"`, take the default files from the package
-- `Names::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: list the file names. 
+- `Names::NamedTuple{(:constants, :site, :meteo, :soil, :coffee, :tree),NTuple{6,String}}`: list the file names.
 
 # Details
 For the full list of parameters and the format of the parameter files, see [`site`](@ref).
@@ -20,10 +20,10 @@ A list of all input parameters for DynACof
 
 # Examples
 ```julia
-# Default from package: 
+# Default from package:
 import_parameters("package")
 
-# Reading it from local files: 
+# Reading it from local files:
 import_parameters("D:/parameter_files",(constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",coffee="coffee.jl",tree="tree.jl"))
 
 # For a coffee monocrop (without shade trees)
@@ -35,7 +35,7 @@ function import_parameters(path::String= "package",Names= (constants= "constants
     if path == "package"
         paths= repeat(["package"],length(Names))
         paths_names= keys(Names)
-        paths = NamedTuple{paths_names}(paths)       
+        paths = NamedTuple{paths_names}(paths)
     else
         paths= map(x -> normpath(string(path,"/",x)),Names)
     end
@@ -45,22 +45,28 @@ function import_parameters(path::String= "package",Names= (constants= "constants
         # params= map(x -> :(struct_to_tuple($x, read_param_file($(Meta.parse(":$x")),paths.$x))),param_struct)
         # eval_params= map(eval, params)
         params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),
-                    [:constants,:site, :soil, :coffee],
-                    (constants,site,soil,coffee))
+        [:constants,:site, :soil, :coffee],
+        (constants,site,soil,coffee))
         params= merge(params...,(Tree_Species= "No_Shade",))
+    elseif Names.coffee==""
+        params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),
+        [:constants,:site, :soil, :tree],
+        (constants,site,soil,tree))
+        params= merge(params...,(Stocking_Coffee=0.0,AgeCoffeeMax=300,Height_Coffee=0.01,wleaf=params[4].wleaf_Tree))
+        # Note: AgeCoffeeMax is set at a high value when using shade trees only. Should be a parameter though.
     else
         params= map((x,y) -> struct_to_tuple(y, read_param_file(x,getfield(paths,x))),
-                    [:constants,:site, :soil, :coffee, :tree],
-                    (constants,site,soil,coffee,tree))
+        [:constants,:site, :soil, :coffee, :tree],
+        (constants,site,soil,coffee,tree))
         params= merge(params...)
     end
-    
+
     return params
 end
 
 
 """
-    read_param_file(structure::Symbol,filepath::String="package")
+read_param_file(structure::Symbol,filepath::String="package")
 
 Read DynACof parameter files and create the structure according to its structure.
 If parameters are missing from the file, the structure is filled with the default values.
