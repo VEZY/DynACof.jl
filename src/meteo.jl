@@ -44,7 +44,7 @@ is kept for information for the moment.
 | DaysWithoutRain | day         | Number of consecutive days with no rainfall  | Computed from Rain                                                 |
 | Air_Density     | kg m-3      | Air density of moist air (ρ) above canopy | Computed using [`air_density`](@ref)                       |
 | ZEN             | radian      | Solar zenithal angle at noon                 | Computed from Date, Latitude, Longitude and Timezone               |
-    
+
 # Returns
 A daily meteorology DataFrame.
 
@@ -59,41 +59,41 @@ Meteo= meteorology(file,import_parameters())
 rm(file)
 ```
 """
-function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-01-01", "0000-01-02"])::DataFrame
-    period_date= Dates.Date.(period)
+function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01-01", "0000-01-02"])::DataFrame
+    period_date = Dates.Date.(period)
 
-    MetData= CSV.read(file; copycols=true);
+    MetData = CSV.read(file; copycols=true)
 
-    if is_missing(MetData,"Date")
-        if !is_missing(Parameters,"Start_Date")
-            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date, "Y/m/d"):Dates.Day(1):(Dates.Date(Parameters.Start_Date, "Y/m/d") + Dates.Day(nrow(MetData)-1)))
-            warn_var("Date","Start_Date from Parameters","warn")
+    if is_missing(MetData, "Date")
+        if !is_missing(Parameters, "Start_Date")
+            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date, "Y/m/d"):Dates.Day(1):(Dates.Date(Parameters.Start_Date, "Y/m/d")+Dates.Day(nrow(MetData) - 1)))
+            warn_var("Date", "Start_Date from Parameters", "warn")
         else
-            MetData[:Date] = collect(Dates.Date("2000-01-01", "Y/m/d"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01", "Y/m/d")) + Dates.Day(nrow(MetData)-1)))
-            warn_var("Date","dummy 2000-01-01", "warn")
+            MetData[:Date] = collect(Dates.Date("2000-01-01", "Y/m/d"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01", "Y/m/d"))+Dates.Day(nrow(MetData) - 1)))
+            warn_var("Date", "dummy 2000-01-01", "warn")
         end
     end
 
-    if is_missing(MetData,"DOY")
+    if is_missing(MetData, "DOY")
         MetData[:DOY] = dayofyear.(MetData.Date)
-        warn_var("DOY","MetData.Date","warn")
+        warn_var("DOY", "MetData.Date", "warn")
     end
 
-    if is_missing(MetData,"year")
+    if is_missing(MetData, "year")
         MetData[:year] = year.(MetData.Date)
-        warn_var("year","MetData.Date","warn")
+        warn_var("year", "MetData.Date", "warn")
     end
 
     if period != ["0000-01-01", "0000-01-02"]
         if period_date[1] < minimum(MetData.Date) || period_date[2] > maximum(MetData.Date)
             error("Given period is not covered by the meteorology file")
         else
-            MetData= MetData[period_date[1] .<= MetData.Date .<= period_date[2], :]
+            MetData = MetData[period_date[1].<=MetData.Date.<=period_date[2], :]
         end
     end
 
-    if is_missing(MetData,"RAD")
-        if !is_missing(MetData,"PAR")
+    if is_missing(MetData, "RAD")
+        if !is_missing(MetData, "PAR")
             MetData[:RAD] = MetData[:PAR] ./ Parameters.FPAR
             warn_var("RAD", "PAR", "warn")
         else
@@ -101,8 +101,8 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
         end
     end
 
-    if is_missing(MetData,"PAR")
-        if !is_missing(MetData,"RAD")
+    if is_missing(MetData, "PAR")
+        if !is_missing(MetData, "RAD")
             MetData[:PAR] = MetData[:RAD] .* Parameters.FPAR
             warn_var("PAR", "RAD", "warn")
         else
@@ -111,84 +111,84 @@ function meteorology(file::String, Parameters, period::Array{String,1}= ["0000-0
     end
     MetData.PAR[MetData.PAR.<0.1, :] .= 0.1
 
-    if is_missing(MetData,"Tmin") || is_missing(MetData,"Tmax")
-        warn_var("Tmin and/or Tmax","error")
+    if is_missing(MetData, "Tmin") || is_missing(MetData, "Tmax")
+        warn_var("Tmin and/or Tmax", "error")
     end
 
-    if is_missing(MetData,"Tair")
+    if is_missing(MetData, "Tair")
         MetData[:Tair] = (MetData.Tmax .+ MetData.Tmin) ./ 2.0
-        warn_var("Tair","the equation (MetData.Tmax-MetData.Tmin)/2","warn")
+        warn_var("Tair", "the equation (MetData.Tmax-MetData.Tmin)/2", "warn")
     end
 
-    if is_missing(MetData,"VPD")
-        if !is_missing(MetData,"RH")
+    if is_missing(MetData, "VPD")
+        if !is_missing(MetData, "RH")
             MetData[:VPD] = rH_to_VPD.(MetData.RH ./ 100.0, MetData.Tair) .* 10.0 # hPa
-            warn_var("VPD","RH and Tair using bigleaf::rH.to.VPD","warn")
+            warn_var("VPD", "RH and Tair using bigleaf::rH.to.VPD", "warn")
         else
-            warn_var("VPD","RH","error")
+            warn_var("VPD", "RH", "error")
         end
     end
 
-    if is_missing(MetData,"Pressure")
-        if !is_missing(Parameters,"Elevation")
+    if is_missing(MetData, "Pressure")
+        if !is_missing(Parameters, "Elevation")
             MetData[:Pressure] = pressure_from_elevation.(Parameters.Elevation, MetData.Tair, MetData.VPD) .* 10
             # Return in kPa
-            warn_var("Pressure","Elevation, Tair and VPD using pressure_from_elevation","warn")
+            warn_var("Pressure", "Elevation, Tair and VPD using pressure_from_elevation", "warn")
         else
-            warn_var("Pressure","Elevation","error")
+            warn_var("Pressure", "Elevation", "error")
         end
     end
 
     # Missing rain:
-    if is_missing(MetData,"Rain")
+    if is_missing(MetData, "Rain")
         MetData[:Rain] .= 0.0
-        warn_var("Rain","constant (= 0, assuming no rain)","warn")
+        warn_var("Rain", "constant (= 0, assuming no rain)", "warn")
     end
 
     # Missing wind speed:
-    if is_missing(MetData,"WindSpeed")
-        if !is_missing(Parameters,"WindSpeed")
+    if is_missing(MetData, "WindSpeed")
+        if !is_missing(Parameters, "WindSpeed")
             MetData[:WindSpeed] = Parameters.WindSpeed # assume constant windspeed
-            warn_var("WindSpeed","constant (= WindSpeed from Parameters )","warn")
+            warn_var("WindSpeed", "constant (= WindSpeed from Parameters )", "warn")
         else
-            warn_var("WindSpeed",  "WindSpeed from Parameters (constant value)","error")
+            warn_var("WindSpeed", "WindSpeed from Parameters (constant value)", "error")
         end
     end
 
     MetData.WindSpeed[MetData.WindSpeed.<0.01, :] .= 0.01
 
     # Missing atmospheric CO2 concentration:
-    if is_missing(MetData,"CO2")
-        if !is_missing(Parameters,"CO2")
+    if is_missing(MetData, "CO2")
+        if !is_missing(Parameters, "CO2")
             MetData[:CO2] = Parameters.CO2 # assume constant CO2
-            warn_var("CO2","constant (= CO2 from Parameters)","warn")
+            warn_var("CO2", "constant (= CO2 from Parameters)", "warn")
         else
-            warn_var("WindSpeed",  "CO2 from Parameters (constant value)","error")
+            warn_var("WindSpeed", "CO2 from Parameters (constant value)", "error")
         end
     end
 
     # Missing DegreeDays:
-    if is_missing(MetData,"DegreeDays")
+    if is_missing(MetData, "DegreeDays")
         MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT)
-        warn_var("DegreeDays","Tmax, Tmin and MinTT","warn")
+        warn_var("DegreeDays", "Tmax, Tmin and MinTT", "warn")
     end
 
     # Missing diffuse fraction:
-    if is_missing(MetData,"FDiff")
+    if is_missing(MetData, "FDiff")
         MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, "Spitters")
-        warn_var("FDiff","DOY, RAD and Latitude using diffuse_fraction()","warn")
+        warn_var("FDiff", "DOY, RAD and Latitude using diffuse_fraction()", "warn")
     end
 
     # Solar zenithal angle at noon (radian):
-    MetData.ZEN= sun_zenithal_angle.(MetData.DOY,Parameters.Latitude)
+    MetData.ZEN = sun_zenithal_angle.(MetData.DOY, Parameters.Latitude)
 
     # Compute net radiation using the Allen et al. (1998) equation :
-    MetData.Rn= Rad_net.(MetData.DOY,MetData.RAD,MetData.Tmax,MetData.Tmin,MetData.VPD/10.0,
-    Parameters.Elevation,Parameters.Latitude,Parameters.albedo)
+    MetData.Rn = Rad_net.(MetData.DOY, MetData.RAD, MetData.Tmax, MetData.Tmin, MetData.VPD / 10.0,
+        Parameters.Latitude, Parameters.Elevation, Parameters.albedo)
 
     # Number of days without rainfall:
-    MetData.DaysWithoutRain= days_without_rain(MetData.Rain)
+    MetData.DaysWithoutRain = days_without_rain(MetData.Rain)
 
-    printstyled("Meteo computation done \n", bold= true, color= :light_green)
+    printstyled("Meteo computation done \n", bold=true, color=:light_green)
     return MetData
 end
