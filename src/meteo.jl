@@ -61,8 +61,7 @@ rm(file)
 """
 function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01-01", "0000-01-02"])::DataFrame
     period_date = Dates.Date.(period)
-
-    MetData = CSV.read(file, DataFrame)
+    MetData = DataFrame(CSV.File(file), copycols=true)
 
     if is_missing(MetData, "Date")
         if !is_missing(Parameters, "Start_Date")
