@@ -1,16 +1,17 @@
 using DynACof
 using Test
+using Dates
 
 @testset "Test on helpers" begin
-   include("helpers_tests.jl")
+    include("helpers_tests.jl")
 end
 
 @testset "Tests on conductances" begin
-   include("conductances_tests.jl")
+    include("conductances_tests.jl")
 end
 
 @testset "Tests on diseases" begin
-   include("disease_tests.jl")
+    include("disease_tests.jl")
 end
 
 
