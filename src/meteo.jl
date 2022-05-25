@@ -65,21 +65,21 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "Date")
         if !is_missing(Parameters, "Start_Date")
-            MetData[:Date] = collect(Dates.Date(Parameters.Start_Date, "Y/m/d"):Dates.Day(1):(Dates.Date(Parameters.Start_Date, "Y/m/d")+Dates.Day(size(MetData, 1) - 1)))
+            MetData[!, :Date] = collect(Dates.Date(Parameters.Start_Date, "Y/m/d"):Dates.Day(1):(Dates.Date(Parameters.Start_Date, "Y/m/d")+Dates.Day(size(MetData, 1) - 1)))
             warn_var("Date", "Start_Date from Parameters", "warn")
         else
-            MetData[:Date] = collect(Dates.Date("2000-01-01", "Y/m/d"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01", "Y/m/d"))+Dates.Day(size(MetData, 1) - 1)))
+            MetData[!, :Date] = collect(Dates.Date("2000-01-01", "Y/m/d"):Dates.Day(1):(Dates.Date(Dates.Date("2000-01-01", "Y/m/d"))+Dates.Day(size(MetData, 1) - 1)))
             warn_var("Date", "dummy 2000-01-01", "warn")
         end
     end
 
     if is_missing(MetData, "DOY")
-        MetData[:DOY] = dayofyear.(MetData.Date)
+        MetData[!, :DOY] = dayofyear.(MetData.Date)
         warn_var("DOY", "MetData.Date", "warn")
     end
 
     if is_missing(MetData, "year")
-        MetData[:year] = year.(MetData.Date)
+        MetData[!, :year] = year.(MetData.Date)
         warn_var("year", "MetData.Date", "warn")
     end
 
@@ -93,7 +93,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "RAD")
         if !is_missing(MetData, "PAR")
-            MetData[:RAD] = MetData[:PAR] ./ Parameters.FPAR
+            MetData[!, :RAD] = MetData[:PAR] ./ Parameters.FPAR
             warn_var("RAD", "PAR", "warn")
         else
             warn_var("RAD", "PAR", "error")
@@ -102,7 +102,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "PAR")
         if !is_missing(MetData, "RAD")
-            MetData[:PAR] = MetData[:RAD] .* Parameters.FPAR
+            MetData[!, :PAR] = MetData[:RAD] .* Parameters.FPAR
             warn_var("PAR", "RAD", "warn")
         else
             warn_var("PAR", "RAD", "error")
@@ -115,13 +115,13 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
     end
 
     if is_missing(MetData, "Tair")
-        MetData[:Tair] = (MetData.Tmax .+ MetData.Tmin) ./ 2.0
+        MetData[!, :Tair] = (MetData.Tmax .+ MetData.Tmin) ./ 2.0
         warn_var("Tair", "the equation (MetData.Tmax-MetData.Tmin)/2", "warn")
     end
 
     if is_missing(MetData, "VPD")
         if !is_missing(MetData, "RH")
-            MetData[:VPD] = rH_to_VPD.(MetData.RH ./ 100.0, MetData.Tair) .* 10.0 # hPa
+            MetData[!, :VPD] = rH_to_VPD.(MetData.RH ./ 100.0, MetData.Tair) .* 10.0 # hPa
             warn_var("VPD", "RH and Tair using bigleaf::rH.to.VPD", "warn")
         else
             warn_var("VPD", "RH", "error")
@@ -130,7 +130,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "Pressure")
         if !is_missing(Parameters, "Elevation")
-            MetData[:Pressure] = pressure_from_elevation.(Parameters.Elevation, MetData.Tair, MetData.VPD) .* 10
+            MetData[!, :Pressure] = pressure_from_elevation.(Parameters.Elevation, MetData.Tair, MetData.VPD) .* 10
             # Return in kPa
             warn_var("Pressure", "Elevation, Tair and VPD using pressure_from_elevation", "warn")
         else
@@ -140,14 +140,14 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     # Missing rain:
     if is_missing(MetData, "Rain")
-        MetData[:Rain] .= 0.0
+        MetData[!, :Rain] .= 0.0
         warn_var("Rain", "constant (= 0, assuming no rain)", "warn")
     end
 
     # Missing wind speed:
     if is_missing(MetData, "WindSpeed")
         if !is_missing(Parameters, "WindSpeed")
-            MetData[:WindSpeed] = Parameters.WindSpeed # assume constant windspeed
+            MetData[!, :WindSpeed] = Parameters.WindSpeed # assume constant windspeed
             warn_var("WindSpeed", "constant (= WindSpeed from Parameters )", "warn")
         else
             warn_var("WindSpeed", "WindSpeed from Parameters (constant value)", "error")
@@ -159,7 +159,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
     # Missing atmospheric CO2 concentration:
     if is_missing(MetData, "CO2")
         if !is_missing(Parameters, "CO2")
-            MetData[:CO2] = Parameters.CO2 # assume constant CO2
+            MetData[!, :CO2] = Parameters.CO2 # assume constant CO2
             warn_var("CO2", "constant (= CO2 from Parameters)", "warn")
         else
             warn_var("WindSpeed", "CO2 from Parameters (constant value)", "error")
@@ -168,13 +168,13 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     # Missing DegreeDays:
     if is_missing(MetData, "DegreeDays")
-        MetData[:DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT)
+        MetData[!, :DegreeDays] = GDD.(MetData.Tmax, MetData.Tmin, Parameters.MinTT)
         warn_var("DegreeDays", "Tmax, Tmin and MinTT", "warn")
     end
 
     # Missing diffuse fraction:
     if is_missing(MetData, "FDiff")
-        MetData[:FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, "Spitters")
+        MetData[!, :FDiff] = diffuse_fraction.(MetData.DOY, MetData.RAD, Parameters.Latitude, "Spitters")
         warn_var("FDiff", "DOY, RAD and Latitude using diffuse_fraction()", "warn")
     end
 
