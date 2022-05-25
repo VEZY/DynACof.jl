@@ -7,6 +7,10 @@ Computes a DataFrame with three columns:
 - Plot_Age: The age of the rotation (days)
 - Plot_Age_num: The age in a numerical form (0 -> 1)
 
+# Return
+
+Two objects: the DataFrame and the number of rotations.
+
 # Arguments
 
 - `Meteo`: The daily meteo file, *e.g.* output from [`meteorology`](@ref)
@@ -24,7 +28,7 @@ function rotation(Meteo, rotation_length)
     # Setting up the simulation with each plantation rotation (cycle) and plantation age (Plot_Age)
     ndaysYear = zeros(Int64, length(years))
     for i in 1:length(years)
-        ndaysYear[i] = nrow(Meteo[Meteo.year.==years[i], :])
+        ndaysYear[i] = size(Meteo[Meteo.year.==years[i], :], 1)
     end
     # Variables are re-initialized from one to another cycle so each cycle is independant from the others -> mandatory for
     # parallel processing afterwards
@@ -35,5 +39,5 @@ function rotation(Meteo, rotation_length)
     age_day = vcat(map((x, y) -> repeat([x], inner=y), age_year, ndaysYear)...)
     age_day_num = vcat(map((x, y) -> collect(x:(1/y):(x+1.0-1/y)), age_year, ndaysYear)...)
 
-    DataFrame(Cycle=cycle_day, Plot_Age=age_day, Plot_Age_num=age_day_num)
+    return DataFrame(Cycle=cycle_day, Plot_Age=age_day, Plot_Age_num=age_day_num), NCycles
 end

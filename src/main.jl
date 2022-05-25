@@ -202,7 +202,7 @@ function dynacof(; period::Array{String,1}=["0000-01-01", "0000-01-02"], input_p
     Meteo = meteorology(normpath(string(input_path, "/", file_name.meteo)), Parameters, period)
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
-    Direction = rotation(Meteo, Parameters.AgeCoffeeMax)
+    Direction, NCycles = rotation(Meteo, Parameters.AgeCoffeeMax)
 
     printstyled("Starting a simulation from $(minimum(Meteo.Date)) to $(maximum(Meteo.Date)) over $NCycles plantation cycle(s) \n",
         bold=true, color=:light_green)
@@ -220,6 +220,7 @@ function mainfun(cy, Direction, Meteo, Parameters)
     # Initializing the table:
     Sim = Direction[Direction.Cycle.==cy, :]
     Met_c = Meteo[Direction.Cycle.==cy, :]
+    n_i = size(Sim, 1)
 
     initialise!(Sim, Met_c, Parameters)
     if Parameters.Stocking_Coffee > 0.0
@@ -240,11 +241,11 @@ function mainfun(cy, Direction, Meteo, Parameters)
         energy_water_models!(Sim, Parameters, Met_c, i) # the soil is in here also
         # Shade Tree computation if any
         if Sim.Stocking_Tree[i] > 0.0
-            tree_model!(Sim, Parameters, Met_c, i)
+            tree_model!(Sim, Parameters, Met_c, i, n_i)
         end
 
         if Parameters.Stocking_Coffee > 0.0
-            coffee_model!(Sim, Parameters, Met_c, i)
+            coffee_model!(Sim, Parameters, Met_c, i, n_i)
         end
     end
 
@@ -294,16 +295,16 @@ Sim.Rm[366]
 Sim2.Rm[366]
 
 # To run DynACof for several days, use a range for i:
-S= dynacof_i(367:nrow(Meteo),Sim,Meteo,Parameters)
-# NB: nrow(Meteo) or nrow(Sim) is the maximum length we can simulate. To increase a simulation,
+S= dynacof_i(367:size(Meteo,1),Sim,Meteo,Parameters)
+# NB: size(Meteo,1) or size(Sim,1) is the maximum length we can simulate. To increase a simulation,
 # initialize it with a wider range for the "Period" argument (see [`dynacof_i_init`](@ref)).
 ```
 """
-function dynacof_i!(i, Sim::DataFrame, Met_c::DataFrame, Parameters)
+function dynacof_i!(i, Sim::DataFrame, Met_c::DataFrame, Parameters, n_i=size(Sim, 1))
 
-    if minimum(i) > nrow(Sim)
+    if minimum(i) > n_i
         error("""Index or range requested ('i') exceeds the range of the simulation. Please provide a maximum
-                 index/range of $(nrow(Sim)).
+                 index/range of $(n_i).
                  -> If you need a wider range, please initialize a longer simulation using `dynacof_i_init()`.
         """)
     end
@@ -315,10 +316,10 @@ function dynacof_i!(i, Sim::DataFrame, Met_c::DataFrame, Parameters)
         energy_water_models!(Sim, Parameters, Met_c, j) # the soil is in here also
         # Shade Tree computation if any
         if Sim.Stocking_Tree[j] > 0.0
-            tree_model!(Sim, Parameters, Met_c, j)
+            tree_model!(Sim, Parameters, Met_c, j, n_i)
         end
         # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
-        coffee_model!(Sim, Parameters, Met_c, j)
+        coffee_model!(Sim, Parameters, Met_c, j, n_i)
 
         Sim.Yield_green[j] = Sim.Harvest_Fruit[j] ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
     end
@@ -381,30 +382,10 @@ function dynacof_i_init(i; period::Array{String,1}=["0000-01-01", "0000-01-02"],
     Meteo = meteorology(normpath(string(input_path, "/", file_name.meteo)), Parameters, period)
 
     # Setting up the simulation -----------------------------------------------
+
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
-    years = unique(Meteo.year)
 
-    NCycles = ceil(Int64, length(years) ./ Parameters.AgeCoffeeMax)
-
-    if NCycles == 0
-        error("Carefull, minimum allowed simulation length is one year")
-    end
-
-    # Setting up the simulation with each plantation rotation (cycle) and plantation age (Plot_Age)
-    ndaysYear = zeros(Int64, length(years))
-    for i in 1:length(years)
-        ndaysYear[i] = nrow(Meteo[Meteo.year.==years[i], :])
-    end
-    # Variables are re-initialized from one to another cycle so each cycle is independant from the others -> mandatory for
-    # parallel processing afterwards
-
-    cycle_year = repeat(1:NCycles, inner=Parameters.AgeCoffeeMax)[1:length(years)]
-    cycle_day = vcat(map((x, y) -> repeat([x], y), cycle_year, ndaysYear)...)
-    age_year = (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
-    age_day = vcat(map((x, y) -> repeat([x], inner=y), age_year, ndaysYear)...)
-    age_day_num = vcat(map((x, y) -> collect(x:(1/y):(x+1.0-1/y)), age_year, ndaysYear)...)
-
-    Direction = DataFrame(Cycle=cycle_day, Plot_Age=age_day, Plot_Age_num=age_day_num)
+    Direction, NCycles = rotation(Meteo, Parameters.AgeCoffeeMax)
 
     printstyled("Starting a simulation from $(minimum(Meteo.Date)) to $(Meteo.Date[maximum(i)]) over $NCycles plantation cycle(s) \n",
         bold=true, color=:light_green)
@@ -418,6 +399,7 @@ function dynacof_i_init(i; period::Array{String,1}=["0000-01-01", "0000-01-02"],
     # Initializing the table:
     Sim = Direction
     Met_c = Meteo
+    n_i = size(Sim, 1)
 
     initialise!(Sim, Met_c, Parameters)
     bud_init_period!(Sim, Met_c, Parameters)
@@ -431,7 +413,7 @@ function dynacof_i_init(i; period::Array{String,1}=["0000-01-01", "0000-01-02"],
     Sim[!, :year] .= Met_c.year
     Sim[!, :Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
 
-    Sim[1:nrow(Sim_df), :] = Sim_df[:, :]
+    Sim[eachindex(Sim_df), :] = Sim_df[:, :]
 
     n_i = min(maximum(i) + 1, length(Sim.LAI))
     Sim.LAI[n_i] = Sim.CM_Leaf[maximum(i)] * Parameters.SLA / 1000.0 / Parameters.CC_Leaf
