@@ -194,93 +194,68 @@ coffee="package",tree="package"))
 rm(file)
 ```
 """
-function dynacof(;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
-                 file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",
-                             coffee="coffee.jl",tree="tree.jl"))
+function dynacof(; period::Array{String,1}=["0000-01-01", "0000-01-02"], input_path="package",
+    file_name=(constants="constants.jl", site="site.jl", meteo="meteorology.txt", soil="soil.jl",
+        coffee="coffee.jl", tree="tree.jl"))
 
-
-    Parameters= import_parameters(input_path, file_name)
-    Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
+    Parameters = import_parameters(input_path, file_name)
+    Meteo = meteorology(normpath(string(input_path, "/", file_name.meteo)), Parameters, period)
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
-    years= unique(Meteo.year)
-
-    NCycles= ceil(Int64,length(years) ./ Parameters.AgeCoffeeMax)
-
-    if NCycles==0
-      error("Carefull, minimum allowed simulation length is one year")
-    end
-
-    # Setting up the simulation with each plantation rotation (cycle) and plantation age (Plot_Age)
-    ndaysYear= zeros(Int64, length(years))
-    for i in 1:length(years)
-        ndaysYear[i]= nrow(Meteo[Meteo.year .== years[i],:])
-    end
-    # Variables are re-initialized from one to another cycle so each cycle is independant from the others -> mandatory for
-    # parallel processing afterwards
-
-    cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(years)]
-    cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
-    age_year= (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
-    age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
-    age_day_num= vcat(map((x,y) -> collect(x:(1 / y):(x + 1.0 - 1 / y)),age_year,ndaysYear)...)
-
-    Direction= DataFrame(Cycle= cycle_day, Plot_Age= age_day, Plot_Age_num= age_day_num)
+    Direction = rotation(Meteo, Parameters.AgeCoffeeMax)
 
     printstyled("Starting a simulation from $(minimum(Meteo.Date)) to $(maximum(Meteo.Date)) over $NCycles plantation cycle(s) \n",
-                bold= true, color= :light_green)
+        bold=true, color=:light_green)
 
     # Potentially make it parallel here
-    Sim= map(x -> mainfun(x,Direction,Meteo,Parameters), 1:NCycles)
-    printstyled("Simulation completed successfully \n", bold= true, color= :light_green)
+    Sim = map(x -> mainfun(x, Direction, Meteo, Parameters), 1:NCycles)
+    printstyled("Simulation completed successfully \n", bold=true, color=:light_green)
 
     return vcat(Sim...), Meteo, Parameters
     # Note: to get those elements with a call, just do: `Sim, Meteo, Parameters= dynacof(...)`
 end
 
+function mainfun(cy, Direction, Meteo, Parameters)
 
+    # Initializing the table:
+    Sim = Direction[Direction.Cycle.==cy, :]
+    Met_c = Meteo[Direction.Cycle.==cy, :]
 
-function mainfun(cy,Direction,Meteo,Parameters)
-
-  # Initializing the table:
-  Sim= Direction[Direction.Cycle .== cy,:]
-  Met_c= Meteo[Direction.Cycle .== cy,:]
-
-  initialise!(Sim,Met_c,Parameters)
-  if Parameters.Stocking_Coffee > 0.0
-    bud_init_period!(Sim,Met_c,Parameters)
-    Sim.ALS= ALS(
-        Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
-        Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
-        ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning,
-        df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
-  end
-
-  # Main Loop -----------------------------------------------------------------------------------
-  p = Progress(length(Sim.LAI),1)
-
-  for i in 1:length(Sim.LAI)
-    next!(p)
-
-    energy_water_models!(Sim,Parameters,Met_c,i) # the soil is in here also
-    # Shade Tree computation if any
-    if Sim.Stocking_Tree[i] > 0.0
-      tree_model!(Sim,Parameters,Met_c,i)
+    initialise!(Sim, Met_c, Parameters)
+    if Parameters.Stocking_Coffee > 0.0
+        bud_init_period!(Sim, Met_c, Parameters)
+        Sim.ALS = ALS(
+            Elevation=Parameters.Elevation, SlopeAzimut=Parameters.SlopeAzimut, Slope=Parameters.Slope, RowDistance=Parameters.RowDistance,
+            Shade=Parameters.Shade, height_coffee=Parameters.Height_Coffee, Fertilization=Parameters.Fertilization,
+            ShadeType=Parameters.ShadeType, CoffeePruning=Parameters.CoffeePruning,
+            df_rain=DataFrame(year=Met_c.year, DOY=Met_c.DOY, Rain=Met_c.Rain))
     end
+
+    # Main Loop -----------------------------------------------------------------------------------
+    p = Progress(length(Sim.LAI), 1)
+
+    for i in 1:length(Sim.LAI)
+        next!(p)
+
+        energy_water_models!(Sim, Parameters, Met_c, i) # the soil is in here also
+        # Shade Tree computation if any
+        if Sim.Stocking_Tree[i] > 0.0
+            tree_model!(Sim, Parameters, Met_c, i)
+        end
+
+        if Parameters.Stocking_Coffee > 0.0
+            coffee_model!(Sim, Parameters, Met_c, i)
+        end
+    end
+
+    Sim[!, :date] .= Met_c.Date
+    Sim[!, :year] .= Met_c.year
 
     if Parameters.Stocking_Coffee > 0.0
-        coffee_model!(Sim,Parameters,Met_c,i)
+        Sim[!, :Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
     end
-  end
 
-  Sim[!,:date] .= Met_c.Date
-  Sim[!,:year] .= Met_c.year
-
-  if Parameters.Stocking_Coffee > 0.0
-    Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
-  end
-
-  return Sim
+    return Sim
 end
 
 """
@@ -324,29 +299,29 @@ S= dynacof_i(367:nrow(Meteo),Sim,Meteo,Parameters)
 # initialize it with a wider range for the "Period" argument (see [`dynacof_i_init`](@ref)).
 ```
 """
-function dynacof_i!(i,Sim::DataFrame,Met_c::DataFrame,Parameters)
+function dynacof_i!(i, Sim::DataFrame, Met_c::DataFrame, Parameters)
 
-  if minimum(i) > nrow(Sim)
-    error("""Index or range requested ('i') exceeds the range of the simulation. Please provide a maximum
-             index/range of $(nrow(Sim)).
-             -> If you need a wider range, please initialize a longer simulation using `dynacof_i_init()`.
-    """)
-  end
-
-  p = Progress(length(i),1)
-
-  for j in collect(i)
-    next!(p)
-    energy_water_models!(Sim,Parameters,Met_c,j) # the soil is in here also
-    # Shade Tree computation if any
-    if Sim.Stocking_Tree[j] > 0.0
-      tree_model!(Sim,Parameters,Met_c,j)
+    if minimum(i) > nrow(Sim)
+        error("""Index or range requested ('i') exceeds the range of the simulation. Please provide a maximum
+                 index/range of $(nrow(Sim)).
+                 -> If you need a wider range, please initialize a longer simulation using `dynacof_i_init()`.
+        """)
     end
-    # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
-    coffee_model!(Sim,Parameters,Met_c,j)
 
-    Sim.Yield_green[j] = Sim.Harvest_Fruit[j] ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
-  end
+    p = Progress(length(i), 1)
+
+    for j in collect(i)
+        next!(p)
+        energy_water_models!(Sim, Parameters, Met_c, j) # the soil is in here also
+        # Shade Tree computation if any
+        if Sim.Stocking_Tree[j] > 0.0
+            tree_model!(Sim, Parameters, Met_c, j)
+        end
+        # Should output at least APAR_Tree, LAI_Tree, T_Tree, Rn_Tree, H_Tree, LE_Tree (sum of transpiration + leaf evap)
+        coffee_model!(Sim, Parameters, Met_c, j)
+
+        Sim.Yield_green[j] = Sim.Harvest_Fruit[j] ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
+    end
 end
 
 
@@ -390,84 +365,84 @@ Sim, Meteo, Parameters= dynacof_i_init(1:365,input_path= dirname(file), file_nam
 rm(file)
 ```
 """
-function dynacof_i_init(i;period::Array{String,1}= ["0000-01-01", "0000-01-02"], input_path="package",
-                            file_name= (constants= "constants.jl",site="site.jl",meteo="meteorology.txt",soil="soil.jl",
-                                         coffee="coffee.jl",tree="tree.jl"))
+function dynacof_i_init(i; period::Array{String,1}=["0000-01-01", "0000-01-02"], input_path="package",
+    file_name=(constants="constants.jl", site="site.jl", meteo="meteorology.txt", soil="soil.jl",
+        coffee="coffee.jl", tree="tree.jl"))
 
-    if minimum(i)!=1
-      error("i must start at 1 for initialization")
+    if minimum(i) != 1
+        error("i must start at 1 for initialization")
     end
 
-    if maximum(i)<365
-      error("i must be a range of one year minimum (1:365) for initialization")
+    if maximum(i) < 365
+        error("i must be a range of one year minimum (1:365) for initialization")
     end
 
-    Parameters= import_parameters(input_path, file_name)
-    Meteo= meteorology(normpath(string(input_path,"/",file_name.meteo)), Parameters, period)
+    Parameters = import_parameters(input_path, file_name)
+    Meteo = meteorology(normpath(string(input_path, "/", file_name.meteo)), Parameters, period)
 
     # Setting up the simulation -----------------------------------------------
     # Number of cycles (rotations) to do over the period (given by the Meteo file):
-    years= unique(Meteo.year)
+    years = unique(Meteo.year)
 
-    NCycles= ceil(Int64,length(years) ./ Parameters.AgeCoffeeMax)
+    NCycles = ceil(Int64, length(years) ./ Parameters.AgeCoffeeMax)
 
-    if NCycles==0
-      error("Carefull, minimum allowed simulation length is one year")
+    if NCycles == 0
+        error("Carefull, minimum allowed simulation length is one year")
     end
 
     # Setting up the simulation with each plantation rotation (cycle) and plantation age (Plot_Age)
-    ndaysYear= zeros(Int64, length(years))
+    ndaysYear = zeros(Int64, length(years))
     for i in 1:length(years)
-        ndaysYear[i]= nrow(Meteo[Meteo.year .== years[i],:])
+        ndaysYear[i] = nrow(Meteo[Meteo.year.==years[i], :])
     end
     # Variables are re-initialized from one to another cycle so each cycle is independant from the others -> mandatory for
     # parallel processing afterwards
 
-    cycle_year= repeat(1:NCycles, inner= Parameters.AgeCoffeeMax)[1:length(years)]
-    cycle_day= vcat(map((x,y) -> repeat([x],y),cycle_year,ndaysYear)...)
-    age_year= (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
-    age_day= vcat(map((x,y) -> repeat([x],inner=y),age_year,ndaysYear)...)
-    age_day_num= vcat(map((x,y) -> collect(x:(1 / y):(x + 1.0 - 1 / y)),age_year,ndaysYear)...)
+    cycle_year = repeat(1:NCycles, inner=Parameters.AgeCoffeeMax)[1:length(years)]
+    cycle_day = vcat(map((x, y) -> repeat([x], y), cycle_year, ndaysYear)...)
+    age_year = (0:length(ndaysYear)-1) .% Parameters.AgeCoffeeMax .+ 1
+    age_day = vcat(map((x, y) -> repeat([x], inner=y), age_year, ndaysYear)...)
+    age_day_num = vcat(map((x, y) -> collect(x:(1/y):(x+1.0-1/y)), age_year, ndaysYear)...)
 
-    Direction= DataFrame(Cycle= cycle_day, Plot_Age= age_day, Plot_Age_num= age_day_num)
+    Direction = DataFrame(Cycle=cycle_day, Plot_Age=age_day, Plot_Age_num=age_day_num)
 
     printstyled("Starting a simulation from $(minimum(Meteo.Date)) to $(Meteo.Date[maximum(i)]) over $NCycles plantation cycle(s) \n",
-                bold= true, color= :light_green)
+        bold=true, color=:light_green)
 
     # Potentially make it parallel here
-    Sim_df= map(x -> mainfun(x,Direction[i,:],Meteo[i,:],Parameters), 1:NCycles)
-    Sim_df= vcat(Sim_df...)
-    printstyled("Simulation completed successfully \n", bold= true, color= :light_green)
+    Sim_df = map(x -> mainfun(x, Direction[i, :], Meteo[i, :], Parameters), 1:NCycles)
+    Sim_df = vcat(Sim_df...)
+    printstyled("Simulation completed successfully \n", bold=true, color=:light_green)
 
     # Making a simulation DataFrame with the same length as the Meteo, and fill it with the initialization values from Sim_df:
     # Initializing the table:
-    Sim= Direction
-    Met_c= Meteo
+    Sim = Direction
+    Met_c = Meteo
 
-    initialise!(Sim,Met_c,Parameters)
-    bud_init_period!(Sim,Met_c,Parameters)
+    initialise!(Sim, Met_c, Parameters)
+    bud_init_period!(Sim, Met_c, Parameters)
 
-    Sim.ALS= ALS(Elevation= Parameters.Elevation, SlopeAzimut= Parameters.SlopeAzimut, Slope= Parameters.Slope, RowDistance= Parameters.RowDistance,
-                 Shade= Parameters.Shade, height_coffee= Parameters.Height_Coffee, Fertilization= Parameters.Fertilization,
-                 ShadeType= Parameters.ShadeType, CoffeePruning= Parameters.CoffeePruning,
-                 df_rain= DataFrame(year= Met_c.year, DOY= Met_c.DOY, Rain= Met_c.Rain))
+    Sim.ALS = ALS(Elevation=Parameters.Elevation, SlopeAzimut=Parameters.SlopeAzimut, Slope=Parameters.Slope, RowDistance=Parameters.RowDistance,
+        Shade=Parameters.Shade, height_coffee=Parameters.Height_Coffee, Fertilization=Parameters.Fertilization,
+        ShadeType=Parameters.ShadeType, CoffeePruning=Parameters.CoffeePruning,
+        df_rain=DataFrame(year=Met_c.year, DOY=Met_c.DOY, Rain=Met_c.Rain))
 
-    Sim[!,:date] .= Met_c.Date
-    Sim[!,:year] .= Met_c.year
-    Sim[!,:Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
+    Sim[!, :date] .= Met_c.Date
+    Sim[!, :year] .= Met_c.year
+    Sim[!, :Yield_green] .= Sim.Harvest_Fruit ./ 1000.0 .* 10000.0 ./ Parameters.CC_Fruit .* Parameters.FtS
 
-    Sim[1:nrow(Sim_df),:]= Sim_df[:,:]
+    Sim[1:nrow(Sim_df), :] = Sim_df[:, :]
 
-    n_i= min(maximum(i)+1,length(Sim.LAI))
-    Sim.LAI[n_i]= Sim.CM_Leaf[maximum(i)]*Parameters.SLA/1000.0/Parameters.CC_Leaf
+    n_i = min(maximum(i) + 1, length(Sim.LAI))
+    Sim.LAI[n_i] = Sim.CM_Leaf[maximum(i)] * Parameters.SLA / 1000.0 / Parameters.CC_Leaf
 
     if Sim.Stocking_Tree[maximum(i)] > 0.0
-        Sim.LAI_Tree[n_i]= Sim.DM_Leaf_Tree[maximum(i)]*(Parameters.SLA_Tree/1000.0)
-        Sim.LAIplot[n_i]= Sim.LAIplot[n_i] + Sim.LAI_Tree[n_i]
-        Sim.Height_Canopy[n_i]= max(Sim.Height_Tree[maximum(i)], Parameters.Height_Coffee)
+        Sim.LAI_Tree[n_i] = Sim.DM_Leaf_Tree[maximum(i)] * (Parameters.SLA_Tree / 1000.0)
+        Sim.LAIplot[n_i] = Sim.LAIplot[n_i] + Sim.LAI_Tree[n_i]
+        Sim.Height_Canopy[n_i] = max(Sim.Height_Tree[maximum(i)], Parameters.Height_Coffee)
     end
 
-    Sim.LAIplot[n_i]= Sim.LAIplot[n_i] + Sim.LAI[n_i]
+    Sim.LAIplot[n_i] = Sim.LAIplot[n_i] + Sim.LAI[n_i]
 
-  return Sim, Meteo, Parameters
+    return Sim, Meteo, Parameters
 end
