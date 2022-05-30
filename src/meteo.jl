@@ -93,7 +93,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "RAD")
         if !is_missing(MetData, "PAR")
-            MetData[!, :RAD] = MetData[:PAR] ./ Parameters.FPAR
+            MetData[!, :RAD] = MetData[!, :PAR] ./ Parameters.FPAR
             warn_var("RAD", "PAR", "warn")
         else
             warn_var("RAD", "PAR", "error")
@@ -102,7 +102,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
 
     if is_missing(MetData, "PAR")
         if !is_missing(MetData, "RAD")
-            MetData[!, :PAR] = MetData[:RAD] .* Parameters.FPAR
+            MetData[!, :PAR] = MetData[!, :RAD] .* Parameters.FPAR
             warn_var("PAR", "RAD", "warn")
         else
             warn_var("PAR", "RAD", "error")
@@ -147,7 +147,7 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
     # Missing wind speed:
     if is_missing(MetData, "WindSpeed")
         if !is_missing(Parameters, "WindSpeed")
-            MetData[!, :WindSpeed] = Parameters.WindSpeed # assume constant windspeed
+            MetData[!, :WindSpeed] .= Parameters.WindSpeed # assume constant windspeed
             warn_var("WindSpeed", "constant (= WindSpeed from Parameters )", "warn")
         else
             warn_var("WindSpeed", "WindSpeed from Parameters (constant value)", "error")
@@ -159,10 +159,10 @@ function meteorology(file::String, Parameters, period::Array{String,1}=["0000-01
     # Missing atmospheric CO2 concentration:
     if is_missing(MetData, "CO2")
         if !is_missing(Parameters, "CO2")
-            MetData[!, :CO2] = Parameters.CO2 # assume constant CO2
+            MetData[!, :CO2] .= Parameters.CO2 # assume constant CO2
             warn_var("CO2", "constant (= CO2 from Parameters)", "warn")
         else
-            warn_var("WindSpeed", "CO2 from Parameters (constant value)", "error")
+            warn_var("CO2", "CO2 from Parameters (constant value)", "error")
         end
     end
 

@@ -62,6 +62,7 @@ Base.@kwdef struct site
     ZHT::Float64       = 25.0           # Measurment height (m)
     extwind::Float64   = 0.58           # Wind extinction coefficient (-) used to compute the wind speed in the considered layer. Measured on site.
     albedo::Float64    = 0.144          # Site albedo computed using MAESPA.
+    CO2::Float64       = 420.0          # CO2 concentration (ppm)
 end
 
 Base.@kwdef struct soil

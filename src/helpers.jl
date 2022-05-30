@@ -18,15 +18,15 @@ is_missing(df,"B")
 true
 ```
 """
-function is_missing(data::DataFrame,key::String)::Bool
-  columns= names(data)
-  for i in 1:length(columns)
-    is_in_col= columns[i] == key
-    if is_in_col
-      return false
+function is_missing(data::DataFrame, key::String)::Bool
+    columns = names(data)
+    for i in 1:length(columns)
+        is_in_col = columns[i] == key
+        if is_in_col
+            return false
+        end
     end
-  end
-  return true
+    return true
 end
 
 
@@ -50,15 +50,15 @@ is_missing(Parameters,"B")
 true
 ```
 """
-function is_missing(data::NamedTuple,key::String)::Bool
-  try
-    getfield(data,Symbol(key))
-  catch error
-    if isa(error, ErrorException)
-      return true
+function is_missing(data::NamedTuple, key::String)::Bool
+    try
+        getfield(data, Symbol(key))
+    catch error
+        if isa(error, ErrorException)
+            return true
+        end
     end
-  end
-  return false
+    return false
 end
 
 
@@ -84,14 +84,14 @@ will return an error with a hint on which variables can be provided to compute `
 warn_var("Date","Start_Date from Parameters","warn")
 ```
 """
-function warn_var(Var::String,replacement::String,type::String="error")
-  if type=="error"
-    error(string("$Var missing from input Meteo. Cannot proceed unless provided.",
-                 " Hint: $Var can be computed alternatively using $replacement if provided in Meteo file")
-               )
-  else
-    println("$Var missing from input Meteo. Computed from $replacement")
-  end
+function warn_var(Var::String, replacement::String, type::String="error")
+    if type == "error"
+        error(string("$Var missing from input Meteo. Cannot proceed unless provided.",
+            " Hint: $Var can be computed alternatively using $replacement if not provided in Meteo file")
+        )
+    else
+        println("$Var missing from input Meteo. Computed from $replacement")
+    end
 end
 
 """
@@ -103,32 +103,32 @@ Stop execution if mandatory meteorology input variable is not provided.
 
 """
 function warn_var(Var::String)
-  error("$Var missing from input Meteo. Cannot proceed unless provided.")
+    error("$Var missing from input Meteo. Cannot proceed unless provided.")
 end
 
 function cos°(x::Float64)::Float64
-  cos(x*π/180.0)
+    cos(x * π / 180.0)
 end
 
 function sin°(x::Float64)::Float64
-  sin(x*π/180.0)
+    sin(x * π / 180.0)
 end
 
 function tan°(x::Float64)::Float64
-  tan(x*π/180.0)
+    tan(x * π / 180.0)
 end
 
 function acos°(x::Float64)::Float64
-  acos(x)*180.0/π
+    acos(x) * 180.0 / π
 end
 
 function asin°(x::Float64)::Float64
-  asin(x)*180.0/π
+    asin(x) * 180.0 / π
 end
 
 
 function atan°(x::Float64)::Float64
-  atan(x)*180.0/π
+    atan(x) * 180.0 / π
 end
 
 
@@ -142,7 +142,7 @@ arc-cosine, arc-sine, arc-tangent with input and output in degree.
 The output in degree
 
 # Details
-The conversions between radian to degree is: 
+The conversions between radian to degree is:
 
 ```math
 x \\cdot \\frac{pi,180}
@@ -157,31 +157,31 @@ cos°(120)
 cos(120*π/180)
 ```
 """
-cos°,sin°,tan°,acos°,asin°,atan°
+cos°, sin°, tan°, acos°, asin°, atan°
 
 
 
 
 """
     struct_to_tuple(structure::DataType,instance)
-Transform a `struct` instance into a tuple, keeping the field names and values.  
-    
-# Arguments 
+Transform a `struct` instance into a tuple, keeping the field names and values.
+
+# Arguments
 - `structure::DataType`: Any `struct`
 - `instance`: An instance of `structure`.
 
 # Returns
-A named tuple with names and values from the structure. 
+A named tuple with names and values from the structure.
 
 # Examples
 ```julia
 struct_to_tuple(constants, constants())
 ```
 """
-function struct_to_tuple(structure::DataType,instance)
-  structure_names= fieldnames(structure)
-  structure_values= map(x -> getfield(instance, x), structure_names)
-  NamedTuple{structure_names}(structure_values)
+function struct_to_tuple(structure::DataType, instance)
+    structure_names = fieldnames(structure)
+    structure_values = map(x -> getfield(instance, x), structure_names)
+    NamedTuple{structure_names}(structure_values)
 end
 
 
@@ -206,8 +206,8 @@ previous_i(5,10)
 1
 ```
 """
-function previous_i(x::Int64,n::Int64=1)
-  x-n<=0 ? 1 : x-n
+function previous_i(x::Int64, n::Int64=1)
+    x - n <= 0 ? 1 : x - n
 end
 
 
@@ -233,15 +233,15 @@ logistic(1:10,5,0.1)
 logistic_deriv(1:10,5,0.1)
 ```
 """
-logistic,logistic_deriv
+logistic, logistic_deriv
 
-function logistic(x,u_log,s_log)
-  1.0 / (1.0 + exp(-((x - u_log) / s_log)))
+function logistic(x, u_log, s_log)
+    1.0 / (1.0 + exp(-((x - u_log) / s_log)))
 end
 
-function logistic_deriv(x,u_log,s_log)
-  # logistic(x,u_log,s_log) * (1.0 - logistic(x,u_log,s_log))
-  exp(-((x-u_log)/s_log))/(s_log*(1+exp(-((x-u_log)/s_log)))^2)
+function logistic_deriv(x, u_log, s_log)
+    # logistic(x,u_log,s_log) * (1.0 - logistic(x,u_log,s_log))
+    exp(-((x - u_log) / s_log)) / (s_log * (1 + exp(-((x - u_log) / s_log)))^2)
 end
 
 """
@@ -249,5 +249,5 @@ end
  Mean of a vector
 """
 function mean(x)
- sum(x)/length(x)
+    sum(x) / length(x)
 end
