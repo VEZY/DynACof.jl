@@ -2,33 +2,32 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://VEZY.github.io/DynACof.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://VEZY.github.io/DynACof.jl/dev)
-[![Build Status](https://travis-ci.com/VEZY/DynACof.jl.svg?branch=master)](https://travis-ci.com/VEZY/DynACof.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/VEZY/DynACof.jl?svg=true)](https://ci.appveyor.com/project/VEZY/DynACof-jl)
+[![CI](https://github.com/VEZY/DynACof.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/VEZY/DynACof.jl/actions/workflows/CI.yml)
 [![Codecov](https://codecov.io/gh/VEZY/DynACof.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/VEZY/DynACof.jl)
-
 
 ## Overview
 
-This is a Julia version of the DynACof model. To get to the R version, please follow this [link](https://vezy.github.io/DynACof).
-DynACof is a process-based model that computes plot-scale Net Primary Productivity, carbon allocation, growth,
-yield, energy, and water balance of coffee plantations according to management, while accounting for spatial effects using metamodels from the 3D process-based [MAESPA](https://maespa.github.io/). The model also uses coffee bud and fruit cohorts for reproductive development to better represent fruit carbon demand distribution along the year.
+DynACof is a process-based model that computes plot-scale Net Primary Productivity, carbon allocation, growth, yield, energy, and water balance of coffee plantations according to management, while accounting for spatial effects using metamodels from the 3D process-based [MAESPA](https://maespa.github.io/). The model also uses coffee bud and fruit cohorts for reproductive development to better represent fruit carbon demand distribution along the year.
+
+This is the Julia version of the DynACof model, the only one that is maintained. To get to the (unmaintained) R version, please follow this [link](https://vezy.github.io/DynACof).
 
 ## Installation
 
 To download DynACof, simply execute these lines of code in the REPL:
 
 ``` julia
-Pkg.add(DynACof)
+using Pkg; Pkg.add("DynACof")
 ```
 
-The package is tested routinely to pass all tests using Travis-CI (Linux + Mac) and AppVeyor (Windows).
+The package is tested routinely to pass all tests using Github actions.
 
 ## Example
 
-This is a basic example using the parameters and meteorology from Vezy et al. (2019). First, you have to dowload the data from this 
+This is a basic example using the parameters and meteorology from Vezy et al. (2019). First, you have to download the data from this
 [Github repository](https://github.com/VEZY/DynACof.jl_inputs).
 
-Then, simply execute this line of code to run a simulation over the whole period: 
+Then, simply execute this line of code to run a simulation over the whole period:
+
 ``` julia
 using DynACof
 Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_data/DynACof.jl_inputs",
@@ -50,7 +49,6 @@ Sim, Meteo, Parameters= dynacof(input_path= "the_path_where_you_downloaded_the_d
 ## Notes
 
 The model first computes the shade tree, then the coffee and then the soil. So if you need to update the metamodels, please keep in mind that the state of soil of a given day is only accessible on the next day for the tree and the coffee, unless the code is updated too. The model is implemented like this for simplicity, based on the hypothesis that the soil has a rather slow dynamic compared to plants dynamics.
-
 
 ## Code of conduct
 
@@ -78,13 +76,13 @@ Jara, Alonso Barquero for their technical and field support.
 <sub>The DynACof logo was made using
 <a href="http://logomakr.com" title="Logo Makr">LogoMakr.com</a> </sub>
 
-1.  **MACACC project ANR-13-AGRO-0005**, Viabilité et Adaptation des
+1. **MACACC project ANR-13-AGRO-0005**, Viabilité et Adaptation des
     Ecosystèmes Productifs, Territoires et Ressources face aux
     Changements Globaux AGROBIOSPHERE 2013 program
 
-2.  Centre de Coopération Internationale en Recherche Agronomique pour
+2. Centre de Coopération Internationale en Recherche Agronomique pour
     le Développement
 
-3.  Institut National de la Recherche Agronomique
+3. Institut National de la Recherche Agronomique
 
-4.  Centro Agronómico Tropical de Investigación y Enseñanza
+4. Centro Agronómico Tropical de Investigación y Enseñanza
